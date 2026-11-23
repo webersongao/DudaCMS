@@ -1,8 +1,9 @@
-#  DudaCMS 简介
+# DudaCMS 简介
 
 > 当前版本：**DudaCMS 1.0.0**（Build 20261123）
 
 ---
+
 DudaCMS 是 DudaCMS团队推出的一款基于 TP8 的社交化知识付费问答系统与企业内部知识库系统，用于打造私有社交化问答和内部知识存储。
 
 DudaCMS is a TP8-powered social Q&A and internal knowledge base platform.
@@ -81,13 +82,15 @@ https://ask.btbk.org/admin.php 了，而是 https://ask.btbk.org/jxxadmin.php
 
 然后执行下一步，如果顺利的话，就会安装成功了！
 
-URL重写规则
-可以通过URL重写隐藏应用的入口文件index.php（也可以是其它的入口文件，但URL重写通常只能设置一个入口文件）,下面是相关服务器的配置参考：
+#### URL 重写规则
 
-[ Apache ]
-httpd.conf配置文件中加载了mod_rewrite.so模块
-AllowOverride None将None改为All
-把下面的内容保存为.htaccess文件放到应用入口文件的同级目录下
+可以通过 URL 重写隐藏应用入口文件 `index.php`（也可以是其它入口文件，但 URL 重写通常只能设置一个入口文件）。以下是常见服务器的配置参考。
+
+**Apache**
+
+`httpd.conf` 中加载 `mod_rewrite.so` 模块，将 `AllowOverride None` 改为 `AllowOverride All`。把以下内容保存为 `.htaccess`，放到应用入口文件同级目录：
+
+```apache
 <IfModule mod_rewrite.c>
 Options +FollowSymlinks -Multiviews
 RewriteEngine On
@@ -96,34 +99,43 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
 </IfModule>
+```
 
-[ IIS ]
-如果你的服务器环境支持ISAPI_Rewrite的话，可以配置httpd.ini文件，添加下面的内容：
+**IIS**
 
+如果服务器支持 ISAPI_Rewrite，可在 `httpd.ini` 中添加：
+
+```ini
 RewriteRule (.*)$ /index\.php\?s=$1 [I]
+```
 
-在IIS的高版本下面可以配置web.Config，在中间添加rewrite节点：
+高版本 IIS 可在 `web.config` 中添加 rewrite 节点：
 
+```xml
 <rewrite>
- <rules>
- <rule name="OrgPage" stopProcessing="true">
- <match url="^(.*)$" />
- <conditions logicalGrouping="MatchAll">
- <add input="{HTTP_HOST}" pattern="^(.*)$" />
- <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
- <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
- </conditions>
- <action type="Rewrite" url="index.php/{R:1}" />
- </rule>
- </rules>
- </rewrite>
+  <rules>
+    <rule name="OrgPage" stopProcessing="true">
+      <match url="^(.*)$" />
+      <conditions logicalGrouping="MatchAll">
+        <add input="{HTTP_HOST}" pattern="^(.*)$" />
+        <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+        <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+      </conditions>
+      <action type="Rewrite" url="index.php/{R:1}" />
+    </rule>
+  </rules>
+</rewrite>
+```
 
-[ Nginx ]
-在Nginx低版本中，是不支持PATHINFO的，但是可以通过在Nginx.conf中配置转发规则实现：
+**Nginx**
 
-location / { // …..省略部分代码
-if (!-e $request_filename) {
-rewrite  ^(.*)$  /index.php?s=/$1  last;
+低版本 Nginx 不支持 PATHINFO，可通过在 `nginx.conf` 中配置转发规则实现：
+
+```nginx
+location / {
+    if (!-e $request_filename) {
+        rewrite ^(.*)$ /index.php?s=/$1 last;
+    }
 }
-}
+```
 

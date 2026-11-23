@@ -77,9 +77,7 @@ class Widget
         ];
         $this->view->config($config);
         $this->view->engine()->layout(false);
-        $root = get_setting('sub_dir', '/');
-        $root = '/' . ltrim($root, '/');
-        $this->baseUrl = rtrim(Request::domain() . $root, '/');
+        $this->baseUrl = rtrim(Request::domain(), '/');
 
         $this->settings = get_setting();
         $this->assign([

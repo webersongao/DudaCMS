@@ -215,7 +215,6 @@
     {block name="footer"}
     <footer class="app-footer">
         <strong>© {:date('Y')} {:get_setting('site_name')} 保留所有权利。</strong>
-        <span class="ms-2">{$setting.site_slogan|default='基于 TP8 的社交化知识问答社区'}</span>
         <div class="float-end d-none d-sm-inline-block">
             <b>{:get_setting('site_name')} V{:config('version.version')}</b>
         </div>

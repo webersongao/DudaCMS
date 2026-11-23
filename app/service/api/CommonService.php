@@ -10,7 +10,7 @@ class CommonService
     {
         $config = Config::getConfigs();
         $keys = [
-            'site_name', 'site_logo', 'site_description', 'site_keywords', 'site_tagline',
+            'site_name', 'site_logo', 'site_description', 'site_keywords',
             'register_type', 'topic_enable', 'enable_category', 'contents_per_page',
             'upload_image_ext', 'upload_file_ext', 'upload_max_size',
             'answer_unique',

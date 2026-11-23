@@ -320,7 +320,7 @@ if (isPost()) {
             // 导入sql语句等等
             $adminUrl = strstr($adminUrl, '.php') === false ? $adminUrl . '.php' : $adminUrl;
 
-            $install = install($username, $password, array_merge($config, ['database' => $database]), $adminUrl, $path);
+            $install = install($username, $password, array_merge($config, ['database' => $database]), $adminUrl);
             if ($install !== true) {
                 $data = [
                     'code' => 0,
@@ -417,7 +417,7 @@ function parseSql($sql, $to, $from)
     return explode(";\n", $pure_sql);
 }
 
-function install($username, $password, $config, $adminUrl, $path = '')
+function install($username, $password, $config, $adminUrl)
 {
     $sqlPath = file_get_contents(INSTALL_PATH . 'sql' . DS . 'install.sql');
     $sqlArray = parseSql($sqlPath, $config['prefix'], 'dask_');
@@ -468,13 +468,6 @@ function install($username, $password, $config, $adminUrl, $path = '')
                     'record_db' => 'users'
                 ]);
 
-            //更新二级目录
-            Db::connect('install')
-                ->name('config')
-                ->where('name', 'sub_dir')
-                ->update([
-                    'value' => $path,
-                ]);
         }
         // 处理安装文件
         !is_dir(INSTALL_PATH) && !mkdir($concurrentDirectory = INSTALL_PATH) && !is_dir($concurrentDirectory);

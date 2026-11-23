@@ -41,9 +41,7 @@ class Frontend extends Base
 
         $this->user_info = Users::getUserInfo(intval(getLoginUid()));
         $this->user_id = $this->user_info['uid'] ?? 0;
-        $root = get_setting('sub_dir','/');
-        $root = '/'.ltrim($root,'/');
-        $this->baseUrl = rtrim(Request::domain().$root,'/');
+        $this->baseUrl = rtrim(Request::domain(), '/');
 
         $this->settings = get_setting();
 
@@ -85,8 +83,8 @@ class Frontend extends Base
         $showHero = in_array($heroKey, $heroPages, true)
             && strtolower($this->action) === 'index';
         $heroTitle = $this->settings['site_name'] . ' ' . ($heroLabels[$heroKey] ?? '');
-        // 与静态页、侧栏共用后台「站点短标语」配置，避免同义文案散落各处
-        $heroSubtitle = get_setting('site_tagline', '与世界分享你的装逼技巧与水平');
+        // 题图副标题使用固定默认文案（原「站点短标语」配置项已移除）
+        $heroSubtitle = '与世界分享你的装逼技巧与水平';
         $this->assign([
             'baseUrl'=> $this->baseUrl,
             'thisController'       => parse_name($this->controller),

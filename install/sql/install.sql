@@ -463,14 +463,10 @@ INSERT INTO `dask_config` VALUES (119,'content_popular_value_show','9','热度�
 INSERT INTO `dask_config` VALUES (120,'upload_image_thumb_enable','4','是否启用图片压缩','是否启用图片压缩，PNG图片压缩会失去透明效果','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (121,'upload_image_thumb_percent','4','上传图片默认压缩比例','默认为0.7','text','0.7','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (122,'db_version','1','数据库版本','','hidden','100','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (124,'sub_dir','1','二级目录地址','二级目录安装时path地址，不包含域名如二级目录域名为http://www.xxx.com/sub,只需填写/sub/即可','text','/','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (125,'api_doc_public','7','公开展示API文档','开启后所有访客可访问 /api-docs；关闭后仅管理员可预览','radio','Y','{\"Y\":\"公开\",\"N\":\"仅管理员\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (126,'system_version','1','系统版本','当前代码与数据库结构版本','hidden','1.0.0','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (127,'site_logo_text','1','后台文字Logo','无图片Logo时展示，最多显示5个字；留空则使用站点名称','text','','null',3,NULL,1,0);
-INSERT INTO `dask_config` VALUES (128,'site_slogan','1','品牌中文文案','站点页脚展示','text','','null',1,NULL,1,0);
-INSERT INTO `dask_config` VALUES (154,'site_tagline','1','站点短标语','题图副标题、侧栏引导与静态页描述共用；留空则使用代码默认文案','text','','null',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (302,'t_hm_search_title_text','12','题图主标题','留空时使用“站点名称 - 当前频道”','text','','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (303,'t_hm_search_min_text','12','题图副标题','留空时使用后台“站点短标语”','textarea','','[]',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (303,'t_hm_search_min_text','12','题图副标题','留空时使用默认文案','textarea','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (304,'t_hm_sidebar_show_items','12','侧边栏项目','侧边栏显示的项目','checkbox','write_nav,announce,focus_topic,column,hot_topic,hot_users,side_footer','{\"write_nav\":\"快速发起\",\"announce\":\"网站公告\",\"focus_topic\":\"关注话题\",\"column\":\"热门专栏\",\"hot_topic\":\"热门话题\",\"hot_users\":\"热门用户\",\"diy_content\":\"自定义内容\",\"side_footer\":\"边栏页脚\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (305,'t_hm_sidebar_diy_content','12','自定义内容','侧边栏自定义内容,支持富文本','editor','&lt;p class=&quot;p-3 bg-info mt-2&quot;&gt;这是自定义内容&lt;/p&gt;','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (306,'t_hm_links_show_type','12','友情链接展示方式','侧边栏自定义内容,支持富文本','radio','text','{\"text\":\"文字链接\",\"image\":\"图片链接\"}',0,NULL,1,0);

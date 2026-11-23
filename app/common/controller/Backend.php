@@ -81,9 +81,7 @@ class Backend extends Base
         $controller = $this->request->controller();
         $actionName = Str::snake(request()->action());
 
-        $root = get_setting('sub_dir','/');
-        $root = '/'.ltrim($root,'/');
-        $this->baseUrl = rtrim(Request::domain().$root,'/');
+        $this->baseUrl = rtrim(Request::domain(), '/');
 
         //检验权限地址
         $checkPath = $controller.'/'.strtolower($actionName);
@@ -132,9 +130,8 @@ class Backend extends Base
             $this->assign('email_tips',1);
         }
 
-        // 后台是源码（DudaCMS）的管理界面，品牌与运营站点名解耦：
-        // 后台 Logo 文字固定为源码品牌；站点名只出现在"当前站点"语境（页面 title、页脚）。
-        $logoText = trim((string) get_setting('admin_logo_text', ''));
+        // 后台 Logo 文字固定使用站点名称（site_name），不再提供独立配置项。
+        $logoText = trim((string) get_setting('site_name', 'DudaCMS'));
         if ($logoText === '') {
             $logoText = 'DudaCMS';
         }

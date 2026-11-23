@@ -107,7 +107,7 @@
 <div class="bh-md-card">
     <div class="bh-sidesign">
         <div class="bh-sidesignHeader">
-            <div class="bh-sidesignTitle">{:L('上 %s', get_setting('site_name'))}<br>{:get_setting('site_tagline', '与世界分享你的装逼技巧与水平')}</div>
+            <div class="bh-sidesignTitle">{:L('上 %s', get_setting('site_name'))}<br>{:L('与世界分享你的装逼技巧与水平')}</div>
                 <div class="bh-sidesign-action">
                     <a href="/account/login" class="user-sidebtn bh-sidebtn-primary">{:L('登录')}</a>
                     <a href="/account/register" class="user-sidebtn bh-sidebtn-blue">注册</a>

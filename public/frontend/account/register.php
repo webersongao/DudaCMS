@@ -67,13 +67,13 @@
     .signBoxFooter a{color: #fff !important;}
     .signBoxFooter{background:rgba(0,0,0,.5);border-radius:12px;margin:0 12px 12px;padding-left:12px !important;padding-right:12px !important;padding-top:6px;padding-bottom:6px;}
     .signBox .logo {
-        height: 80px;
+        height: auto;
         margin-bottom: 24px;
-        line-height: 80px;
-        font-weight: 600;
+        line-height: 1;
         text-align: center;
-        font-size: 2rem;
     }
+    .signBox .logo a{display:inline-block;line-height:1;}
+    .signBox .logo img{display:inline-block;width:210px;max-width:86%;height:auto;vertical-align:middle;}
     .SignContainer-content {
         margin: 0 auto;
         text-align: center;
@@ -87,11 +87,12 @@
     .bline input{ width:100%}
     @media (max-width: 767px){
         .signBoxContent{padding: 16px 8px;}
-        .signBox .logo{height: auto;padding-top: 12px;margin-bottom: 12px;line-height: 1.2;font-size: 1.6rem;}
+        .signBox .logo{height: auto;padding-top: 12px;margin-bottom: 12px;line-height: 1;}
+        .signBox .logo img{width:180px;}
         .bline{margin-bottom: 12px;}
     }
     @media (max-width: 360px){
-        .signBox .logo{font-size: 1.4rem;}
+        .signBox .logo img{width:160px;}
         .signBoxFooter{padding-left: 8px !important;padding-right: 8px !important;}
         .SignContainer-content.dask-card__body{padding: 12px;}
     }
@@ -101,7 +102,7 @@
         <div class="signBoxContent">
             {if !$_ajax_open}
             <h1 class="logo ">
-                <a href="{$baseUrl}" class="text-primary">{:get_setting('site_name')}</a>
+                <a href="{$baseUrl}" class="text-primary"><img src="{:asset('brand/logo-bihu-white.svg', false)}" alt="{:get_setting('site_name')}"></a>
             </h1>
             {/if}
             <div class="content dask-card" style="padding: 0" id="boxMain">

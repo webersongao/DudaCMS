@@ -16,11 +16,11 @@ use app\common\library\helper\UpgradeHelper;
 use think\App;
 
 /**
- * 系统运维：把「本地升级 / 数据库备份 / 数据库还原」聚合到同一页面。
+ * 系统运维：仅保留在线数据库升级。
  *
- * 三个功能仍由各自的 Upgrade / Database 控制器实现，本页只提供统一的
- * Tab 外壳，iframe 以 _ajax_open=1 加载各功能主体（去掉侧栏与顶栏，
- * 保留完整 head 资源），避免功能逻辑重复与回归风险。
+ * 保留 extend.System/index 作为后台菜单入口（url 不变，避免旧链接失效），
+ * 本页直接渲染升级页内容，不再使用 Tab 外壳与 iframe。
+ * 升级执行仍由 extend.Upgrade/run 处理；升级前自动备份由底层 BackupHelper 提供。
  */
 class System extends Backend
 {
@@ -31,29 +31,35 @@ class System extends Backend
 
     public function index()
     {
+        $helper = UpgradeHelper::instance();
+        $info   = $helper->getLocalInfo();
+        $pending = $helper->getPendingUpgrade();
+
+        $files = $helper->listUpgradeFiles();
+        foreach ($files as $version => &$file) {
+            if ($pending && $pending['version'] === (string) $version) {
+                $file['status_label'] = '待升级';
+                $file['status_class'] = 'text-bg-warning';
+            } elseif (UpgradeHelper::compareVersion((string) $version, $info['db_version']) <= 0) {
+                $file['status_label'] = '已应用';
+                $file['status_class'] = 'text-bg-success';
+            } else {
+                $file['status_label'] = '等待前置版本';
+                $file['status_class'] = 'text-bg-secondary';
+            }
+        }
+        unset($file);
+
         $this->assign([
-            'info' => UpgradeHelper::instance()->getLocalInfo(),
-            'tabs' => [
-                [
-                    'key'   => 'upgrade',
-                    'title' => '本地升级',
-                    'icon'  => 'fa fa-download',
-                    'url'   => (string) url('extend.Upgrade/index', ['_ajax_open' => 1]),
-                ],
-                [
-                    'key'   => 'backup',
-                    'title' => '数据库备份',
-                    'icon'  => 'fa fa-database',
-                    'url'   => (string) url('extend.Database/database', ['_ajax_open' => 1]),
-                ],
-                [
-                    'key'   => 'restore',
-                    'title' => '数据库还原',
-                    'icon'  => 'fa fa-undo',
-                    'url'   => (string) url('extend.Database/restore', ['_ajax_open' => 1]),
-                ],
-            ],
+            'info'          => $info,
+            'pending'       => $pending,
+            'files'         => $files,
+            'logs'          => $helper->listUpgradeLogs(),
+            'needs_upgrade' => UpgradeHelper::compareVersion($info['version'], $info['db_version']) > 0,
+            'preflight'     => $helper->preflight(),
+            'lock'          => $helper->lockStatus(),
         ]);
-        return $this->fetch();
+        // 直接渲染升级页模板，不再套 Tab/iframe
+        return $this->fetch('/extend/upgrade/index');
     }
 }

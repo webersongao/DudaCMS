@@ -16,8 +16,11 @@ class Page extends Frontend
 {
     public function index()
     {
-        $id = $this->request->get('id', 0);
-        $url_name = $this->request->get('url_name', '');
+        // 必须用 param() 而非 get()：page/:url_name 是路由路径参数，不在 $_GET 中。
+        // 用 get() 会取不到 url_name，导致 $where 只剩 status 条件，
+        // find() 永远返回第一条发布页面（所有页面显示相同内容）。
+        $id = $this->request->param('id', 0);
+        $url_name = $this->request->param('url_name', '');
         $where[] = ['status', '=', 1];
         if ($id) {
             $where[] = ['id', '=', $id];

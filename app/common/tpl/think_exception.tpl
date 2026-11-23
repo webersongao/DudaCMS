@@ -132,7 +132,7 @@ $jsonMessage = json_encode((string) ($message ?? ''), JSON_HEX_TAG | JSON_HEX_AP
             fetch('/ajax/report_bug', {
                 method: 'POST',
                 credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
                 body: 'msg=' + encodeURIComponent(<?=$jsonMessage?>)
             }).then(function (r) { return r.json(); }).then(function (data) {
                 alert(data && data.code ? '反馈成功，感谢你的帮助！' : '反馈已提交');

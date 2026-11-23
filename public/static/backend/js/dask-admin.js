@@ -1,3 +1,7 @@
+// 跨页保留选中的行 ID（rememberSelected 用）。原实现依赖未定义的全局 _ 与隐式全局，
+// 这里显式声明并用原生数组运算替代 underscore 的 union/difference。
+let selectionIds = [];
+
 const DaskAdmin = {
     api: {
         /**
@@ -81,7 +85,6 @@ const DaskAdmin = {
                 type: 'GET',
                 url: url,
                 dataType: 'json',
-                headers: { "Access-Control-Allow-Headers": "X-Requested-With" },
                 success: function (result) {
                     if (typeof success != 'function') {
                         let msg = typeof result.msg !== 'undefined' ? result.msg : '操作成功';
@@ -91,12 +94,16 @@ const DaskAdmin = {
                             DaskAdmin.api.error(msg, result.url)
                         }
                     } else {
-                        success || success(result);
+                        success(result);
                     }
                 },
                 error: function (xhr) {
-                    //let ret = {code: xhr.status, msg: xhr.statusText, data: null};
-                    DaskAdmin.api.error(error);
+                    var ret = {code: xhr.status, msg: xhr.statusText, data: null};
+                    if (typeof error === 'function') {
+                        error(ret);
+                    } else {
+                        DaskAdmin.api.error('请求失败（HTTP ' + xhr.status + '）');
+                    }
                 }
             });
         },
@@ -122,7 +129,7 @@ const DaskAdmin = {
                             DaskAdmin.api.error(msg, result.url)
                         }
                     } else {
-                        success || success(result);
+                        success(result);
                     }
                 },
                 error: function (error) {
@@ -520,8 +527,14 @@ const DaskAdmin = {
                 // 复选框分页保留保存选中数组
                 var rowIds = DaskAdmin.table.affectedRowIds(rows);
                 if (DaskAdmin.common.isNotEmpty(DaskAdmin.table._option.rememberSelected) && DaskAdmin.table._option.rememberSelected) {
-                    func = $.inArray(e.type, ['check', 'check-all']) > -1 ? 'union' : 'difference';
-                    selectionIds = _[func](selectionIds, rowIds);
+                    var isCheck = $.inArray(e.type, ['check', 'check-all']) > -1;
+                    if (isCheck) {
+                        // union：合并后去重
+                        selectionIds = DaskAdmin.common.uniqueFn(selectionIds.concat(rowIds));
+                    } else {
+                        // difference：移除取消勾选的行
+                        selectionIds = selectionIds.filter(function (id) { return rowIds.indexOf(id) === -1; });
+                    }
                 }
             });
         },
@@ -979,7 +992,7 @@ const DaskAdmin = {
         build: function (id, url) {
             DaskAdmin.modal.confirm("确定要生成代码吗？生成代码会覆盖原有的控制器、模型和验证器文件<br>注意：原有文件会被重命名留做备份", function () {
                 if (DaskAdmin.common.isEmpty(id)) {
-                    var id = DaskAdmin.common.isEmpty($.table._option.uniqueId) ? DaskAdmin.table.selectFirstColumns() : DaskAdmin.table.selectColumns(DaskAdmin.table._option.uniqueId);
+                    var id = DaskAdmin.common.isEmpty(DaskAdmin.table._option.uniqueId) ? DaskAdmin.table.selectFirstColumns() : DaskAdmin.table.selectColumns(DaskAdmin.table._option.uniqueId);
                     if (id.length == 0) {
                         DaskAdmin.modal.alertWarning("请至少选择一条记录");
                         return;
@@ -1316,7 +1329,6 @@ const DaskAdmin = {
                 type: 'GET',
                 url: url,
                 dataType: 'json',
-                headers: { "Access-Control-Allow-Headers": "X-Requested-With" },
                 success: function (ret) {
                     ret = DaskAdmin.events.onAjaxResponse(ret);
                     if (ret.code === 1) {
@@ -1457,7 +1469,7 @@ const DaskAdmin = {
                                     DaskAdmin.api.error(msg, result.url)
                                 }
                             } else {
-                                success || success(result);
+                                success(result);
                             }
                         },
                         complete: function () {
@@ -1492,7 +1504,7 @@ const DaskAdmin = {
                                 DaskAdmin.api.error(msg, result.url)
                             }
                         } else {
-                            success || success(result);
+                            success(result);
                         }
                     },
                     complete: function () {
@@ -1592,8 +1604,9 @@ const DaskAdmin = {
 
                 $(that).addClass('disabled').attr('autocomplete', 'off').prop('disabled', true);
 
-                $.post(target, query).success(function (data) {
-                    if (data.code === 1) {
+                // jQuery 4 已移除 jqXHR.success()，统一用 done()/fail()，且异常时也要恢复按钮
+                $.post(target, query).done(function (data) {
+                    if (data && data.code === 1) {
                         DaskAdmin.api.success(data.msg);
                         setTimeout(function () {
                             $(that).removeClass('disabled').prop('disabled', false);
@@ -1606,11 +1619,14 @@ const DaskAdmin = {
                             }
                         }, 1500);
                     } else {
-                        DaskAdmin.api.error(data.msg);
+                        DaskAdmin.api.error(data && data.msg ? data.msg : '操作失败');
                         setTimeout(function () {
                             $(that).removeClass('disabled').prop('disabled', false);
                         }, 1500);
                     }
+                }).fail(function (xhr) {
+                    DaskAdmin.api.error('请求失败（HTTP ' + (xhr && xhr.status ? xhr.status : '未知') + '）');
+                    $(that).removeClass('disabled').prop('disabled', false);
                 });
             }
             return false;

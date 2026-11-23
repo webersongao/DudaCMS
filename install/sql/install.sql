@@ -62,14 +62,6 @@ INSERT INTO `dask_admin_auth` VALUES (72, 68, 'member.Permission/state', '操作
 INSERT INTO `dask_admin_auth` VALUES (73, 68, 'member.Permission/export', '操作-导出', 1, 0, '', 0, 1, '', 0, 0, '', 'system');
 INSERT INTO `dask_admin_auth` VALUES (74, 68, 'member.Permission/sort', '操作-排序', 1, 0, '', 0, 1, '', 0, 0, '', 'system');
 INSERT INTO `dask_admin_auth` VALUES (76, 68, 'member.Permission/choose', '操作-选择', 1, 0, '', 3, 1, 'fas fa-cogs', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (77, 389, 'extend.Database/database', '数据库备份', 1, 0, '', 31, 1, 'fa fa-server', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (78, 77, 'extend.Database/backup', '操作-备份', 1, 0, '', 1, 1, '', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (79, 77, 'extend.Database/repair', '操作-修复', 1, 0, '', 2, 1, '', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (80, 77, 'extend.Database/optimize', '操作-优化', 1, 0, '', 3, 1, '', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (81, 389, 'extend.Database/restore', '数据库还原', 1, 0, '', 32, 1, 'fa fa-recycle', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (82, 77, 'extend.Database/import', '操作-还原', 1, 0, '', 1, 1, '', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (83, 77, 'extend.Database/downfile', '操作-下载', 1, 0, '', 2, 1, '', 0, 0, '', 'system');
-INSERT INTO `dask_admin_auth` VALUES (84, 77, 'extend.Database/delete', '操作-删除', 1, 0, '', 3, 1, '', 0, 0, '', 'system');
 INSERT INTO `dask_admin_auth` VALUES (85, 4, 'extend.Links/index', '友情链接', 1, 1, '', 61, 1, 'fa fa-link', 0, 0, '', 'system');
 INSERT INTO `dask_admin_auth` VALUES (86, 85, 'extend.Links/add', '操作-添加', 1, 0, '', 1, 1, '', 0, 0, '', 'system');
 INSERT INTO `dask_admin_auth` VALUES (87, 85, 'extend.Links/edit', '操作-修改', 1, 0, '', 3, 1, '', 0, 0, '', 'system');
@@ -1966,6 +1958,25 @@ UPDATE `dask_config` SET value = 'Y' WHERE name IN (
   'enable_column', 'enable_multilingual', 'attach_enable', 'remove_xss', 'record_admin_log'
 );
 UPDATE `dask_config` SET value = 'qq,wechat,weibo,github,google,twitter' WHERE name = 'third_enable';
+
+-- 16. 在线升级记录表：跟踪数据库已应用版本与升级历史（基准版本为程序版本）。
+DROP TABLE IF EXISTS `dask_upgrade_log`;
+CREATE TABLE `dask_upgrade_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` varchar(20) NOT NULL DEFAULT '' COMMENT '升级到的版本',
+  `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0=进行中 1=成功 2=失败',
+  `sql_file` varchar(100) NOT NULL DEFAULT '' COMMENT 'SQL文件',
+  `sql_count` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '执行SQL条数',
+  `remark` varchar(500) NOT NULL DEFAULT '' COMMENT '说明',
+  `backup_path` varchar(255) NOT NULL DEFAULT '' COMMENT '升级前备份路径',
+  `add_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据库升级记录';
+
+-- 新装即为当前程序版本，写入一条成功记录作为版本基准，避免误报待升级
+INSERT INTO `dask_upgrade_log` (`version`, `status`, `sql_file`, `sql_count`, `remark`, `add_time`)
+VALUES ('1.0.1', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
 
 SET FOREIGN_KEY_CHECKS = 1;
 

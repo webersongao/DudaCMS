@@ -93,7 +93,7 @@ $check_extension[] = [
 ];
 
 // 发布包不包含运行时目录，安装器先按需创建再检查写权限。
-foreach ([ROOT_PATH . 'runtime' . DS, ROOT_PATH . 'backup' . DS, ROOT_PATH . 'public' . DS . 'storage' . DS] as $runtimeDir) {
+foreach ([ROOT_PATH . 'runtime' . DS, ROOT_PATH . 'runtime' . DS . 'backup' . DS . 'database' . DS, ROOT_PATH . 'public' . DS . 'storage' . DS] as $runtimeDir) {
     if (!is_dir($runtimeDir)) {
         @mkdir($runtimeDir, 0775, true);
     }
@@ -103,7 +103,7 @@ $file_write_enable = file_write_enable(array(
     ROOT_PATH . 'config' . DS,
     ROOT_PATH . 'runtime' . DS,
     ROOT_PATH . 'public' . DS,
-    ROOT_PATH . 'backup' . DS,
+    ROOT_PATH . 'runtime' . DS . 'backup' . DS . 'database' . DS,
     ROOT_PATH . 'public' . DS . 'storage' . DS
 ));
 

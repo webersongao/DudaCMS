@@ -23,7 +23,6 @@ admin.php
 /public/fkadmin.php
 /tests/visual/tests/visual
 /test-results
-/backup/
 /output/
 
 # 插件安装/配置生成的运行时文件，不进入版本库

@@ -65,7 +65,7 @@ class BackupHelper
      */
     public function __construct($config = [])
     {
-        $this->config['path'] = root_path('backup');
+        $this->config['path'] = rtrim(runtime_path(), '/\\') . DS . 'backup' . DS;
         $this->config = array_merge($this->config, $config);
         //初始化文件名
         $this->setFile();

@@ -59,13 +59,13 @@
     {/if}
     .signBoxFooter a{color: #f6f6f6;}
     .signBox .logo {
-        width: 128px;
-        height: 80px;
+        height: auto;
         margin-bottom: 24px;
-        line-height: 80px;
-        font-weight: 600;
+        line-height: 1;
         text-align: center;
     }
+    .signBox .logo a{display:inline-block;line-height:1;}
+    .signBox .logo img{display:inline-block;width:210px;max-width:86%;height:auto;vertical-align:middle;}
     .SignContainer-content {
         margin: 0 auto;
         text-align: center;
@@ -108,7 +108,7 @@
         <div class="signBoxContent">
             {if !$_ajax_open}
             <h1 class="logo ">
-                <a href="{$baseUrl}" class="text-primary">{:get_setting('site_name')}</a>
+                <a href="{$baseUrl}" class="text-primary"><img src="{:asset('brand/logo-bihu-white.svg', false)}" alt="{:get_setting('site_name')}"></a>
             </h1>
             {/if}
             <div class="content" style="padding: 0" id="boxMain">

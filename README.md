@@ -1,6 +1,6 @@
 # DudaCMS 简介
 
-> 当前版本：**DudaCMS 1.0.0**（Build 20261123）
+> 当前版本：**DudaCMS 1.0.1**（Build 20261123）
 
 ---
 
@@ -52,7 +52,7 @@ composer audit --no-dev
 
 全新安装 SQL：`install/sql/install.sql`。
 
-后续升级通过后台上传官方 ZIP 升级包完成。
+后续升级：涉及数据库变更的版本，随代码同步 `update/upgrade/` 目录下的幂等升级 SQL（文件名如 `update1.0.0to1.0.1.sql`），管理员在后台「系统运维 → 在线升级」页面即可看到待升级版本并一键执行；升级前自动全库备份、失败自动回滚，相邻版本逐级升级，不支持跨版本。
 
 ### DudaCMS 问答系统的安装
 

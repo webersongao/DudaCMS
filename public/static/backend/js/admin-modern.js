@@ -190,8 +190,8 @@
       .ajaxError((event, xhr, settings) => {
         if (xhr.status === 0 || xhr.statusText === 'abort') return;
         const message = `请求失败（HTTP ${xhr.status}）`;
-        if (window.Dask && window.Dask.api && typeof window.Dask.api.error === 'function') {
-          window.Dask.api.error(message);
+        if (window.DaskAdmin && window.DaskAdmin.api && typeof window.DaskAdmin.api.error === 'function') {
+          window.DaskAdmin.api.error(message);
         } else {
           console.warn('[admin-modern]', message, settings && settings.url);
         }

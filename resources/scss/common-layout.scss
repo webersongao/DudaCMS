@@ -1,0 +1,2426 @@
+// 由 npm run css:build 编译到 public/static。请只修改本文件，不要直接编辑产物。
+@use "breakpoints" as *;
+
+/* DudaCMS 统一四端骨架：大屏两栏、Pad 侧栏下沉、手机单列。
+   以现有模板结构为基础做干净的布局收敛，不改变任何业务变量与功能。 */
+
+:root {
+  --dask-page-gap: var(--dask-grid-gap, 20px);
+  --dask-card-radius: var(--dask-r-lg);
+  --dask-card-line: var(--dask-line);
+}
+
+/* ---------- 页面容器与两栏骨架 ---------- */
+#wrapMain { min-height: 40vh; }
+.container,
+.dask-wrap .container {
+  width: min(calc(100% - 32px), var(--dask-container));
+  max-width: var(--dask-container);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.dask-left,
+.dask-right { min-width: 0; }
+
+/* 语义骨架类 */
+.dask-page { display: block; }
+.dask-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--dask-side-col);
+  gap: var(--dask-page-gap);
+  align-items: start;
+}
+.dask-main,
+.dask-side { min-width: 0; }
+.dask-card {
+  background: var(--dask-surface);
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-card-radius);
+}
+.dask-card__head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--dask-line);
+}
+/* Tab 栏在窄屏/多语言下可横向滚动，避免长文案 tab 被压缩截断 */
+html body .dask-card__head.nav-tabs,
+html body .dask-card__head.nav {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html body .dask-card__head.nav-tabs::-webkit-scrollbar,
+html body .dask-card__head.nav::-webkit-scrollbar { display: none; }
+html body .dask-card__head .nav-link,
+html body .dask-card__head .nav-item {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.dask-card__body { padding: 16px; }
+.dask-card__foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--dask-line);
+}
+.dask-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.dask-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dask-left.radius,
+.dask-right.radius > .dask-mod,
+.bg-white.radius {
+  border-radius: var(--dask-card-radius) !important;
+}
+
+.dask-common-list > .questionItem,
+.dask-answer-list > .dask-answer-item,
+.dask-topic-list .topic-item {
+  border-bottom: 1px solid var(--dask-card-line);
+}
+
+.dask-common-list > .questionItem:last-child,
+.dask-answer-list > .dask-answer-item:last-child {
+  border-bottom: 0;
+}
+
+/* ---------- 题图：保留现有视觉，只统一四端几何 ---------- */
+.w-top-img {
+  min-height: 260px;
+}
+.w-top-img .index-search {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.w-top-img .index-search input {
+  min-height: 44px;
+}
+.w-top-img .index-search .btn {
+  min-height: 44px;
+}
+
+/* ---------- 标签与筛选 ---------- */
+.nav-tabs,
+.dask-pjax-tabs,
+.searchSortTab {
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar,
+.dask-pjax-tabs::-webkit-scrollbar,
+.searchSortTab::-webkit-scrollbar { display: none; }
+.nav-tabs .nav-link,
+.dask-pjax-tabs .nav-link {
+  white-space: nowrap;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ---------- 触控目标与交互态 ---------- */
+.btn,
+button,
+a.btn,
+[data-action],
+.dask-list-more,
+.dask-state__action {
+  min-height: 36px;
+}
+.btn:focus-visible,
+button:focus-visible,
+a:focus-visible,
+[data-action]:focus-visible {
+  outline: none;
+  box-shadow: var(--dask-focus);
+}
+
+.dask-list-img img,
+.topic-cover,
+.avatar {
+  border-radius: var(--dask-r-sm);
+}
+
+/* 列表封面四周统一圆角：让 img 以 cover 填满容器，避免大图被 overflow 裁切后丢失右下/右上圆角 */
+.pcon .dask-list-img,
+.pcon .dask-list-img cite { border-radius: 8px !important; }
+.pcon .dask-list-img img,
+.pcon .dask-list-img cite img {
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  height: 100% !important;
+  margin-bottom: 0 !important;
+}
+
+/* ---------- 详情与用户页 ---------- */
+.dask-question-container,
+.dask-answer-item,
+.dask-mod.bg-white {
+  border-radius: var(--dask-card-radius);
+}
+
+.dask-question-container .dask-content,
+.dask-answer-item .dask-content {
+  overflow-wrap: anywhere;
+}
+
+.page-detail-topic,
+.dask-list-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---------- Pad：侧栏下沉 ---------- */
+@media (max-width: $dask-bp-narrow) {
+  .dask-grid { grid-template-columns: minmax(0, 1fr); }
+  .dask-left,
+  .dask-right { flex: 0 0 100%; max-width: 100%; }
+  .dask-right { margin-top: var(--dask-page-gap); }
+  .dask-right .dask-mod { margin-bottom: var(--dask-page-gap); }
+}
+
+/* ---------- 手机：单列，题图保留但收紧 ---------- */
+@media (max-width: $dask-bp-mobile) {
+  .container,
+  .dask-wrap .container {
+    width: calc(100% - 20px);
+  }
+  .w-top-img {
+    min-height: 220px;
+    height: 220px !important;
+  }
+  .w-top-img .index-search {
+    padding-top: 16px !important;
+  }
+  .w-top-img .index-search h2 {
+    font-size: 20px;
+    line-height: 1.35;
+  }
+  .w-top-img .index-search p {
+    margin-bottom: 10px;
+  }
+  .w-top-img .index-search > .row {
+    display: flex;
+  }
+  .w-top-img .index-search input {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .w-top-img .index-search .btn {
+    flex: 0 0 auto;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .nav-tabs .nav-link,
+  .dask-pjax-tabs .nav-link {
+    min-height: 44px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .btn,
+  button,
+  a.btn,
+  [data-action] {
+    min-height: 44px;
+  }
+  .dask-common-list > .questionItem,
+  .dask-answer-list > .dask-answer-item {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .dask-answer-item .user-details-card-name {
+    max-width: calc(100% - 56px);
+  }
+  .dask-question-container .float-end,
+  .dask-answer-item .float-end {
+    margin-top: 6px;
+  }
+  .dask-right { display: block; }
+}
+
+/* ---------- 320px 极窄屏 ---------- */
+@media (max-width: $dask-bp-mini) {
+  .w-top-img .index-search h2 { font-size: 19px; }
+  .w-top-img .index-search p { font-size: 12px; }
+  .container, .dask-wrap .container { width: calc(100% - 16px); }
+  .dask-common-list .dask-list-img { display: none; }
+}
+
+/* ---------- 深浅色一致 ---------- */
+html[data-theme="dark"] .dask-common-list .dask-list-item,
+html[data-theme="auto"][data-dark="1"] .dask-common-list .dask-list-item,
+html[data-theme="dark"] .dask-answer-item,
+html[data-theme="auto"][data-dark="1"] .dask-answer-item {
+  border-bottom-color: var(--dask-line);
+}
+
+/* 深色下链接蓝 #4C9AFF 配白字对比度不足，主按钮改用专用背景令牌。 */
+html[data-dark="1"] body .btn-primary,
+html[data-dark="1"] body .gradientBtn,
+html[data-dark="1"] body .logon-but {
+  background: var(--dask-primary-bg) !important;
+  border-color: var(--dask-primary-bg) !important;
+  color: #fff !important;
+}
+html[data-dark="1"] body .btn-primary:hover,
+html[data-dark="1"] body .gradientBtn:hover,
+html[data-dark="1"] body .logon-but:hover {
+  background: var(--dask-primary-bg-hover) !important;
+  border-color: var(--dask-primary-bg-hover) !important;
+}
+html[data-dark="1"] .w-top-img .navbox .btn-primary,
+html[data-dark="1"] .dask-right .bh-sidebtn-primary {
+  background: var(--dask-primary-bg) !important;
+  border-color: var(--dask-primary-bg) !important;
+  color: #fff !important;
+}
+
+/* 深色下 zhihu-blue.css 的近白 hover（#FCFDFF / #e6f1ff）会形成白块，统一改为抬升表面。 */
+html[data-dark="1"] .dask-list-item:hover,
+html[data-dark="1"] .dask-focus-topic-item:hover,
+html[data-dark="1"] .dask-topic-list .topic-item:hover,
+html[data-dark="1"] .topic-item:hover {
+  background-color: var(--dask-elevated, #262A31) !important;
+  color: var(--dask-text) !important;
+}
+
+/* 同类白岛：题图搜索框、话题卡片页脚、编辑器工具栏在模板里写死近白底。 */
+html[data-dark="1"] .w-top-img .index-search input,
+html[data-dark="1"] .dask-topic-card-footer,
+html[data-dark="1"] .dask-editor-v5-toolbar {
+  background-color: var(--dask-elevated, #262A31) !important;
+  color: var(--dask-text) !important;
+  border-color: var(--dask-line) !important;
+}
+html[data-dark="1"] .w-top-img .index-search input::placeholder {
+  color: var(--dask-text-2, #A8ADB7) !important;
+  opacity: 1;
+}
+
+/* 顶部搜索框：app.min.css 给 .searchbox 写死白色 border-bottom；
+   .navbox-2 下容器 260px 而 input 仅 206px，靠右对齐后容器左侧露出一段白线。
+   去掉下划线，让输入框铺满容器，并把放大镜真正垂直居中。 */
+.navbox .searchbox,
+.navbox-2 .searchbox {
+  border-bottom: 0 !important;
+}
+.navbox .searchbox .dask-search-input,
+.navbox-2 .searchbox .dask-search-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 36px;
+  line-height: 34px;
+  padding: 0 40px 0 14px !important;
+  border: 1px solid var(--dask-line) !important;
+  border-radius: var(--dask-r-pill);
+  background: var(--dask-bg);
+  color: var(--dask-text);
+}
+.navbox .searchbox .dask-search-input::placeholder {
+  color: var(--dask-text-3);
+  opacity: 1;
+}
+.navbox .searchbox label.si-magnifier,
+.navbox-2 .searchbox label.si-magnifier {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 36px;
+  height: 36px;
+  margin: 0 !important;
+  padding: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transform: none !important;
+  line-height: 1 !important;
+  font-size: 14px;
+  color: var(--dask-text-3) !important;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.navbox:not(.navbox-2) .searchbox label.si-magnifier {
+  color: var(--dask-text-3) !important;
+}
+.navbox .searchbox label.si-magnifier:hover,
+.navbox-2 .searchbox label.si-magnifier:hover,
+.navbox:not(.navbox-2) .searchbox label.si-magnifier:hover {
+  color: var(--dask-blue) !important;
+}
+
+
+/* ---------- 深浅色浮层/弹窗收口 ----------
+   这些组件来自 bootstrap dropdown / layui layer / 模板，位于 #headerMain
+   或 #dask-ajax-box 内，tokens.css 里 #wrapMain 作用域的深色规则命中不到，
+   因此在此统一按 html[data-dark="1"] 覆盖（同时兼容 auto + 系统深色）。 */
+
+/* 顶部导航区的下拉：用户菜单、通知、私信浮层 */
+html[data-dark="1"] #headerMain .dropdown-menu,
+html[data-theme="auto"][data-dark="1"] #headerMain .dropdown-menu {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+  border-color: var(--dask-line) !important;
+}
+html[data-dark="1"] #headerMain .dropdown-item,
+html[data-theme="auto"][data-dark="1"] #headerMain .dropdown-item {
+  color: var(--dask-text) !important;
+  background: transparent !important;
+}
+html[data-dark="1"] #headerMain .dropdown-item:hover,
+html[data-theme="auto"][data-dark="1"] #headerMain .dropdown-item:hover {
+  background-color: var(--dask-blue-tint) !important;
+  color: var(--dask-blue) !important;
+}
+html[data-dark="1"] #headerMain .dropdown-divider,
+html[data-theme="auto"][data-dark="1"] #headerMain .dropdown-divider {
+  border-top-color: var(--dask-line) !important;
+}
+html[data-dark="1"] #headerMain .dropdown-menu .bg-primary {
+  background-color: var(--dask-primary-bg) !important;
+}
+/* 通知/私信浮层：列表项、弱文字、分隔线、底部按钮 */
+html[data-dark="1"] #headerMain .nav-items a,
+html[data-theme="auto"][data-dark="1"] #headerMain .nav-items a {
+  background: transparent !important;
+  border-bottom-color: var(--dask-line) !important;
+  color: var(--dask-text) !important;
+}
+html[data-dark="1"] #headerMain .nav-items a:hover,
+html[data-theme="auto"][data-dark="1"] #headerMain .nav-items a:hover {
+  background-color: var(--dask-blue-tint) !important;
+}
+html[data-dark="1"] #headerMain .dropdown-menu .text-muted,
+html[data-theme="auto"][data-dark="1"] #headerMain .dropdown-menu .text-muted {
+  color: var(--dask-text-3) !important;
+}
+html[data-dark="1"] #headerMain .dropdown-menu .btn-light,
+html[data-theme="auto"][data-dark="1"] #headerMain .dropdown-menu .btn-light {
+  background-color: var(--dask-elevated) !important;
+  border-color: var(--dask-line) !important;
+  color: var(--dask-text) !important;
+}
+
+/* 内容区通用下拉（文章更多菜单等，位于 #wrapMain 但 bootstrap 白底未被命中） */
+html[data-dark="1"] #wrapMain .dropdown-menu,
+html[data-theme="auto"][data-dark="1"] #wrapMain .dropdown-menu {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+  border-color: var(--dask-line) !important;
+}
+html[data-dark="1"] #wrapMain .dropdown-item,
+html[data-theme="auto"][data-dark="1"] #wrapMain .dropdown-item {
+  color: var(--dask-text) !important;
+}
+html[data-dark="1"] #wrapMain .dropdown-item:hover,
+html[data-theme="auto"][data-dark="1"] #wrapMain .dropdown-item:hover {
+  background-color: var(--dask-blue-tint) !important;
+  color: var(--dask-blue) !important;
+}
+
+/* 原生 select 选项弹层（编辑器分类下拉） */
+html[data-dark="1"] select,
+html[data-dark="1"] select option,
+html[data-theme="auto"][data-dark="1"] select,
+html[data-theme="auto"][data-dark="1"] select option {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+}
+html[data-dark="1"] select { color-scheme: dark; }
+
+/* layui layer 弹窗壳（添加话题、私信对话等 ajaxModal / Dask.api.open） */
+html[data-dark="1"] .layui-layer,
+html[data-theme="auto"][data-dark="1"] .layui-layer {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .45) !important;
+}
+html[data-dark="1"] .layui-layer-title,
+html[data-theme="auto"][data-dark="1"] .layui-layer-title {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+  border-bottom-color: var(--dask-line) !important;
+}
+html[data-dark="1"] .layui-layer-content,
+html[data-theme="auto"][data-dark="1"] .layui-layer-content {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+}
+html[data-dark="1"] .layui-layer-btn,
+html[data-theme="auto"][data-dark="1"] .layui-layer-btn {
+  background-color: var(--dask-elevated) !important;
+  border-top-color: var(--dask-line) !important;
+}
+html[data-dark="1"] .layui-layer-btn a,
+html[data-theme="auto"][data-dark="1"] .layui-layer-btn a {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+  border-color: var(--dask-line) !important;
+}
+/* 保留主操作按钮（btn0）的蓝色强调，避免整窗灰平 */
+html[data-dark="1"] .layui-layer-btn .layui-layer-btn0,
+html[data-theme="auto"][data-dark="1"] .layui-layer-btn .layui-layer-btn0 {
+  background-color: var(--dask-primary-bg) !important;
+  color: #fff !important;
+  border-color: var(--dask-primary-bg) !important;
+}
+/* 添加话题弹窗内容：标签、最近话题。内容实际挂在 .layui-layer-content 内，
+   同时保留 #dask-ajax-box 作用域以兼容 iframe / 直接插入两种承载方式。 */
+html[data-dark="1"] .layui-layer-content .dask-topic,
+html[data-dark="1"] .layui-layer-content em.tag,
+html[data-dark="1"] .layui-layer-content .topicSelected.active em,
+html[data-dark="1"] #dask-ajax-box .dask-topic,
+html[data-dark="1"] #dask-ajax-box em.tag,
+html[data-dark="1"] #dask-ajax-box .topicSelected.active em,
+html[data-theme="auto"][data-dark="1"] .layui-layer-content .dask-topic,
+html[data-theme="auto"][data-dark="1"] .layui-layer-content em.tag,
+html[data-theme="auto"][data-dark="1"] #dask-ajax-box .dask-topic,
+html[data-theme="auto"][data-dark="1"] #dask-ajax-box em.tag {
+  background-color: var(--dask-blue-tint) !important;
+  border-color: var(--dask-blue-tint-2) !important;
+  color: var(--dask-blue) !important;
+}
+
+/* 阅读全文/收起全文：页面级 CSS 写死白底渐隐，桌面层覆盖回深色 */
+html[data-dark="1"] #show-all,
+html[data-theme="auto"][data-dark="1"] #show-all {
+  background: transparent !important;
+}
+html[data-dark="1"] .dask-alpha-hidden,
+html[data-theme="auto"][data-dark="1"] .dask-alpha-hidden {
+  background: linear-gradient(180deg, rgba(20, 22, 26, 0) 0%, var(--dask-bg) 100%) !important;
+}
+html[data-dark="1"] .dask-alpha-hidden span,
+html[data-theme="auto"][data-dark="1"] .dask-alpha-hidden span {
+  background-color: var(--dask-elevated) !important;
+  color: var(--dask-blue) !important;
+  border: 1px solid var(--dask-line) !important;
+}
+
+/* 手机端热门话题横向卡片：--dask-surface-2 未定义导致背景透明、边框孤立成竖线，
+   这里补正确背景并柔化边框，标题右侧不再出现突兀竖线。 */
+
+/* ----------  布局与信息密度 ---------- */
+
+/* 侧栏"查看更多"箭头：改为浮右居中，紧跟标题改为最右侧。 */
+.r-title .dask-r-title-more {
+  float: right !important;
+  margin-left: auto;
+}
+
+/* 关注/赞同按钮统一为同规格浅底蓝字主操作样式。
+   之前 .dask-ajax-agree 带 btn-primary 在某些主题下被顶成实心蓝底白字，
+   而 a.gz 始终是浅底蓝字，导致同一行两个主操作风格不一致。
+   这里以既有浅底令牌为统一目标，浅/深/自动三态一致。 */
+#wrapMain a.gz,
+#wrapMain a.ygz,
+#wrapMain a.ygz:hover,
+#wrapMain .dask-ajax-agree,
+#wrapMain .dask-ajax-agree:hover,
+html[data-theme="dark"] #wrapMain a.gz,
+html[data-theme="dark"] #wrapMain a.ygz,
+html[data-theme="dark"] #wrapMain .dask-ajax-agree,
+html[data-theme="auto"][data-dark="1"] #wrapMain a.gz,
+html[data-theme="auto"][data-dark="1"] #wrapMain a.ygz,
+html[data-theme="auto"][data-dark="1"] #wrapMain .dask-ajax-agree {
+  background-color: var(--dask-blue-tint) !important;
+  border-color: var(--dask-blue-tint) !important;
+  color: #A9CDFF !important;
+}
+/* 已关注态用稍重的描边区分，仍与主色系一致 */
+#wrapMain a.ygz.active,
+#wrapMain a.ygz.active:hover {
+  background-color: var(--dask-blue-tint-2) !important;
+  border-color: var(--dask-blue-tint-2) !important;
+  color: var(--dask-blue-active) !important;
+}
+/* 按钮内计数徽标：浅色下按钮文字是深蓝（--dask-blue-active），徽标若继续用
+   浅蓝 #A9CDFF 在浅蓝底上对比度不足 2:1，数字几乎看不清；改为跟随主题变量：
+   浅色=深蓝字+浅蓝底，深色=浅蓝字+深蓝底，并放大字号保证可读性。 */
+#wrapMain a.gz .focus-count,
+#wrapMain a.ygz .focus-count,
+#wrapMain .dask-ajax-agree .badge {
+  background: var(--dask-blue-tint-2) !important;
+  color: var(--dask-blue-strong-hover) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  margin-left: 4px;
+  line-height: 1 !important;
+  vertical-align: middle;
+}
+html[data-theme="dark"] #wrapMain a.gz .focus-count,
+html[data-theme="dark"] #wrapMain a.ygz .focus-count,
+html[data-theme="dark"] #wrapMain .dask-ajax-agree .badge,
+html[data-dark="1"] #wrapMain a.gz .focus-count,
+html[data-dark="1"] #wrapMain a.ygz .focus-count,
+html[data-dark="1"] #wrapMain .dask-ajax-agree .badge {
+  color: #A9CDFF !important;
+}
+
+/* 文章/问答 item：时间已由组件类 .dask-article-row__time / __meta 定位到右上，
+   标题右侧留白与省略规则继续沿用下方 .n-title 定义。 */
+/* 与时间同行的标题（文章项标题位于紧贴 dt 的 dd 内）右侧留白避免压到时间，
+   超长以省略号结尾；不影响问题项原本已省略的两行描述。 */
+.dask-common-list .articleItem .n-title > a,
+.dask-common-list .questionItem .n-title > a {
+  display: inline-block; max-width: calc(100% - 96px);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom;
+}
+/* 窄屏文章行：时间原本绝对定位在右上角，长标题会与它叠在一起。
+   改为「标签 + 可省略标题 + 时间」的弹性行，标题始终让出时间宽度。 */
+@media (max-width: $dask-bp-mobile) {
+  html body .dask-common-list .dask-article-row .dask-article-row__title {
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  html body .dask-common-list .dask-article-row .dask-article-row__title .badge { order: 1; flex: 0 0 auto; }
+  html body .dask-common-list .dask-article-row .dask-article-row__title > a {
+    order: 2; flex: 1 1 auto; min-width: 0; max-width: none !important;
+  }
+  html body .dask-common-list .dask-article-row .dask-article-row__time {
+    order: 3; position: static; transform: none; flex: 0 0 auto;
+    margin-left: auto; white-space: nowrap;
+  }
+}
+
+/* 话题卡片：时间右下角居右；窄屏（<=767px）隐藏避免拥挤。 */
+.dask-topic-list .topic-item .topic-meta { position: relative; }
+.dask-topic-list .topic-item .topic-meta .topic-time {
+  margin-left: auto; color: var(--dask-text-3); font-size: 12px; white-space: nowrap;
+}
+@media (max-width: $dask-bp-mobile) {
+  .dask-topic-list .topic-item .topic-meta .topic-time { display: none !important; }
+}
+
+/* 窄屏侧栏热门话题：flex 子项缺 min-width 会撑破容器，图标+文字整体省略号处理。 */
+@media (max-width: $dask-bp-mobile) {
+  .hot-topic .sidebarFocusTopic,
+  .focus-topic-box .sidebarFocusTopic {
+    display: flex !important;
+    flex-wrap: wrap;
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal !important;
+  }
+  .hot-topic .sidebarFocusTopic .topic-btn,
+  .focus-topic-box .sidebarFocusTopic .topic-btn {
+    display: inline-flex !important;
+    max-width: 100% !important;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .hot-topic .sidebarFocusTopic .topic-btn em.tag,
+  .focus-topic-box .sidebarFocusTopic .topic-btn em.tag {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ---------- 全站 tab 点击态字重恒定，切换不再跳动 ----------
+   根因：active 被强制 600、非 active 继承 700，切换时文字宽度变化 1~2px，
+   同排 tab 位移导致"跳动一下"。统一为同一字重，只靠颜色 + 小短线区分选中态。 */
+html body .nav-tabs .nav-link,
+html body .nav-tabs .nav-item > a,
+html body .nav-tabs .nav-item.nav-link,
+html body .nav-pills .nav-link,
+html body .dask-pjax-tabs .nav-link,
+html body .dask-pjax-tabs .nav-item > a {
+  font-weight: 500 !important;
+}
+html body .nav-tabs .nav-link.active,
+html body .nav-tabs .nav-item.active > a,
+html body .nav-tabs .nav-item.nav-link.active,
+html body .nav-pills .nav-link.active,
+html body .dask-pjax-tabs .nav-link.active {
+  font-weight: 500 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-tabs, .dask-pjax-tabs, .searchSortTab { scroll-behavior: auto; }
+}
+
+/* ---------- 按钮高度、中心对齐、导航间距、列表时间/话题位置 ----------
+   根因实测：
+   1) app.min.css 的 .nav-form.position-relative 带 justify-content:center;flex-grow:1，
+      登录态在部分宽度把头像与主题按钮拉开；统一收口为右对齐 + 固定 12px 间隔。
+   2) .btn-sm 按钮实高 36/37px，同行纯文字仅 15~18px，视觉上"太高"且中心差 6px；
+      操作行改 flex 居中，主操作压到 28px，文字项拉到同高。
+   3) 关注/赞同在列表走 #wrapMain a.gz/.dask-ajax-agree，详情页是 button.btn-primary，
+      原规则漏掉按钮分支，造成深蓝/浅蓝两套风格；按 data-action 统一。
+   4) .r-title 行高 50px，箭头 24px 顶对齐，中心差 13px；改 flex 居中。
+   5) 部分模板把话题放在 dt，与右上角时间同行；统一改为 item 右下角。
+*/
+.navbox .nav-form,
+.navbox-2 .nav-form {
+  justify-content: flex-end !important;
+  flex-grow: 0 0 auto !important;
+  gap: 12px !important;
+}
+.navbox .nav-form .dask-theme-toggle,
+.navbox-2 .nav-form .dask-theme-toggle { margin-left: 0 !important; }
+.navbox .nav-form .gradientBtn.btn-sm,
+.navbox-2 .nav-form .gradientBtn.btn-sm {
+  height: 30px !important;
+  min-height: 30px !important;
+  line-height: 28px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.r-title { display: flex !important; align-items: center !important; }
+.r-title > h4 { float: none !important; }
+.r-title > .dask-r-title-more { float: none !important; margin-left: auto !important; }
+
+.dask-actions,
+.answer-btn-actions,
+.dask-common-list .actions {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap;
+}
+.dask-actions > label,
+.answer-btn-actions > label,
+.dask-common-list .actions > label {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin-bottom: 0 !important;
+  line-height: 28px;
+}
+.dask-actions > label > a,
+.answer-btn-actions > label > a,
+.dask-common-list .actions > label > a {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px;
+  line-height: 26px;
+}
+.dask-actions .btn.btn-sm,
+.answer-btn-actions .btn.btn-sm,
+.dask-common-list .actions .btn.btn-sm {
+  height: 28px !important;
+  min-height: 28px !important;
+  line-height: 26px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 13px !important;
+}
+
+.answer-btn-actions a.dask-ajax-agree,
+.answer-btn-actions a.dask-ajax-against,
+.actions a.dask-ajax-agree,
+.actions a.dask-ajax-against {
+  height: 28px !important;
+  min-height: 28px !important;
+  line-height: 26px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 13px !important;
+}
+
+/* 主操作按钮：列表与详情页统一为浅底蓝字小圆角（含 button 分支） */
+#wrapMain a[data-action="user-focus"].btn-primary,
+#wrapMain a[data-action="user-agree"].btn-primary,
+#wrapMain a[data-action="user-against"].btn-primary,
+body a[data-action="user-focus"].btn-primary,
+body a[data-action="user-agree"].btn-primary,
+body button[data-action="user-focus"].btn-primary,
+html body #wrapMain button[data-action="user-focus"].btn-primary,
+html body #wrapMain a[data-action="user-focus"].btn-primary,
+html body #wrapMain a[data-action="user-agree"].btn-primary,
+html body #wrapMain a[data-action="user-against"].btn-primary,
+html body #wrapMain a.dask-ajax-agree,
+body a.dask-ajax-agree,
+body a.dask-ajax-against,
+body .answer-btn-actions a.dask-ajax-agree,
+body .answer-btn-actions a.dask-ajax-against,
+body .actions a.dask-ajax-agree,
+body .actions a.dask-ajax-against {
+  background-color: var(--dask-blue-tint) !important;
+  border-color: var(--dask-blue-tint) !important;
+  color: var(--dask-blue-active) !important;
+  border-radius: var(--dask-r-sm) !important;
+}
+body a[data-action="user-focus"].btn-primary:hover,
+body a[data-action="user-agree"].btn-primary:hover,
+body a.dask-ajax-agree:hover,
+body button[data-action="user-focus"].btn-primary:hover,
+html body #wrapMain button[data-action="user-focus"].btn-primary:hover,
+html body #wrapMain a.ygz[data-action="user-focus"].btn-primary,
+body a.ygz[data-action="user-focus"].btn-primary,
+body button.ygz[data-action="user-focus"].btn-primary,
+body .ygz.active[data-action="user-agree"] {
+  background-color: var(--dask-blue-tint-2) !important;
+  border-color: var(--dask-blue-tint-2) !important;
+  color: var(--dask-blue-active) !important;
+}
+
+/* 时间右上 + 话题右下：话题绝对定位到 item 右下角，
+   与已在 .dask-actions 内使用 ms-auto 的模板视觉一致。 */
+.dask-common-list .dask-list-item,
+.dask-common-list > .questionItem,
+.dask-common-list > .articleItem { position: relative; }
+.dask-common-list .dask-list-item__meta > .tag,
+.dask-common-list .dask-list-item__meta > .tags {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 10px !important;
+  max-width: 52% !important;
+  margin: 0 !important;
+  overflow: hidden;
+  white-space: nowrap;
+  z-index: 1;
+}
+@media (max-width: $dask-bp-mobile) {
+  .dask-common-list dt > .tag,
+  .dask-common-list dt > .tags,
+  .dask-common-list .dask-list-item__meta > .tag,
+  .dask-common-list .dask-list-item__meta > .tags { max-width: 42% !important; }
+}
+
+/* ---------- /people 用户卡片响应式网格 ----------
+   实测：模板 row-cols-2 + col-md-6 在大屏固定每行 2 个；
+   介绍用 dask-one-line（nowrap + keep-all），flex 子项无 min-width:0，
+   文本把 dd 撑到 2182px，超出卡片边界。改为响应式网格 + 两行截断。
+    反馈：大屏 4 列过于拥挤；主区实际宽度受容器限制（约 852px），
+   3 列时每卡仅 273px、指标文案折成两行。桌面统一 2 列，窄屏 1 列。 */
+.plist.people-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  padding: 0 16px;
+}
+.plist.people-grid > .people-list { min-width: 0; margin-bottom: 0; }
+.plist.people-grid .dask-card {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  height: 100%;
+  box-shadow: none;
+}
+.plist.people-grid h3 {
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plist.people-grid .people-signature {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+  min-height: 3em;
+  margin-top: 4px;
+}
+.plist.people-grid .dask-stat-grid { gap: 4px; margin-top: 6px; }
+.plist.people-grid .dask-actions { margin-top: 10px; gap: 8px; }
+.plist.people-grid .dask-actions .btn {
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  height: 28px;
+  min-height: 28px;
+  line-height: 20px !important;
+}
+/* ≥768px 桌面/平板固定 2 列（基础规则）；不再按屏宽增列，
+   避免主区仅 852px 时 3~4 列把成长值/获赞挤成两行。 */
+@media (max-width: $dask-bp-mobile) {
+  .plist.people-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 0 12px; }
+  /* 320px 下两列指标会把「成长值: 1415」折成两行，窄屏改为上下排列。 */
+  .plist.people-grid .dask-stat-grid { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+
+/* ---------- 话题卡片对齐、用户信息浮层重设、tab 下划线稳定 ---------- */
+
+/* 1) 热门话题卡片已改用 .dask-hcard，垂直居中由 12C 的组件规则承担。 */
+
+/* 2) 用户信息浮层：改为 grid 两列布局，头像不再绝对定位压住昵称。
+   原规则 .dask-mod-head padding-left:70px 给绝对头像留位，但
+   zhihu-blue.css 又把 p.title 的 padding-left 清成 0，导致文字被头像遮挡。 */
+.dask-ui-card-tips.dask-ui-card-tips-user {
+  width: 320px !important;
+  overflow: hidden;
+  background: var(--dask-surface) !important;
+  border: 1px solid var(--dask-line) !important;
+  border-radius: var(--dask-r-md) !important;
+  box-shadow: 0 12px 32px rgba(18, 18, 18, .16) !important;
+  color: var(--dask-text) !important;
+}
+.dask-ui-card-tips-user .dask-mod-head {
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  column-gap: 12px !important;
+  row-gap: 6px !important;
+  min-height: 0 !important;
+  padding: 16px !important;
+  border-bottom: 1px solid var(--dask-line) !important;
+}
+.dask-ui-card-tips-user .dask-mod-head .img {
+  position: static !important;
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  width: 52px !important;
+  height: 52px !important;
+}
+.dask-ui-card-tips-user .dask-mod-head .img img {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+.dask-ui-card-tips-user .dask-mod-head p.title {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.3;
+}
+.dask-ui-card-tips-user .dask-mod-head p.title .name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dask-text) !important;
+  font-weight: 600;
+}
+.dask-ui-card-tips-user .dask-mod-head .dask-user-center-follow-meta {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  min-width: 0;
+  margin: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--dask-text-3) !important;
+}
+.dask-ui-card-tips-user .dask-mod-body { padding: 12px 16px !important; }
+.dask-ui-card-tips-user .dask-mod-body p {
+  margin: 0 !important;
+  line-height: 1.55;
+  color: var(--dask-text-2) !important;
+  word-break: break-word;
+}
+/* 用户浮层简介：原框架把 p 重置成 flow-root，line-clamp 因此失效，
+   这里显式恢复两行盒模型，让长简介最多展示两行而不是单行截断。 */
+.dask-ui-card-tips-user .dask-mod-body p.dask-two-line {
+  display: -webkit-box !important;
+  line-clamp: 2 !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+.dask-ui-card-tips-user .dask-mod-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px;
+  padding: 10px 16px !important;
+  background: var(--dask-elevated) !important;
+  border-top: 1px solid var(--dask-line) !important;
+  line-height: 1.4 !important;
+}
+.dask-ui-card-tips-user .dask-mod-footer .btn {
+  margin-left: auto !important;
+  padding: 4px 12px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  line-height: 22px !important;
+}
+
+/* 3) tab 下划线：非选中态也保留同尺寸透明伪元素，
+   切换时只变颜色，几何完全不变，杜绝跳动。 */
+html body .nav-tabs .nav-link,
+html body .dask-pjax-tabs .nav-link,
+html body .nav-pills .nav-link { position: relative !important; }
+html body .nav-tabs .nav-link::after,
+html body .dask-pjax-tabs .nav-link::after,
+html body .nav-pills .nav-link::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: -1px !important;
+  width: 22px !important;
+  height: 2px !important;
+  border-radius: 2px !important;
+  background: transparent !important;
+}
+html body .nav-tabs .nav-link.active::after,
+html body .dask-pjax-tabs .nav-link.active::after,
+html body .nav-pills .nav-link.active::after,
+html body .dask-left .nav-tabs .nav-item.nav-link.active::after {
+  background: var(--dask-blue) !important;
+}
+
+/* ---------- 列表右边缘、窄屏对齐、顶部用户昵称与返回顶部图标 ----------
+   实测根因：
+   1) /question 的话题包在 dt 内，被绝对定位到 dl 的 padding 外沿（right:0），
+      而时间在 dt 内容盒内，右边缘差一个 24px 列表内边距。
+   2) .pcon.row 的 Bootstrap 负边距让窄屏描述文字与操作行的视觉左边缘不一致；
+      320px 下操作标签合计超出容器，第三个标签换行。
+   3) app.min.css 的 .navbar-light .dropdown a { color:#fff } 把顶部用户昵称设成白底白字。
+   4) iconfont e9d6 在本字体中未实际出字形，返回顶部只剩空白圆。
+*/
+:root { --dask-list-pad-x: 24px; }
+
+.dask-common-list .dask-list-item__meta > .tag,
+.dask-common-list .dask-list-item__meta > .tags {
+  right: var(--dask-list-pad-x) !important;
+}
+
+html body .nav-form #page-header-user-dropdown,
+html body .nav-form #page-header-user-dropdown span,
+html body .nav-form #page-header-user-dropdown i {
+  color: var(--dask-text-2) !important;
+}
+html body .nav-form #page-header-user-dropdown img {
+  border-radius: 50% !important;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.dask-backtop svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+.dask-backtop svg circle,
+.dask-backtop svg path { vector-effect: non-scaling-stroke; }
+
+@media (max-width: $dask-bp-mobile) {
+  .dask-common-list .questionItem .pcon,
+  .dask-common-list .articleItem .pcon {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .dask-common-list .questionItem .pcon > div,
+  .dask-common-list .questionItem .pcon .dask-two-line {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .dask-common-list .dask-actions,
+  .answer-btn-actions,
+  .dask-common-list .actions {
+    gap: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+  .dask-common-list .dask-actions > label,
+  .answer-btn-actions > label,
+  .dask-common-list .actions > label {
+    margin-left: 0 !important;
+    margin-right: 12px !important;
+  }
+  /* 窄屏操作行：话题胶囊与回答操作按钮在 nowrap 下会超出卡片被压缩成竖排。
+     改为允许换行，子项不收缩、文字不折断，保留全部按钮且不越界。 */
+  .dask-common-list .dask-actions,
+  .dask-common-list .actions,
+  .answer-btn-actions {
+    flex-wrap: wrap !important;
+    row-gap: 6px;
+  }
+  .answer-btn-actions > label {
+    flex: 0 0 auto !important;
+    white-space: nowrap;
+  }
+  .dask-common-list .dask-actions .dask-list-topics,
+  .dask-common-list .actions .dask-list-topics {
+    flex: 1 1 100% !important;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: $dask-bp-mini) {
+  .dask-common-list .dask-actions > label,
+  .answer-btn-actions > label,
+  .dask-common-list .actions > label {
+    margin-right: 8px !important;
+    font-size: 12px !important;
+  }
+  .dask-common-list .dask-actions .btn.btn-sm {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* 有图列表项在 Bootstrap .row 负边距下，描述文字比按钮/图片左边缘少 15px；
+   大屏把描述补回同一内容左边缘，窄屏已在上面把负边距清零。 */
+@media (min-width: $dask-bp-mobile-start) {
+  .dask-common-list .pcon.row .ov-3 .dask-two-line,
+  .dask-common-list .pcon.row .ov-3 .dask-three-line {
+    padding-left: 15px !important;
+  }
+}
+
+/* ---------- 全站文本输入框占位文字与边框保持统一间距 ----------
+   根因：app.min.css 的 .dask-form-control 只清边框未设 padding，
+   登录页 input.dask-form-control 的 placeholder 直接贴住左边框。
+   搜索框已有 14px 左内边距和 38px 右内边距，这里明确排除，避免覆盖图标位置。
+*/
+html body input.dask-form-control,
+html body textarea.dask-form-control,
+html body .form-control:not(.select2-search__field),
+html body input[type="text"]:not(.dask-search-input):not(.select2-search__field),
+html body input[type="email"]:not(.dask-search-input):not(.select2-search__field),
+html body input[type="password"]:not(.dask-search-input):not(.select2-search__field),
+html body input[type="tel"]:not(.dask-search-input):not(.select2-search__field),
+html body input[type="number"]:not(.dask-search-input):not(.select2-search__field),
+html body textarea:not(.select2-search__field) {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* ---------- /account/* 统一紫色认证页外壳、居中与白字版权 ---------- */
+html body#pageMain.dask-account-page {
+  background-image: url('/static/frontend/image/body-bg.jpg') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* 已有 signBox 的登录/注册/找回密码/重置密码：统一垂直居中、卡片宽度与页脚 */
+html body#pageMain .signBox {
+  min-height: 100vh !important;
+  height: auto !important;
+  background-image: url('/static/frontend/image/body-bg.jpg') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
+}
+html body#pageMain .signBoxContent {
+  justify-content: center !important;
+  margin-top: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 24px 12px !important;
+}
+html body#pageMain .signBox .content {
+  width: 100% !important;
+  max-width: 489px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+}
+html body#pageMain .signBox .logo {
+  width: auto !important;
+  height: 80px !important;
+  margin-bottom: 24px !important;
+  line-height: 80px !important;
+  font-size: 2rem !important;
+  text-align: center !important;
+}
+html body#pageMain .signBoxFooter {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  margin: 0 12px 12px !important;
+  padding: 6px 12px 20px !important;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+}
+html body#pageMain .signBoxFooter a,
+html body#pageMain .signBoxFooter span {
+  color: #fff !important;
+  text-shadow: inherit !important;
+}
+
+/* 社交登录：登录页与找回密码页使用同一套居中样式 */
+html body .dask-social a {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box !important;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  margin: 0 4px 8px !important;
+  border: 1px solid var(--dask-line, #e9ecef) !important;
+  border-radius: 50% !important;
+  background: var(--dask-surface, #fff) !important;
+  line-height: 1 !important;
+  text-decoration: none;
+}
+html body .dask-social a i,
+html body .dask-social a svg {
+  font-size: 1.5rem !important;
+  line-height: 1 !important;
+}
+
+/* 其余 /account/* 完整页面（修改资料、首次登录引导等）套用同一外壳 */
+html body#pageMain.dask-account-page:not(:has(.signBox)) #headerMain { display: none !important; }
+html body#pageMain.dask-account-page:not(:has(.signBox)) #wrapMain {
+  margin-top: 0 !important;
+  padding: 24px 12px !important;
+  min-height: calc(100vh - 96px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+}
+html body#pageMain.dask-account-page:not(:has(.signBox)) #wrapMain > * {
+  width: min(100%, 489px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  background: var(--dask-surface) !important;
+  border: 1px solid var(--dask-line) !important;
+  border-radius: var(--dask-r-md) !important;
+  box-shadow: 0 1px 3px rgba(18,18,18,.1) !important;
+  overflow: hidden;
+}
+html body#pageMain.dask-account-page:not(:has(.signBox)) .foot {
+  background: transparent !important;
+  border: 0 !important;
+  color: #fff !important;
+  text-align: center !important;
+  padding: 6px 12px 20px !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+}
+html body#pageMain.dask-account-page:not(:has(.signBox)) .foot a,
+html body#pageMain.dask-account-page:not(:has(.signBox)) .foot span,
+html body#pageMain.dask-account-page:not(:has(.signBox)) .foot-copyright {
+  color: #fff !important;
+  text-shadow: inherit !important;
+}
+html body#pageMain.dask-account-page:not(:has(.signBox)) .foot-main,
+html body#pageMain.dask-account-page:not(:has(.signBox)) .foot-links {
+  display: block !important;
+  float: none !important;
+  width: auto !important;
+}
+
+/* 聚焦高亮只用一层边框；3px 外圈会与边框叠成双层蓝边。 */
+html body input.dask-form-control:focus,
+html body input.form-control:focus,
+html body input[type="text"]:focus,
+html body input[type="email"]:focus,
+html body input[type="password"]:focus,
+html body input[type="tel"]:focus,
+html body input[type="number"]:focus,
+html body textarea:focus {
+  border-color: var(--dask-blue) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+@media (max-width: $dask-bp-mobile) {
+  html body#pageMain .signBoxContent { padding: 16px 8px !important; }
+  html body#pageMain .signBox .logo {
+    height: auto !important;
+    padding-top: 12px !important;
+    margin-bottom: 12px !important;
+    line-height: 1.2 !important;
+    font-size: 1.6rem !important;
+  }
+}
+
+/* ---------- 导航短线、列表时间对齐、浮层关注按钮统一 ---------- */
+/* 1) 顶部导航链接与导航条同高，active 小短线落在导航条自身底部。 */
+html body .navbox-2 .navbar-new-nav .nav-link {
+  padding: 0 14px !important;
+  line-height: 56px !important;
+}
+
+/* 2) /时间不再用 top:32px 人工下移。
+   文章项时间已进入标题行内的组件；问题项时间回到 dt 行，与“发起了提问”同排居右。 */
+
+/* 3) 话题浮层关注按钮与用户浮层完全同规格：同一组 gz/ygz 状态色，
+   同一 30px 高度 / 13px 字号 / 4px 12px 内边距，计数统一为“关注 | N”。 */
+html body .dask-topic-card-footer .dask-topic-card-follow,
+html body .dask-ui-card-tips-user .dask-mod-footer .btn.follow {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  box-sizing: border-box !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 4px 12px !important;
+  min-width: 88px !important;
+  font-size: 13px !important;
+  line-height: 22px !important;
+  border-radius: 6px !important;
+}
+html body .dask-topic-card-footer .dask-topic-card-follow em,
+html body .dask-ui-card-tips-user .dask-mod-footer .btn.follow em {
+  font-style: normal !important;
+  opacity: .7;
+  margin: 0 2px;
+}
+html body .dask-topic-card-footer .dask-topic-card-follow b,
+html body .dask-ui-card-tips-user .dask-mod-footer .btn.follow b {
+  font-weight: 500 !important;
+}
+
+/* ---------- 话题胶囊可见右边缘与右上角时间对齐 ---------- */
+/* app.min.css 的 em.tag 带 margin-right:10px，容器虽已右对齐，
+   但蓝色胶囊本身仍内缩 10px；间距改由 .dask-list-topics 的 gap 承担。 */
+.dask-common-list .dask-list-topics em.tag,
+.dask-common-list .dask-actions .dask-list-topics em.tag {
+  margin-right: 0 !important;
+}
+
+/* ---------- 全站头像圆形无边框 + 认证角标右下角 ----------
+   1) 头像 URL 统一包含 avatar（/storage/avatar/… 或 default-avatar.svg），
+      用属性选择器覆盖模板散落的 .rounded（4px 方角）和 1px 边框。
+   2) 认证标识不再是昵称右侧的蓝色人形图（people.svg），
+      统一为蓝底白色对勾，绝对定位在头像右下角；
+      非选中态与选中态尺寸一致，不参与 tab 布局。 */
+html body img[src*="avatar"],
+html body img.circle,
+html body img.dask-user-img,
+html body img.img-avatar,
+html body .dask-avatar-wrap > img {
+  border-radius: 50% !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover;
+}
+html body .dask-avatar-wrap,
+html body .user-details-card-avatar,
+html body .authorAvatar,
+html body .dask-ui-card-tips-user .dask-mod-head .img {
+  position: relative !important;
+  display: inline-block !important;
+  /* 头像统一浅灰圆形底：图片透明或为白底 Logo 时仍能看出圆形轮廓 */
+  background: var(--dask-bg) !important;
+}
+html body .authorAvatar,
+html body #wrapMain .authorAvatar {
+  border-radius: 50% !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  background: var(--dask-bg) !important;
+}
+/* 个人主页大头像：浅灰圆形底外露 6px，内图裁圆，认证角标仍贴右下角 */
+html body .dask-profile-head__avatar .authorAvatar {
+  box-sizing: border-box !important;
+  width: 96px !important;
+  height: 96px !important;
+  padding: 6px !important;
+}
+html body .dask-profile-head__avatar .authorAvatar > img {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+}
+html body .authorAvatar > img,
+html body #wrapMain .authorAvatar > img {
+  border-radius: 50% !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body .dask-verified-badge {
+  --dask-badge-size: 16px;
+  position: absolute !important;
+  right: -1px !important;
+  bottom: -1px !important;
+  z-index: 3;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--dask-badge-size) !important;
+  height: var(--dask-badge-size) !important;
+  min-width: var(--dask-badge-size) !important;
+  min-height: var(--dask-badge-size) !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--dask-surface) !important;
+  background: var(--dask-blue) !important;
+  color: #fff !important;
+  line-height: 1 !important;
+  box-shadow: 0 1px 4px rgba(18, 18, 18, .22);
+}
+html body .dask-verified-badge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+html body .authorAvatar .dask-verified-badge,
+html body #wrapMain .authorAvatar .dask-verified-badge {
+  --dask-badge-size: 24px;
+  right: 2px !important;
+  bottom: 2px !important;
+  border-width: 3px !important;
+  background: var(--dask-blue) !important;
+}
+
+/* 选中态短线只改颜色、不改尺寸与位置；tab 项几何在切换前后保持一致。
+   CDP 实测：原规则让非选中 tab 为 16px 上下内边距 + 54px 行盒 = 86px，
+   选中态却只有 53px，切换时整排 tab 高度会跳变；这里锁定统一高度。 */
+html body .nav-tabs .nav-link,
+html body .dask-pjax-tabs .nav-link {
+  box-sizing: border-box !important;
+  height: 54px !important;
+  padding: 0 14px !important;
+  line-height: 54px !important;
+}
+html body .nav-tabs .nav-link,
+html body .dask-pjax-tabs .nav-link,
+html body .nav-pills .nav-link,
+html body .dask-profile-tabs-list .nav-link {
+  font-weight: 500 !important;
+  transition: color .15s ease !important;
+}
+
+/* ---------- 添加话题弹窗按钮高度与内容留白 ----------
+   CDP 实测：窄屏（≤767px）全局 .btn{min-height:44px} 把弹窗按钮从 36px 撑到 44px，
+   输入框仍是 38px，同行不等高；空的话题搜索结果 UL 保留 20px 下边距 + 分隔线，
+   叠加容器 min-height:280px，弹窗底部出现大片空白。这里只在弹窗作用域内收敛。 */
+html body .layui-layer-content > .bg-white,
+html body #dask-ajax-box > .bg-white {
+  min-height: 0 !important;
+  padding: 12px 14px !important;
+}
+html body .layui-layer-content .mb-3,
+html body #dask-ajax-box .mb-3 {
+  margin-bottom: 12px !important;
+}
+html body .layui-layer-content .topicSearchInput,
+html body #dask-ajax-box .topicSearchInput {
+  height: 36px !important;
+  min-height: 36px !important;
+  line-height: 34px !important;
+  font-size: 14px !important;
+}
+html body .layui-layer-content .saveCreateTopic,
+html body .layui-layer-content .saveTopic,
+html body #dask-ajax-box .saveCreateTopic,
+html body #dask-ajax-box .saveTopic {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 4px 12px !important;
+  font-size: 13px !important;
+  line-height: 26px !important;
+  border-radius: 6px !important;
+}
+html body .layui-layer-content ul.topicSearchList:empty,
+html body #dask-ajax-box ul.topicSearchList:empty {
+  display: none !important;
+}
+html body .layui-layer-content .page-detail-topic,
+html body #dask-ajax-box .page-detail-topic {
+  gap: 6px 8px !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  border-bottom: 0 !important;
+}
+html body .layui-layer-content .page-detail-topic em.tag,
+html body #dask-ajax-box .page-detail-topic em.tag {
+  margin-right: 0 !important;
+}
+html body .layui-layer-content .topic-save-form > div,
+html body #dask-ajax-box .topic-save-form > div {
+  margin-top: 12px !important;
+}
+html body .layui-layer-content .topic-save-form,
+html body #dask-ajax-box .topic-save-form {
+  display: flow-root !important;
+}
+html body .layui-layer-content .saveTopic,
+html body #dask-ajax-box .saveTopic {
+  margin-top: 12px !important;
+}
+
+/* ---------- 文章列表项标题上方空白 ----------
+   已从 DOM 结构根治：时间移入同一个 dd 的 .n-title 内，不再有独立 dt。
+   几何收敛到 `dask-article-row` 组件（见 dask-components.css）。 */
+
+/* ---------- 图左文右卡片改用 .dask-hcard 后，补齐.hot-list dl/dt/dd 规则 ----------
+   侧栏热门话题/专栏/用户卡原用 dl+float，样式来自 app.min.css 的 .hot-list dl*。
+   换成 Flex 组件后这里复刻等价视觉，并兼容深色。 */
+.hot-list .dask-hcard {
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dask-line, #efefef);
+  align-items: center;
+}
+.hot-list .dask-hcard:first-child { padding-top: 6px; }
+.hot-list .dask-hcard:last-child { border-bottom: 0; padding-bottom: 6px; }
+.hot-list .dask-hcard__media { width: 41px; height: 41px; }
+.hot-list .dask-hcard__media img,
+.hot-list .dask-hcard__media > div { width: 41px; height: 41px; border-radius: 3px; }
+.hot-yh-list .dask-hcard__media img { border-radius: 100px; }
+.hot-list .dask-hcard__body { padding: 0 10px; }
+.hot-list .dask-hcard__body h3 { font-size: 14px; margin-bottom: 2px; }
+.hot-list .dask-hcard__body h3 a { font-size: 14px; color: #333333; }
+.hot-list .dask-hcard__body label { font-size: 12px; color: #999999; margin-right: 5px; }
+.hot-list .dask-hcard__body label i { color: var(--dask-blue); font-style: normal; }
+html[data-dark="1"] .hot-list .dask-hcard { border-bottom-color: rgba(255,255,255,.06) !important; }
+html[data-dark="1"] .hot-list .dask-hcard:last-child { border-bottom-color: transparent !important; }
+html[data-dark="1"] .hot-list .dask-hcard__body h3 a { color: var(--dask-text) !important; }
+html[data-dark="1"] #wrapMain .hot-topic-box .hot-list .dask-hcard,
+html[data-theme="auto"][data-dark="1"] #wrapMain .hot-topic-box .hot-list .dask-hcard {
+  background-color: var(--dask-surface) !important;
+  border-color: var(--dask-line) !important;
+}
+
+/* ---------- 剩余布局型 dl/float 收尾 ---------- */
+/* 关注/粉丝列表：头像收敛为 56px 圆形，正文与按钮同一水平带，
+   右侧按钮用 gap 控制间距（me-3 被全局 .btn{margin:0} 清掉）。
+   外层 .dask-user-row 提供左右内边距，避免内容贴卡片边框。 */
+html body .dask-common-list .dask-user-row { padding-left: 16px; padding-right: 16px; }
+html body .dask-user-hcard {
+  align-items: center;
+  gap: 12px;
+}
+html body .dask-user-hcard .dask-hcard__media,
+html body .dask-user-hcard .dask-hcard__media a {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+}
+html body .dask-user-hcard .dask-hcard__media img {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background: var(--dask-bg) !important;
+}
+html body .dask-user-hcard .dask-hcard__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 0 !important;
+}
+html body .dask-user-hcard .dask-hcard__body h3 {
+  margin: 0 0 2px !important;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+}
+html body .dask-user-hcard .dask-hcard__body h3 a {
+  display: inline-block;
+  max-width: 100%;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html body .dask-user-hcard .dask-hcard__body p {
+  margin: 0 0 2px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  white-space: normal !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+html body .dask-user-hcard .dask-hcard__body .text-muted label { font-size: 12px !important; line-height: 1.5 !important; }
+html body .dask-user-hcard .dask-hcard__extra {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  margin-left: 0 !important;
+}
+html body .dask-user-hcard .dask-hcard__extra .btn {
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  line-height: 30px !important;
+  white-space: nowrap;
+}
+
+/* 关注的话题：模板用 absolute 压统计行，标题与「关注：n」必然重叠；
+   改为纵向 flex 三行结构，缩略图固定 56px。 */
+html body .dask-common-list .dask-topic-row { padding-left: 16px; padding-right: 16px; border-bottom: 1px solid var(--dask-line); }
+html body .dask-topic-row .topic-thumb,
+html body .dask-topic-row .topic-thumb a { flex: 0 0 56px; width: 56px; height: 56px; }
+html body .dask-topic-row .topic-thumb img {
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: cover;
+}
+html body .dask-topic-row .dask-hcard__body.topic-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 56px;
+}
+html body .dask-topic-row__title {
+  display: block;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  color: var(--dask-text) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html body .dask-topic-row__desc {
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: var(--dask-text-3) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html body .dask-topic-row__meta {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: var(--dask-text-3) !important;
+}
+
+/* 文章预览作者行：头像 + 昵称 + 右侧统计 */
+.dask-article .dask-author-info .dask-hcard { align-items: center; }
+.dask-article .dask-author-info .dask-hcard__extra { font-size: 13px; }
+
+/* 私信会话项：窄屏下原布局把 hcard 压成 0 宽，文字逐字竖排。
+   明确给会话项 100% 宽，头像固定 46px，正文占满剩余空间。 */
+@media (max-width: $dask-bp-mobile) {
+  html body .dask-wrap [data-dask-list-items] > .dask-hcard {
+    width: 100% !important; display: flex !important; flex-wrap: nowrap; gap: 10px;
+  }
+  html body .dask-wrap [data-dask-list-items] > .dask-hcard .dask-hcard__media { flex: 0 0 46px; }
+  html body .dask-wrap [data-dask-list-items] > .dask-hcard .dask-hcard__body {
+    flex: 1 1 auto; min-width: 0; width: auto;
+  }
+  html body .dask-wrap [data-dask-list-items] > .dask-hcard .dask-hcard__body p { word-break: break-word; }
+  html body .dask-wrap [data-dask-list-items] > .dask-hcard > .position-absolute {
+    position: static !important; display: flex !important; align-items: center;
+    justify-content: flex-end; gap: 12px; width: 100%; margin-top: 8px;
+  }
+  html body .dask-wrap [data-dask-list-items] > .dask-hcard > .position-absolute a {
+    white-space: nowrap; float: none !important; margin-left: 0 !important;
+  }
+  /* 私信页头：标题 + 两个操作链接在 375px 下强行同行会把
+     “Private Message Settings”拆成 “Private Message S / ettings”。
+     操作区另起一行，每个链接作为整体换行，不按音节折断。 */
+  html body .block-header.dask-inbox-head {
+    display: flex !important; flex-wrap: wrap !important; align-items: center !important;
+    gap: 8px 16px;
+  }
+  html body .dask-inbox-head .notefun {
+    float: none !important; width: 100%; display: flex; flex-wrap: wrap; gap: 8px 16px;
+  }
+  html body .dask-inbox-head .notefun a { white-space: nowrap; }
+}
+
+/* 关注页 ygz 与首页 gz 必须完全同款（浅底蓝字、1px 同色边框、无外发光）。
+   dask-layout.css 在 dask-components.css 之后加载，这里做最终覆盖。 */
+html body #wrapMain a.ygz[data-action="user-focus"].btn-primary,
+html body #wrapMain a.ygz.active[data-action="user-focus"].btn-primary,
+html body #wrapMain a.ygz[data-action="user-focus"].btn-primary:hover {
+  background-color: var(--dask-blue-tint) !important;
+  border-color: var(--dask-blue-tint) !important;
+  color: var(--dask-blue-strong) !important;
+  box-shadow: none !important;
+}
+
+/* 窄屏下统计信息换行到下一行，避免把昵称/简介挤成单字竖排 */
+@media (max-width: $dask-bp-mobile) {
+  html body .dask-article .dask-author-info .dask-hcard { flex-wrap: wrap; gap: 10px; }
+  html body .dask-article .dask-author-info .dask-hcard__body { flex: 1 1 calc(100% - 60px); }
+  html body .dask-article .dask-author-info .dask-hcard__body small {
+    display: block; line-height: 1.55; word-break: break-word;
+  }
+  html body .dask-article .dask-author-info .dask-hcard__extra {
+    flex: 1 1 100%; margin-left: 0; padding-left: 57px; font-size: 12px;
+  }
+}
+
+/* 审核列表：标题沿用 n-title 视觉，但比前台信息流收敛一档 */
+.dask-common-list .approval-item .n-title { margin-bottom: 6px; }
+.dask-common-list .approval-item .n-title > a { font-size: 14px; }
+.dask-common-list .approval-item .dask-list-item__actions { min-height: 22px; }
+.dask-common-list .approval-item .dask-list-item__actions i { font-style: normal; color: var(--dask-text-3); }
+
+/* 搜索话题卡：60px 缩略图 + 自适应正文 */
+.dask-list-item.dask-hcard { gap: 15px; }
+
+/* 消息通知设置：语义键值对改 div 后保持原行距；
+   label 改 flex 后原生 input 与文字节点之间没有空白符间距，统一用 gap。 */
+.dask-setting-field { margin: 0; }
+.dask-setting-field .row > label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 全站 icon + 文字间距兜底：模板中部分 <i> 后紧跟本地化文案，
+   HTML 里没有空白符可被 collapse，渲染后图标与文字贴在一起。
+   给图标本身补 4px；已有 flex gap 的话题操作区单独归零避免叠加。 */
+html body label > i.iconfont,
+html body a > i.fa-share-alt {
+  margin-right: 4px;
+}
+html body .dask-topic-page .dask-list-item__actions > label.dz > i.iconfont {
+  margin-right: 0;
+}
+
+/* 后台表单图标选择器：取消 width:calc 内联计算 */
+.dask-form-icon-row { display: flex; align-items: center; gap: 10px; }
+.dask-form-icon-row .dask-form-icon { flex: 1 1 auto; min-width: 0; }
+.dask-form-icon-pick {
+  flex: 0 0 38px; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+
+/* 评论头部：头像/昵称/时间/删除按钮一行排列，替代 clearfix + float */
+.dask-comment-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.dask-comment-head__avatar { flex: 0 0 auto; }
+.dask-comment-head__name { flex: 1 1 auto; min-width: 0; }
+.dask-comment-head__time { flex: 0 0 auto; }
+.dask-comment-head__actions { margin-left: auto; }
+.dask-comment-body { padding-left: 45px; }
+@media (max-width: $dask-bp-mobile) {
+  .dask-comment-body { padding-left: 0; }
+}
+
+/* ---------- P2：Lucide 静态图标替换全局高频图标 ---------- */
+.si-magnifier.dask-icon-svg::before { content: none !important; }
+.si-magnifier.dask-icon-svg svg { display: block; width: 16px; height: 16px; }
+.dask-back-top svg { display: block; margin: 0 auto; }
+
+/* ============================================================
+   问题详情页 UI 重设计（标题遮挡 / 阅读全文 / 操作栏 / 回答区）
+   全部样式统一在此文件维护（样式统一在此文件维护）。
+   ============================================================ */
+
+/* --- 1) 标题与统计：统计移右上角，标题让出空间避免遮挡 --- */
+.dask-question-container .container.position-relative > .extend-info {
+  top: 2px; right: 0 !important; left: auto !important;
+  display: flex; align-items: center; gap: 16px;
+  z-index: 1;
+}
+.dask-question-container .container.position-relative > .extend-info dl { margin: 0 !important; }
+.dask-question-container h2.title { padding-right: 150px; }
+@media (max-width: $dask-bp-mobile) {
+  .dask-question-container h2.title { padding-right: 0; }
+  .dask-question-container .container.position-relative > .extend-info {
+    position: static !important; margin: 0 0 10px; justify-content: flex-start;
+  }
+}
+
+/* --- 2) 阅读全文/收起全文：水平居中 + 明显背景色 --- */
+.dask-alpha-hidden {
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 8px;
+}
+.dask-alpha-hidden span {
+  position: static !important; display: inline-flex !important;
+  align-items: center; gap: 4px;
+  width: auto !important; margin: 0 auto !important;
+  padding: 6px 20px;
+  background: var(--dask-blue, #3182f7) !important;
+  color: #fff !important;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(49,130,247,.28);
+  font-size: 13px; line-height: 1.4;
+  opacity: .92; transition: opacity .15s;
+}
+.dask-alpha-hidden span:hover { opacity: 1; }
+.dask-question-hide.dask-alpha-hidden,
+.dask-answer-hide.dask-alpha-hidden {
+  background: none !important; height: auto !important;
+  padding: 8px 0 0;
+}
+.dask-question-hide.dask-alpha-hidden span,
+.dask-answer-hide.dask-alpha-hidden span { background: transparent !important; color: var(--dask-blue, #3182f7) !important; box-shadow: none; }
+
+/* --- 3) 问题底部操作栏：主操作/次要操作分组，避免全堆一行 --- */
+.dask-content-info .actions.dask-actions {
+  gap: 10px 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dask-line);
+  margin-top: 14px;
+}
+.dask-content-info .actions.dask-actions > label,
+.dask-content-info .actions.dask-actions > .dropdown {
+  margin: 0 !important;
+}
+.dask-content-info .actions.dask-actions > label:not(:nth-child(-n+3)) > a,
+.dask-content-info .actions.dask-actions > label:not(:nth-child(-n+3)) {
+  font-size: 13px;
+  color: var(--dask-text-3);
+}
+.dask-content-info .actions.dask-actions .btn-outline-primary { flex: 0 0 auto; }
+@media (max-width: $dask-bp-mobile) {
+  .dask-content-info .actions.dask-actions { gap: 8px; }
+  .dask-content-info .actions.dask-actions > label a { font-size: 12px; }
+}
+
+/* --- 4) 回答区用户信息：flex 替代 float，头像/昵称/标签/时间错开 --- */
+.dask-answer-item .user-details-card {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.dask-answer-item .user-details-card-avatar { float: none !important; flex: 0 0 40px; }
+.dask-answer-item .user-details-card-name {
+  float: none !important; margin-left: 0 !important;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px;
+  flex: 1 1 auto; min-width: 0;
+  line-height: 1.4;
+}
+.dask-answer-item .user-details-card-name > div { margin-left: 0 !important; padding-top: 0 !important; }
+.dask-answer-item .user-details-card-name .badge { margin-left: 0; }
+.dask-answer-item .dask-answer-best { position: static !important; margin-left: auto; }
+
+/* --- 5) 回答操作栏：主操作突出，次要操作弱化并留间距 --- */
+.dask-answer-item .answer-btn-actions {
+  gap: 6px 14px;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid var(--dask-line);
+}
+.dask-answer-item .answer-btn-actions > label { margin: 0 !important; }
+.dask-answer-item .answer-btn-actions > label > a {
+  font-size: 13px;
+  color: var(--dask-text-3);
+}
+.dask-answer-item .answer-btn-actions > label:first-child > a { color: var(--dask-blue, #3182f7); font-weight: 600; }
+
+/* 深色模式下"阅读全文"主按钮保持品牌蓝（覆盖既有 --dask-elevated 深色遮罩规则） */
+html[data-dark="1"] .dask-alpha-hidden span,
+html[data-theme="auto"][data-dark="1"] .dask-alpha-hidden span {
+  background: var(--dask-blue, #3182f7) !important;
+  color: #fff !important;
+}
+html[data-dark="1"] .dask-question-hide.dask-alpha-hidden span,
+html[data-dark="1"] .dask-answer-hide.dask-alpha-hidden span,
+html[data-theme="auto"][data-dark="1"] .dask-question-hide.dask-alpha-hidden span,
+html[data-theme="auto"][data-dark="1"] .dask-answer-hide.dask-alpha-hidden span {
+  background: transparent !important;
+  color: var(--dask-blue, #4C9AFF) !important;
+}
+
+/* 覆盖 #wrapMain .dask-content span[style] 的深色文字规则，确保主按钮白字 */
+#wrapMain .dask-question-show.dask-alpha-hidden span,
+#wrapMain .dask-answer-show.dask-alpha-hidden span {
+  color: #fff !important;
+}
+
+/* 与 zhihu-blue 深色正文规则同优先级，确保蓝色主按钮白字不被误伤 */
+html[data-theme="dark"] #wrapMain .dask-question-show.dask-alpha-hidden span[style],
+html[data-theme="dark"] #wrapMain .dask-answer-show.dask-alpha-hidden span[style],
+html[data-theme="auto"][data-dark="1"] #wrapMain .dask-question-show.dask-alpha-hidden span[style],
+html[data-theme="auto"][data-dark="1"] #wrapMain .dask-answer-show.dask-alpha-hidden span[style] {
+  color: #fff !important;
+}
+
+/* --- 6) 收口深色边框：第 489 行的 1px solid --dask-line 会让胶囊按钮出现深色轮廓，
+       并让"收起全文"变成突兀的深框灰字。主按钮去边框，次要按钮改为蓝色文字链接。 --- */
+.dask-alpha-hidden span { border: 0 !important; }
+html[data-dark="1"] .dask-alpha-hidden span,
+html[data-theme="auto"][data-dark="1"] .dask-alpha-hidden span {
+  border: 0 !important;
+}
+/* 收起全文：次要链接样式（透明底 + 品牌蓝字 + 无阴影），覆盖 #wrapMain 深色灰字规则 */
+html[data-theme="dark"] #wrapMain .dask-question-hide.dask-alpha-hidden span[style],
+html[data-theme="dark"] #wrapMain .dask-answer-hide.dask-alpha-hidden span[style],
+html[data-theme="auto"][data-dark="1"] #wrapMain .dask-question-hide.dask-alpha-hidden span[style],
+html[data-theme="auto"][data-dark="1"] #wrapMain .dask-answer-hide.dask-alpha-hidden span[style] {
+  color: var(--dask-blue, #4C9AFF) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ============================================================
+   创作者中心（creator / member 各 tab）统一设计层
+   目标：头像圆形化、统计区对称、左侧导航不换行且行高统一、
+        tab 选中态一致、表单按钮风格统一、深浅色适配。
+   ============================================================ */
+
+/* --- 左侧用户中心导航：菜单文字不换行、行高与间距统一 --- */
+.userNav .list-group-item {
+  white-space: nowrap !important;
+  line-height: 1.4 !important;
+  padding: 10px 14px 10px 18px !important;
+  border-radius: 0 !important;
+}
+.userNav .list-group-item a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  font-size: 13px;
+}
+.userNav .list-group-item a > i {
+  width: 16px;
+  flex: 0 0 16px;
+  text-align: center;
+}
+.userNav .list-group-item a .badge {
+  margin-left: auto;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--dask-blue) !important;
+  color: #fff !important;
+}
+.userNav .list-group-item.active > a { color: var(--dask-blue) !important; font-weight: 600; }
+
+/* --- 用户首页 Profile 卡：头像圆形、昵称徽章、统计区对称网格 --- */
+.dask-creator-profile { background: var(--dask-surface) !important; border: 1px solid var(--dask-line) !important; border-radius: var(--dask-r-lg, 10px) !important; padding: 8px; }
+.dask-creator-avatar { flex: 0 0 88px; width: 88px; margin-right: 20px; }
+.dask-creator-avatar img { width: 88px !important; height: 88px !important; border-radius: 50% !important; object-fit: cover !important; display: block; border: 0 !important; }
+.dask-creator-profile .name { font-size: 18px; font-weight: 600; color: var(--dask-text); }
+.dask-badge-group { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--dask-blue-tint, #e8f2ff) !important; color: var(--dask-blue) !important; }
+.dask-creator-stats {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+.dask-creator-stat { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.dask-stat-label { font-size: 12px; color: var(--dask-text-3); white-space: nowrap; }
+.dask-stat-value { font-size: 16px; font-weight: 600; color: var(--dask-text); line-height: 1.2; }
+@media (max-width: $dask-bp-narrow) { .dask-creator-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: $dask-bp-xs) {
+  .dask-creator-profile .card-body { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+  .dask-creator-avatar { margin-right: 0; }
+  .dask-creator-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+}
+
+/* --- 深色模式徽章 --- */
+html[data-dark="1"] .dask-badge-group,
+html[data-theme="auto"][data-dark="1"] .dask-badge-group { background: rgba(49,130,247,.18) !important; color: #7ab4ff !important; }
+
+/* --- 账号设置页：头像圆形化、表单按钮统一 --- */
+.dask-setting-avatar-wrap { margin: 0 !important; }
+.dask-setting-avatar {
+  width: 88px !important; height: 88px !important;
+  border-radius: 50% !important; object-fit: cover !important;
+  border: 0 !important; display: block;
+}
+#tabMain form .form-control { max-width: 100%; }
+#tabMain form .btn-outline-primary { white-space: nowrap; }
+
+/* --- 邀请页：名额提示文字柔化（不再用刺眼红色紧跟按钮） --- */
+.dask-invite-quota { color: var(--dask-text-3); font-size: 13px; margin-left: 4px; }
+
+/* --- 各 tab 顶部 nav-tabs 选中态统一为品牌蓝填充块 --- */
+.dask-pjax-tabs .nav-link.active,
+.nav-tabs-block .nav-link.active {
+  background: var(--dask-blue) !important;
+  color: #fff !important;
+  border-color: var(--dask-blue) !important;
+  border-radius: 4px 4px 0 0 !important;
+}
+.dask-pjax-tabs .nav-link,
+.nav-tabs-block .nav-link { color: var(--dask-text-2) !important; font-size: 14px !important; }
+.dask-pjax-tabs .nav-link:hover,
+.nav-tabs-block .nav-link:hover { color: var(--dask-blue) !important; }
+
+/* --- 创作者中心移动端：左侧导航与内容改为上下堆叠，避免固定 200px 列挤压统计区 --- */
+@media (max-width: $dask-bp-mobile) {
+  #wrapMain .dask-wrap > .container > .row:has(> .col-md-2 .userNav) { display: block !important; }
+  #wrapMain .dask-wrap > .container > .row > .col-md-2 { width: 100% !important; max-width: 100% !important; margin-bottom: 12px; }
+  #wrapMain .dask-wrap > .container > .row > .col-md-2 .userNav { position: static !important; }
+  #wrapMain .dask-wrap > .container > .row > .col-md-10 { width: 100% !important; max-width: 100% !important; }
+  .dask-creator-profile .card-body { padding: 12px !important; }
+  .dask-creator-stats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px 8px !important; }
+  .dask-creator-stat { align-items: flex-start !important; }
+}
+
+/* ============================================================
+   个人主页（people/index）头部与侧栏统一设计
+   目标：消除头部右半大片空白、统计区对称铺满、侧栏成就卡信息更丰富
+   ============================================================ */
+
+/* --- 头部卡：头像 + 信息左右分栏，信息区铺满剩余宽度 --- */
+.dask-profile-head {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px 24px !important;
+}
+.dask-profile-head__avatar { flex: 0 0 96px; }
+.dask-profile-head__info { flex: 1 1 auto; min-width: 0; }
+.dask-profile-head__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.dask-profile-head__id { min-width: 0; }
+.dask-profile-head__name { font-size: 20px; font-weight: 600; color: var(--dask-text); line-height: 1.3; }
+.dask-profile-head__name a { color: var(--dask-text); text-decoration: none; }
+.dask-profile-head__sign { color: var(--dask-text-2); font-size: 13px; margin-top: 2px; }
+.dask-profile-head__sex { color: var(--dask-text-3); font-size: 12px; margin-top: 4px; }
+.dask-profile-head .dask-home-user-btn { flex: 0 0 auto; align-self: flex-start; }
+
+/* --- 统计区：8 项 4 列铺满，数值在上标签在下，列间分隔 --- */
+.dask-profile-stats.dask-stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  width: 100%;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-md, 8px);
+  overflow: hidden;
+}
+.dask-profile-stat {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 12px 6px;
+  border-right: 1px solid var(--dask-line);
+  border-bottom: 1px solid var(--dask-line);
+}
+.dask-profile-stat:nth-child(4n) { border-right: 0; }
+.dask-profile-stat:nth-child(n+5) { border-bottom: 0; }
+.dask-profile-stat .dask-stat-value { font-size: 18px; font-weight: 700; color: var(--dask-text); line-height: 1.1; }
+.dask-profile-stat .dask-stat-label { font-size: 12px; color: var(--dask-text-3); }
+
+/* --- 侧栏成就卡：覆盖 zhihu-blue 的透明无边框，恢复卡片样式 --- */
+html body #wrapMain .dask-achievement-card {
+  background: var(--dask-surface) !important;
+  border: 1px solid var(--dask-line) !important;
+  border-radius: var(--dask-card-radius, 10px) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+html body #wrapMain .dask-achievement-card .dask-card__head { padding: 12px 16px; border-bottom: 1px solid var(--dask-line); }
+html body #wrapMain .dask-achievement-card .dask-card__head h6 { color: var(--dask-text); font-size: 14px; }
+html body #wrapMain .dask-achievement-card .dask-card__body { padding: 6px 16px 12px; }
+.dask-achievement-list { display: flex; flex-direction: column; }
+.dask-achievement-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--dask-line);
+}
+.dask-achievement-item:last-child { border-bottom: 0; }
+.dask-achievement-ico {
+  flex: 0 0 28px; width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 13px;
+}
+.dask-achievement-ico--blue { background: rgba(49,130,247,.12); color: #3182f7; }
+.dask-achievement-ico--green { background: rgba(40,167,69,.12); color: #28a745; }
+.dask-achievement-ico--orange { background: rgba(253,126,20,.12); color: #fd7e14; }
+.dask-achievement-ico--purple { background: rgba(111,66,193,.12); color: #6f42c1; }
+.dask-achievement-ico--cyan { background: rgba(23,162,184,.12); color: #17a2b8; }
+.dask-achievement-ico--gray { background: rgba(108,117,125,.14); color: #6c757d; }
+.dask-achievement-text { font-size: 13px; color: var(--dask-text-2); }
+
+/* --- tab 栏更紧凑，尽量单行放下 8 个 tab --- */
+html body .dask-profile-tabs-list .nav-link { padding: 0 10px !important; font-size: 13px !important; }
+/* 个人主页 8 个 tab 在桌面端也会把最后一项挤到第二行并截成孤字；
+   改为单行横向滚动，滚动条隐藏，触摸端仍可左右滑动。 */
+html body #wrapMain .dask-profile-tabs-list {
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+html body #wrapMain .dask-profile-tabs-list::-webkit-scrollbar { display: none; }
+html body #wrapMain .dask-profile-tabs-list .nav-item { flex: 0 0 auto; }
+
+/* --- 响应式 --- */
+@media (max-width: $dask-bp-narrow) {
+  .dask-profile-stats.dask-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (max-width: $dask-bp-mobile) {
+  .dask-profile-head { flex-direction: column; gap: 14px; padding: 16px !important; }
+  .dask-profile-head__avatar { flex: 0 0 auto; }
+  .dask-profile-head__info { width: 100%; }
+  .dask-profile-stats.dask-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .dask-profile-stat { padding: 10px 2px; }
+  .dask-profile-stat .dask-stat-value { font-size: 15px; }
+  .dask-profile-stat .dask-stat-label { font-size: 11px; }
+}
+@media (max-width: $dask-bp-tiny) {
+  .dask-profile-stats.dask-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .dask-profile-stat { padding: 8px 0; }
+  .dask-profile-stat .dask-stat-value { font-size: 14px; }
+  .dask-profile-stat .dask-stat-label { font-size: 10px; }
+}
+
+/* ===========================================================================
+   话题详情页 UI 重设计（.dask-topic-page 作用域）
+   问题：顶部卡 80px 图 + 标题 + 关注 + 统计堆在 113px；tab 双分割线；
+        列表项操作栏被压成 30px、gap 仅 8px；侧栏每张卡都有标题下分割线、
+        话题管理 4 图标无间距、关注头像错用 col-2 挤成单字。
+   设计：顶部卡做"封面 + 标题/关注 + 描述 + 统计"四层信息层级；
+        tab 去双线只留选中短蓝线；操作栏改弹性布局+充分间距；
+        侧栏卡片统一内边距、弱化分割线、图标/头像模块独立卡片感。
+   =========================================================================== */
+
+/* ---- 顶部话题卡 ---- */
+html body .dask-topic-page .dask-topic-head { padding: 22px 24px; }
+html body .dask-topic-page .dask-topic-head .dask-hcard { gap: 20px; align-items: flex-start; }
+html body .dask-topic-page .dask-topic-head__cover {
+  flex: 0 0 88px; width: 88px; height: 88px; border-radius: 16px !important;
+  background-size: cover; background-position: center;
+  box-shadow: 0 2px 10px rgba(18,18,18,.06);
+}
+html body .dask-topic-page .dask-topic-head .dask-hcard__body { flex: 1 1 auto; min-width: 0; }
+html body .dask-topic-page .dask-topic-head__title-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-height: 36px;
+}
+html body .dask-topic-page .dask-topic-head__title {
+  margin: 0; font-size: 21px; line-height: 1.4; font-weight: 700;
+  color: var(--dask-text); word-break: break-word;
+}
+html body .dask-topic-page .dask-topic-head__focus {
+  margin: 0 !important; float: none !important; height: 32px;
+  line-height: 30px; padding: 0 16px !important; border-radius: 999px;
+  font-size: 13px; white-space: nowrap;
+}
+html body .dask-topic-page .dask-topic-head__desc {
+  margin: 8px 0 0; font-size: 13px; line-height: 1.7;
+  color: var(--dask-text-2); word-break: break-word;
+}
+html body .dask-topic-page .dask-topic-head__stats {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  margin-top: 14px; font-size: 12px; color: var(--dask-text-3);
+}
+html body .dask-topic-page .dask-topic-head__stats b {
+  font-size: 15px; font-weight: 700; color: var(--dask-text);
+  margin-right: 2px;
+}
+html body .dask-topic-page .dask-topic-head__stat-sep {
+  width: 1px; height: 12px; background: var(--dask-line);
+}
+
+/* ---- tab 栏：只保留选中短线，去掉重复的底部边框 ---- */
+html body .dask-topic-page .dask-topic-tabs { border-bottom: 0 !important; display: flex; align-items: center; gap: 8px; }
+html body .dask-topic-page .dask-topic-tabs .nav-tabs {
+  border-bottom: 1px solid var(--dask-line) !important;
+  float: none !important; flex: 1 1 auto; min-width: 0; max-width: 100%;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+html body .dask-topic-page .dask-topic-tabs .nav-tabs::-webkit-scrollbar { display: none; }
+html body .dask-topic-page .dask-topic-tabs .nav-tabs .nav-link { flex: 0 0 auto; white-space: nowrap; }
+html body .dask-topic-page .dask-topic-tabs .nav-link {
+  min-height: 52px; height: 52px; padding: 0 22px !important;
+  line-height: 52px !important; font-size: 14px;
+}
+html body .dask-topic-page .dask-topic-tabs .dropdown { float: none !important; flex: 0 0 auto; padding: 0 4px; }
+
+/* ---- 内容项：操作栏给足呼吸空间 ---- */
+html body .dask-topic-page .dask-common-list .dask-list-item { padding: 22px 24px !important; }
+html body .dask-topic-page .dask-common-list .dask-list-item__actions {
+  height: auto !important; min-height: 38px !important;
+  padding: 10px 0 0 !important; gap: 18px; flex-wrap: wrap;
+}
+html body .dask-topic-page .dask-common-list .dask-list-item__actions > label {
+  margin: 0 !important; white-space: nowrap; font-size: 12px;
+  color: var(--dask-text-2); display: inline-flex; align-items: center; gap: 3px;
+}
+html body .dask-topic-page .dask-common-list .dask-list-item__actions > label.dz { gap: 6px; }
+html body .dask-topic-page .dask-common-list .dask-list-topics { margin-top: 2px; }
+html body .dask-topic-page .dask-common-list .dask-list-img img { border-radius: 10px !important; }
+html body .dask-topic-page .dask-common-list .n-title { margin-bottom: 10px !important; }
+
+/* ---- 侧栏卡片：统一留白、弱化标题分割线 ---- */
+html body .dask-topic-page .dask-topic-side-card,
+html body .dask-topic-page .dask-topic-quick { border-radius: 12px !important; }
+html body .dask-topic-page .dask-topic-side-card .dask-card__head,
+html body .dask-topic-page .dask-topic-quick .dask-card__head {
+  padding: 16px 18px 10px; border-bottom: 0 !important;
+}
+html body .dask-topic-page .dask-topic-side-card .dask-card__head h4 {
+  margin: 0; font-size: 15px; font-weight: 700;
+}
+html body .dask-topic-page .dask-topic-quick { padding: 14px 8px 18px; }
+html body .dask-topic-page .dask-topic-quick .row > a { padding: 8px 4px; }
+html body .dask-topic-page .dask-topic-quick h6 { margin-top: 10px; font-size: 13px; }
+
+/* 话题管理 4 图标：网格留间距 + 图标底衬 */
+html body .dask-topic-page .dask-topic-side-card ul.row > li {
+  padding: 10px 4px !important;
+}
+html body .dask-topic-page .dask-topic-side-card ul.row > li > a { border-radius: 10px; transition: background .15s; }
+html body .dask-topic-page .dask-topic-side-card ul.row > li > a:hover { background: var(--dask-blue-tint); }
+html body .dask-topic-page .dask-topic-side-card ul.row > li i {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; margin: 0 auto; border-radius: 12px;
+  background: var(--dask-blue-tint); color: var(--dask-blue); font-size: 20px;
+}
+html body .dask-topic-page .dask-topic-side-card ul.row > li span { margin-top: 8px !important; font-size: 12px; }
+
+/* 相关话题 chip 间距 */
+html body .dask-topic-page .dask-topic-side-card .page-detail-topic { padding: 4px 18px 18px; gap: 8px; }
+
+/* 关注用户头像：去掉错位的 col-2 列表，改弹性头像组 */
+html body .dask-topic-page .dask-topic-followers {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 6px 18px 18px;
+}
+html body .dask-topic-page .dask-topic-follower {
+  flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; overflow: hidden;
+  display: inline-block; border: 1px solid var(--dask-line);
+}
+html body .dask-topic-page .dask-topic-follower img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+
+/* ---- 深色模式：图标底衬在深底上保持可辨识 ---- */
+html[data-dark="1"] .dask-topic-page .dask-topic-side-card ul.row > li i { background: rgba(76,154,255,.16); }
+
+/* ---- 响应式 ---- */
+@media (max-width: $dask-bp-narrow) {
+  html body .dask-topic-page .dask-topic-head { padding: 18px; }
+  html body .dask-topic-page .dask-topic-head__cover { flex-basis: 72px; width: 72px; height: 72px; }
+  html body .dask-topic-page .dask-topic-head__title { font-size: 19px; }
+}
+@media (max-width: $dask-bp-mobile) {
+  html body .dask-topic-page .dask-topic-head .dask-hcard { gap: 14px; }
+  html body .dask-topic-page .dask-topic-head__cover { flex-basis: 64px; width: 64px; height: 64px; }
+  html body .dask-topic-page .dask-topic-head__title { font-size: 17px; }
+  html body .dask-topic-page .dask-topic-head__focus { height: 30px; line-height: 28px; font-size: 12px; padding: 0 12px !important; }
+  html body .dask-topic-page .dask-topic-tabs .nav-tabs { padding: 0 12px !important; }
+  html body .dask-topic-page .dask-topic-tabs .nav-link { padding: 0 16px !important; }
+  html body .dask-topic-page .dask-common-list .dask-list-item { padding: 18px 16px !important; }
+  /* 覆盖早先的 .dask-common-list .dask-actions { gap:0 !important } */
+  html body .dask-topic-page .dask-common-list .dask-list-item__actions { gap: 12px !important; }
+}
+
+/* 顶部卡内部：去掉 .dask-hcard 自带的底部边框，避免卡片内多一条分割线 */
+html body .dask-topic-page .dask-topic-head .dask-hcard { border-bottom: 0 !important; }
+
+/* 话题页侧栏热门话题卡：窄屏下 h3 长标题撑破卡片（实测 right 超出视口 30px）。
+   约束 body 最小宽度为 0，并允许标题省略，保留卡片不溢出。 */
+html body .dask-topic-page .hot-list .dask-hcard__body { min-width: 0 !important; }
+html body .dask-topic-page .hot-list .dask-hcard__body h3 { min-width: 0; }
+html body .dask-topic-page .hot-list .dask-hcard__body h3 a {
+  display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ===========================================================================
+   /account/* 认证页简洁化重设（作用域 .dask-account-page）
+   问题：紫色背景 + 白卡片 + tab 灰底条 + 表单白块 + 社交白块/硬分割线，
+   多层色块叠加显得杂乱。设计：保留紫色题图 + 单一内容卡，
+   tab 去灰底仅留选中蓝短线，表单/社交区与卡片同色不再单独成块，
+   加大圆角、统一留白，深浅色遵循令牌。覆盖登录/注册/找回密码/重置密码
+   及修改资料等全部 account 页面。
+   =========================================================================== */
+
+/* 单一内容卡：加大圆角、柔和阴影，去掉内部杂色块 */
+html body.dask-account-page .content,
+html body.dask-account-page #boxMain {
+  background: var(--dask-elevated) !important;
+  border: 1px solid var(--dask-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, .16) !important;
+  overflow: hidden !important;
+}
+html body.dask-account-page .SignContainer-content.dask-card__body { padding: 0 !important; }
+html body.dask-account-page .SignContainer-inner { overflow: visible !important; }
+
+/* tab 栏：透明底、去灰块与下边框，仅保留选中蓝短线 */
+html body.dask-account-page .nav-tabs-block.dask-card__head,
+html body.dask-account-page .nav-tabs-block {
+  background: transparent !important;
+  border-bottom: 0 !important;
+  padding: 20px 26px 0 !important;
+}
+html body.dask-account-page .nav-tabs-block .nav-link {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--dask-text-3) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  padding: 10px 4px 14px !important;
+  margin-right: 24px !important;
+}
+html body.dask-account-page .nav-tabs-block .nav-link.active {
+  color: var(--dask-blue) !important;
+  background: transparent !important;
+  box-shadow: inset 0 -2px 0 var(--dask-blue) !important;
+}
+
+/* 表单区：与卡片同色，不再单独白色块 */
+html body.dask-account-page .block-content,
+html body.dask-account-page #tabMain {
+  background: transparent !important;
+  padding: 24px 26px 8px !important;
+}
+html body.dask-account-page .bline { margin-bottom: 18px !important; }
+
+/* 社交区：去白块、弱化分割线，标签透明 */
+html body.dask-account-page .dask-social { padding: 8px 26px 28px !important; }
+html body.dask-account-page .dask-social > .border-bottom {
+  border-color: var(--dask-line) !important;
+  opacity: .35;
+}
+html body.dask-account-page .dask-social > span.bg-white {
+  background: transparent !important;
+  color: var(--dask-text-3) !important;
+  font-size: 12px !important;
+}
+html body.dask-account-page .dask-social a {
+  border-color: var(--dask-line) !important;
+  background: var(--dask-surface) !important;
+}
+
+@media (max-width: $dask-bp-xs) {
+  html body.dask-account-page .nav-tabs-block.dask-card__head,
+  html body.dask-account-page .nav-tabs-block { padding: 18px 20px 0 !important; }
+  html body.dask-account-page .block-content,
+  html body.dask-account-page #tabMain { padding: 20px 20px 8px !important; }
+  html body.dask-account-page .dask-social { padding: 8px 20px 24px !important; }
+}
+
+/* 需登录的 account 完整页（修改密码/邮箱/手机/URL令牌/首次登录引导）：
+   与登录卡统一为 16px 圆角，保持单一卡片简洁视觉。 */
+html body#pageMain.dask-account-page:not(:has(.signBox)) #wrapMain > * {
+  border-radius: 16px !important;
+}
+
+/* ===========================================================================
+   搜索联想浮层重设计（.dask-ui-dropdown）
+   问题：浮层宽度跟随搜索框仅 240px，却复用了大列表项样式（18px 标题、
+   20px24px padding、meta 多行、150-204px 每项高），内容拥挤、标题换行。
+   设计：有结果时加宽到 480px；为浮层内列表项写专用紧凑样式——
+   头像/元信息单行、标题 14px 单行省略、描述单行弱化、底部轻量操作条。
+   窄屏搜索框本身隐藏（走独立搜索页），此处仅保证不溢出。
+   =========================================================================== */
+
+/* 1) 有结果时加宽，打破跟随搜索框的 240px 窄宽 */
+html body .dask-form-search .dask-ui-dropdown {
+  width: 480px !important;
+  max-width: min(480px, calc(100vw - 24px)) !important;
+  right: 0 !important;
+  left: auto !important;
+  border-radius: 14px !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .18) !important;
+}
+
+/* 2) 列表项专用紧凑样式，不再复用大列表的 20px 24px / 18px 标题 */
+html body .dask-form-search .dask-ui-dropdown .dask-ui-dropdown-list {
+  padding: 6px 0 !important;
+  max-height: 420px !important;
+}
+html body .dask-form-search .dask-ui-dropdown .dask-list-item {
+  padding: 10px 16px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--dask-line) !important;
+}
+html body .dask-form-search .dask-ui-dropdown .dask-list-item:last-child { border-bottom: 0 !important; }
+html body .dask-form-search .dask-ui-dropdown .dask-list-item:hover { background: var(--dask-blue-tint) !important; }
+
+/* meta：头像缩小、单行、时间右对齐，隐藏话题标签与动作文字 */
+html body .dask-form-search .dask-ui-dropdown .dask-list-item__meta {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  height: auto !important;
+  margin-bottom: 3px !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden;
+}
+html body .dask-form-search .dask-ui-dropdown .dask-list-item__meta img {
+  width: 16px !important; height: 16px !important; flex: 0 0 16px;
+}
+html body .dask-form-search .dask-ui-dropdown .dask-list-item__meta .time {
+  margin-left: auto !important;
+  white-space: nowrap;
+}
+html body .dask-form-search .dask-ui-dropdown .dask-list-item__meta .tag,
+html body .dask-form-search .dask-ui-dropdown .dask-list-item__meta i { display: none !important; }
+
+/* 标题：14px 单行省略 */
+html body .dask-form-search .dask-ui-dropdown .n-title {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  margin: 0 !important;
+  min-height: 22px !important;
+}
+html body .dask-form-search .dask-ui-dropdown .n-title > a {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+html body .dask-form-search .dask-ui-dropdown .n-title .badge {
+  font-size: 10px !important;
+  padding: 1px 5px !important;
+  flex: 0 0 auto;
+}
+
+/* 描述：单行省略、弱化 */
+html body .dask-form-search .dask-ui-dropdown .pcon,
+html body .dask-form-search .dask-ui-dropdown .dask-two-line,
+html body .dask-form-search .dask-ui-dropdown .dask-three-line {
+  display: block !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: var(--dask-text-3) !important;
+  margin-top: 2px !important;
+  max-height: 18px !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 1 !important;
+}
+
+/* 底部：去蓝底大按钮块，改为轻量胶囊操作条 */
+html body .dask-form-search .dask-ui-dropdown .mod-footer {
+  background: var(--dask-elevated) !important;
+  border-top: 1px solid var(--dask-line) !important;
+  padding: 8px 16px !important;
+}
+html body .dask-form-search .dask-ui-dropdown .mod-footer .btn {
+  font-size: 12px !important;
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+}
+html body .dask-form-search .dask-ui-dropdown .search {
+  padding: 8px 16px !important;
+  font-size: 12px !important;
+}
+
+@media (max-width: $dask-bp-mobile) {
+  html body .dask-form-search .dask-ui-dropdown {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}

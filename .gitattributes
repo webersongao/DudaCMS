@@ -1,0 +1,24 @@
+# 二进制文件（避免 Git 做文本转换）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.phar binary
+
+# Shell 脚本统一 LF
+*.sh text eol=lf
+
+# 发布包剔除开发/运行时产物（git archive 默认遵守 export-ignore）
+/backup export-ignore
+/runtime export-ignore
+/update/backup export-ignore
+/update/packages export-ignore
+/public/storage export-ignore
+/public/backup export-ignore

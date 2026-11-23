@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64" role="img" aria-labelledby="title">
+  <title id="title">DudaCMS</title>
+  <rect x="0" y="4" width="56" height="56" rx="14" fill="#056DE8"/>
+  <path d="M17 17h12c11.5 0 20 6.3 20 15s-8.5 15-20 15H17V17zm12 8h-4v14h4c6 0 11-3 11-7s-5-7-11-7z" fill="#FFFFFF"/>
+  <text x="70" y="31" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#121212">Duda<tspan fill="#056DE8">CMS</tspan></text>
+  <text x="71" y="47" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="600" letter-spacing="1.6" fill="#8590A6">DASK · TP8 KNOWLEDGE</text>
+</svg>

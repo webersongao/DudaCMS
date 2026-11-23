@@ -1,0 +1,107 @@
+/* DudaCMS 内置 Vditor 适配样式：深浅色跟随、浮层关闭、窄屏工具栏收敛。 */
+
+.dask-editor .dask-editor-vditor {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.dask-editor .vditor {
+  border: 1px solid var(--dask-border, #dee2e6) !important;
+  border-radius: 0.5rem;
+}
+
+.dask-editor .vditor-toolbar {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.dask-editor .vditor-reset,
+.dask-editor .vditor-ir,
+.dask-editor .vditor-sv,
+.dask-editor .vditor-wysiwyg {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* 编辑态块浮层：默认关闭上移/下移/删除，不影响链接编辑面板。 */
+.dask-editor--no-float .vditor-panel button[data-type="up"],
+.dask-editor--no-float .vditor-panel button[data-type="down"],
+.dask-editor--no-float .vditor-panel button[data-type="remove"],
+.dask-editor--no-float .vditor-wysiwyg__mobile-toolbar {
+  display: none !important;
+}
+
+/* 深色站点：编辑器 chrome 与正文统一深色，避免白底刺眼。 */
+html[data-dark="1"] .dask-editor .vditor {
+  border-color: #3a3f47 !important;
+  background: #1b1f24 !important;
+  color: #e8eaed !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-toolbar {
+  background: #20252b !important;
+  border-bottom-color: #3a3f47 !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-toolbar__item .vditor-tooltipped {
+  color: #b8bec7 !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-toolbar__item .vditor-tooltipped:hover,
+html[data-dark="1"] .dask-editor .vditor-icon--current {
+  color: #7aa7ff !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-reset,
+html[data-dark="1"] .dask-editor .vditor-ir,
+html[data-dark="1"] .dask-editor .vditor-sv,
+html[data-dark="1"] .dask-editor .vditor-wysiwyg,
+html[data-dark="1"] .dask-editor .vditor-content {
+  background: #1b1f24 !important;
+  color: #e8eaed !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-reset a,
+html[data-dark="1"] .dask-editor .vditor-ir a {
+  color: #8ab4f8 !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-reset blockquote,
+html[data-dark="1"] .dask-editor .vditor-ir blockquote {
+  border-left-color: #4a5058 !important;
+  color: #aeb4bd !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-reset pre,
+html[data-dark="1"] .dask-editor .vditor-reset code,
+html[data-dark="1"] .dask-editor .vditor-ir pre,
+html[data-dark="1"] .dask-editor .vditor-ir code {
+  background: #15181c !important;
+  color: #e8eaed !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-panel {
+  background: #252a31 !important;
+  color: #e8eaed !important;
+  border-color: #3a3f47 !important;
+}
+
+html[data-dark="1"] .dask-editor .vditor-input,
+html[data-dark="1"] .dask-editor .vditor-textarea {
+  background: #15181c !important;
+  color: #e8eaed !important;
+  border-color: #3a3f47 !important;
+}
+
+@media screen and (max-width: 520px) {
+  .dask-editor .vditor-toolbar {
+    padding: 0 2px;
+  }
+
+  .dask-editor .vditor-toolbar__item .vditor-tooltipped {
+    padding: 8px 3px;
+  }
+
+  .dask-editor .vditor-toolbar__divider {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}

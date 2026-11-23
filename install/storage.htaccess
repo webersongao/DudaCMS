@@ -1,0 +1,5 @@
+# 上传目录禁止执行脚本、禁止目录列表
+Options -Indexes
+<FilesMatch "\.(php|php3|php4|php5|php7|php8|phtml|phar|pl|py|sh|cgi|shtml)$">
+    Require all denied
+</FilesMatch>

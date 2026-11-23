@@ -1,0 +1,13 @@
+{
+  "name": "dask-static-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dask 静态资源构建：Sass 编译。运行时不需要 Node，产物已提交到 public/static。",
+  "scripts": {
+    "css:build": "sass --no-source-map --style=compressed --load-path=resources/scss resources/scss/frontend-app.scss:public/static/frontend/css/app.min.css resources/scss/frontend-zhihu.scss:public/static/frontend/css/zhihu-blue.css resources/scss/common-tokens.scss:public/static/common/design/tokens.css resources/scss/common-components.scss:public/static/common/css/dask-components.css resources/scss/common-layout.scss:public/static/common/css/dask-layout.css resources/scss/common-publish.scss:public/static/common/css/dask-publish.css resources/scss/backend-bundle.scss:public/static/backend/css/admin-bundle.css resources/scss/backend-modern.scss:public/static/backend/css/admin-modern.css"
+  },
+  "devDependencies": {
+    "css-tree": "^3.1.0",
+    "sass": "^1.108.2"
+  }
+}

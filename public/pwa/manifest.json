@@ -1,0 +1,23 @@
+{
+  "name": "DudaCMS 问答社区",
+  "short_name": "DudaCMS",
+  "description": "提问、回答、分享知识",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F6F6F6",
+  "theme_color": "#056DE8",
+  "categories": ["social", "education"],
+  "icons": [
+    { "src": "/pwa/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "提问", "url": "/ask", "icons": [{ "src": "/pwa/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "我的消息", "url": "/inbox", "icons": [{ "src": "/pwa/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

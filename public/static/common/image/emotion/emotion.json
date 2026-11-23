@@ -1,0 +1,422 @@
+[
+  {
+    "name": "expression_1",
+    "text": "[微笑]"
+  },
+  {
+    "name": "expression_2",
+    "text": "[撇嘴]"
+  },
+  {
+    "name": "expression_3",
+    "text": "[色]"
+  },
+  {
+    "name": "expression_4",
+    "text": "[发呆]"
+  },
+  {
+    "name": "expression_5",
+    "text": "[得意]"
+  },
+  {
+    "name": "expression_6",
+    "text": "[流泪]"
+  },
+  {
+    "name": "expression_7",
+    "text": "[害羞]"
+  },
+  {
+    "name": "expression_8",
+    "text": "[闭嘴]"
+  },
+  {
+    "name": "expression_9",
+    "text": "[睡]"
+  },
+  {
+    "name": "expression_10",
+    "text": "[大哭]"
+  },
+  {
+    "name": "expression_11",
+    "text": "[尴尬]"
+  },
+  {
+    "name": "expression_12",
+    "text": "[发怒]"
+  },
+  {
+    "name": "expression_13",
+    "text": "[调皮]"
+  },
+  {
+    "name": "expression_14",
+    "text": "[呲牙]"
+  },
+  {
+    "name": "expression_15",
+    "text": "[惊讶]"
+  },
+  {
+    "name": "expression_16",
+    "text": "[难过]"
+  },
+  {
+    "name": "expression_17",
+    "text": "[酷]"
+  },
+  {
+    "name": "expression_18",
+    "text": "[冷汗]"
+  },
+  {
+    "name": "expression_19",
+    "text": "[抓狂]"
+  },
+  {
+    "name": "expression_20",
+    "text": "[吐]"
+  },
+  {
+    "name": "expression_21",
+    "text": "[偷笑]"
+  },
+  {
+    "name": "expression_22",
+    "text": "[愉快]"
+  },
+  {
+    "name": "expression_23",
+    "text": "[白眼]"
+  },
+  {
+    "name": "expression_24",
+    "text": "[傲慢]"
+  },
+  {
+    "name": "expression_25",
+    "text": "[饥饿]"
+  },
+  {
+    "name": "expression_26",
+    "text": "[困]"
+  },
+  {
+    "name": "expression_27",
+    "text": "[恐惧]"
+  },
+  {
+    "name": "expression_28",
+    "text": "[流汗]"
+  },
+  {
+    "name": "expression_29",
+    "text": "[憨笑]"
+  },
+  {
+    "name": "expression_30",
+    "text": "[悠闲]"
+  },
+  {
+    "name": "expression_31",
+    "text": "[奋斗]"
+  },
+  {
+    "name": "expression_32",
+    "text": "[咒骂]"
+  },
+  {
+    "name": "expression_33",
+    "text": "[疑问]"
+  },
+  {
+    "name": "expression_34",
+    "text": "[嘘]"
+  },
+  {
+    "name": "expression_35",
+    "text": "[晕]"
+  },
+  {
+    "name": "expression_36",
+    "text": "[疯了]"
+  },
+  {
+    "name": "expression_37",
+    "text": "[衰]"
+  },
+  {
+    "name": "expression_38",
+    "text": "[骷髅]"
+  },
+  {
+    "name": "expression_39",
+    "text": "[敲打]"
+  },
+  {
+    "name": "expression_40",
+    "text": "[再见]"
+  },
+  {
+    "name": "expression_41",
+    "text": "[擦汗]"
+  },
+  {
+    "name": "expression_42",
+    "text": "[抠鼻]"
+  },
+  {
+    "name": "expression_43",
+    "text": "[鼓掌]"
+  },
+  {
+    "name": "expression_44",
+    "text": "[糗大了]"
+  },
+  {
+    "name": "expression_45",
+    "text": "[坏笑]"
+  },
+  {
+    "name": "expression_46",
+    "text": "[左哼哼]"
+  },
+  {
+    "name": "expression_47",
+    "text": "[右哼哼]"
+  },
+  {
+    "name": "expression_48",
+    "text": "[哈欠]"
+  },
+  {
+    "name": "expression_49",
+    "text": "[鄙视]"
+  },
+  {
+    "name": "expression_50",
+    "text": "[委屈]"
+  },
+  {
+    "name": "expression_51",
+    "text": "[快哭了]"
+  },
+  {
+    "name": "expression_52",
+    "text": "[阴险]"
+  },
+  {
+    "name": "expression_53",
+    "text": "[亲亲]"
+  },
+  {
+    "name": "expression_54",
+    "text": "[吓]"
+  },
+  {
+    "name": "expression_55",
+    "text": "[可怜]"
+  },
+  {
+    "name": "expression_56",
+    "text": "[菜刀]"
+  },
+  {
+    "name": "expression_57",
+    "text": "[西瓜]"
+  },
+  {
+    "name": "expression_58",
+    "text": "[啤酒]"
+  },
+  {
+    "name": "expression_59",
+    "text": "[篮球]"
+  },
+  {
+    "name": "expression_60",
+    "text": "[乒乓]"
+  },
+  {
+    "name": "expression_61",
+    "text": "[咖啡]"
+  },
+  {
+    "name": "expression_62",
+    "text": "[饭]"
+  },
+  {
+    "name": "expression_63",
+    "text": "[猪头]"
+  },
+  {
+    "name": "expression_64",
+    "text": "[玫瑰]"
+  },
+  {
+    "name": "expression_65",
+    "text": "[凋谢]"
+  },
+  {
+    "name": "expression_66",
+    "text": "[嘴唇]"
+  },
+  {
+    "name": "expression_67",
+    "text": "[爱心]"
+  },
+  {
+    "name": "expression_68",
+    "text": "[心碎]"
+  },
+  {
+    "name": "expression_69",
+    "text": "[蛋糕]"
+  },
+  {
+    "name": "expression_70",
+    "text": "[闪电]"
+  },
+  {
+    "name": "expression_71",
+    "text": "[炸弹]"
+  },
+  {
+    "name": "expression_72",
+    "text": "[刀]"
+  },
+  {
+    "name": "expression_73",
+    "text": "[足球]"
+  },
+  {
+    "name": "expression_74",
+    "text": "[瓢虫]"
+  },
+  {
+    "name": "expression_75",
+    "text": "[便便]"
+  },
+  {
+    "name": "expression_76",
+    "text": "[月亮]"
+  },
+  {
+    "name": "expression_77",
+    "text": "[太阳]"
+  },
+  {
+    "name": "expression_78",
+    "text": "[礼物]"
+  },
+  {
+    "name": "expression_79",
+    "text": "[拥抱]"
+  },
+  {
+    "name": "expression_80",
+    "text": "[强]"
+  },
+  {
+    "name": "expression_81",
+    "text": "[弱]"
+  },
+  {
+    "name": "expression_82",
+    "text": "[握手]"
+  },
+  {
+    "name": "expression_83",
+    "text": "[胜利]"
+  },
+  {
+    "name": "expression_84",
+    "text": "[抱拳]"
+  },
+  {
+    "name": "expression_85",
+    "text": "[勾引]"
+  },
+  {
+    "name": "expression_86",
+    "text": "[拳头]"
+  },
+  {
+    "name": "expression_87",
+    "text": "[差劲]"
+  },
+  {
+    "name": "expression_88",
+    "text": "[爱你]"
+  },
+  {
+    "name": "expression_89",
+    "text": "[NO]"
+  },
+  {
+    "name": "expression_90",
+    "text": "[OK]"
+  },
+  {
+    "name": "expression_91",
+    "text": "[爱情]"
+  },
+  {
+    "name": "expression_92",
+    "text": "[飞吻]"
+  },
+  {
+    "name": "expression_93",
+    "text": "[跳跳]"
+  },
+  {
+    "name": "expression_94",
+    "text": "[发抖]"
+  },
+  {
+    "name": "expression_95",
+    "text": "[怄火]"
+  },
+  {
+    "name": "expression_96",
+    "text": "[转圈]"
+  },
+  {
+    "name": "expression_97",
+    "text": "[磕头]"
+  },
+  {
+    "name": "expression_98",
+    "text": "[回头]"
+  },
+  {
+    "name": "expression_99",
+    "text": "[跳绳]"
+  },
+  {
+    "name": "expression_100",
+    "text": "[投降]"
+  },
+  {
+    "name": "expression_101",
+    "text": "[激动]"
+  },
+  {
+    "name": "expression_102",
+    "text": "[街舞]"
+  },
+  {
+    "name": "expression_103",
+    "text": "[献吻]"
+  },
+  {
+    "name": "expression_104",
+    "text": "[左太极]"
+  },
+  {
+    "name": "expression_105",
+    "text": "[右太极]"
+  }
+]

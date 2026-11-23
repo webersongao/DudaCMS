@@ -1,0 +1,33 @@
+/.idea
+/.vscode
+*.log
+.DS_Store
+/runtime
+/node_modules/
+/config/app.php
+.env
+/config/database.php
+/public/storage/
+/public/backup/
+/install/lock/
+h5/unpackage/*
+colorUI/unpackage/*
+view/unpackage/*
+view/.hbuilderx/*
+view/.idea/*
+/update/*
+!/update/upgrade/
+!/update/upgrade/**
+admin.php
+!/public/admin.php
+/public/fkadmin.php
+/tests/visual/tests/visual
+/test-results
+/backup/
+/output/
+
+# 插件安装/配置生成的运行时文件，不进入版本库
+/plugins/*/config.php
+
+# HTMLPurifier 运行时定义缓存（remove_xss 开启后自动生成，不进入版本库）
+/vendor/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer/

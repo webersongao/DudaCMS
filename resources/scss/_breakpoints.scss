@@ -1,0 +1,45 @@
+// Dask 断点单一真相源。
+// CSS 变量不能用于 media query，因此断点在 Sass 层定义；tokens.css 中的
+// --dask-bp-* 仅用于文档与 JS 读取，数值必须与此文件保持一致。
+// 全站唯一口径：≤1023px 单列，≤767px 移动触控布局。
+// 其余变量只用于表达明确的次级档位，禁止在源文件里再写裸像素断点。
+
+$dask-bp-wide: 1280px;
+$dask-bp-lg: 1200px;
+$dask-bp-desktop: 1024px;
+$dask-bp-narrow: 1023px;
+$dask-bp-mobile-start: 768px;
+$dask-bp-mobile: 767px;
+$dask-bp-xs: 575px;
+$dask-bp-sm: 520px;
+$dask-bp-tablet: 500px;
+$dask-bp-tablet-wide: 720px;
+$dask-bp-tablet-sm: 640px;
+$dask-bp-compact: 480px;
+$dask-bp-tiny: 420px;
+$dask-bp-mini: 360px;
+$dask-bp-300: 300px;
+
+@mixin dask-narrow {
+  @media (max-width: $dask-bp-narrow) {
+    @content;
+  }
+}
+
+@mixin dask-mobile {
+  @media (max-width: $dask-bp-mobile) {
+    @content;
+  }
+}
+
+@mixin dask-compact {
+  @media (max-width: $dask-bp-compact) {
+    @content;
+  }
+}
+
+@mixin dask-desktop {
+  @media (min-width: $dask-bp-desktop) {
+    @content;
+  }
+}

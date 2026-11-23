@@ -1,0 +1,216 @@
+<h2>接口约定</h2>
+<p>文档生成时间：2026-11-21 07:21:25。完整机器可读规范见 <a href="/api-docs/openapi.yaml">OpenAPI YAML</a>。</p>
+<p>API 入口为 <code>/api.php/v1/*</code>，认证方式为 <code>Authorization: Bearer &lt;token&gt;</code>；统一响应结构为 <code>{"code":0,"message":"ok","data":{},"request_id":"..."}</code>。</p>
+<p>架构约定：Web、Ajax、API 是上层入口；业务与数据库读写收敛在 <code>app/service/api/*</code> 与现有模型中，避免同一逻辑重复实现。</p>
+<pre><code>GET /api.php/v1/common/health
+Authorization: Bearer &lt;token&gt;
+
+{
+  "code": 0,
+  "message": "ok",
+  "data": { "status": "ok" },
+  "request_id": "uuid"
+}</code></pre>
+<h2>API v1</h2>
+<p>共 27 个接口。认证标记“否”的接口可匿名访问。</p>
+<table><thead><tr><th>方法</th><th>路径</th><th>说明</th><th>认证</th><th>参数</th></tr></thead><tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/common/config</code></td>
+<td>站点配置</td>
+<td>否</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/common/categories</code></td>
+<td>分类树</td>
+<td>否</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/common/topics</code></td>
+<td>Common/topics</td>
+<td>否</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/common/health</code></td>
+<td>健康检查</td>
+<td>否</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/feed</code></td>
+<td>首页混合信息流</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/auth/login</code></td>
+<td>登录</td>
+<td>否</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/auth/register</code></td>
+<td>注册</td>
+<td>否</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/auth/me</code></td>
+<td>当前用户</td>
+<td>Bearer Token</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/auth/refresh</code></td>
+<td>刷新 Token</td>
+<td>Bearer Token</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/auth/logout</code></td>
+<td>Auth/logout</td>
+<td>Bearer Token</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/questions/search</code></td>
+<td>搜索问题</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/questions/:id/answers</code></td>
+<td>Question/answer</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/questions/:id/vote</code></td>
+<td>Question/vote</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/questions/:id/favorite</code></td>
+<td>Question/favorite</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/questions/:id</code></td>
+<td>Question/detail</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/questions</code></td>
+<td>问题列表</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/questions</code></td>
+<td>问题列表</td>
+<td>Bearer Token</td>
+<td><code>category_id&lt;/code&gt;, &lt;code&gt;page&lt;/code&gt;, &lt;code&gt;page_size&lt;/code&gt;, &lt;code&gt;answer_page&lt;/code&gt;, &lt;code&gt;answer_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/articles/:id</code></td>
+<td>Article/detail</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/articles</code></td>
+<td>文章列表</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/topics/:id</code></td>
+<td>Topic/detail</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/topics</code></td>
+<td>话题列表</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/users/me/notifications/:id/read</code></td>
+<td>User/readNotification</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/users/me/notifications</code></td>
+<td>通知列表</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/users/me</code></td>
+<td>当前用户资料</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/v1/users/:id</code></td>
+<td>User/profile</td>
+<td>Bearer Token</td>
+<td><code>page&lt;/code&gt;, &lt;code&gt;page_size</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/upload/image</code></td>
+<td>上传图片</td>
+<td>Bearer Token</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/v1/upload/file</code></td>
+<td>Upload/file</td>
+<td>Bearer Token</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h2>Web / Ajax 内部兼容层</h2>
+<p>这些控制器服务于服务端模板局部刷新，不面向第三方客户端；新增功能统一走 API v1 服务层。</p>
+<h3>app/frontend/ajax</h3><ul>
+<li><code>Article: remove_article, action, get_ajax_comment</code></li>
+<li><code>Column: recommend_article, delete, collect_recommend, collect</code></li>
+<li><code>Help: select_chapter</code></li>
+<li><code>Question: lock_question, redirect_content, redirect_search, cancel_redirect, remove_question, manager, force_fold_answers, save_answer</code></li>
+<li><code>Search: ajax, search_result</code></li>
+<li><code>Topic: merge_topic, cancel_merge, remove_topic, logs, get_topics</code></li>
+</ul>

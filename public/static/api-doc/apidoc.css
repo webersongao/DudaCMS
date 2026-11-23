@@ -1,0 +1,168 @@
+/* API 文档模块（站点内嵌，Bootstrap 4 环境） */
+.apidoc-hero {
+    background: radial-gradient(1200px 400px at 15% -10%, #3b82f6 0%, transparent 60%),
+                linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%);
+    color: #fff;
+    padding: 54px 0 42px;
+    margin-bottom: 26px;
+    position: relative;
+    overflow: hidden;
+}
+.apidoc-hero::after {
+    content: "";
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 0 0 40px rgba(255,255,255,.04), 0 0 0 90px rgba(255,255,255,.03);
+}
+.apidoc-kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: #bfdbfe; margin-bottom: 10px;
+}
+.apidoc-kicker::before { content: ""; width: 18px; height: 2px; background: #60a5fa; }
+.apidoc-hero h1 { font-size: 36px; font-weight: 800; letter-spacing: -.03em; margin: 0 0 10px; color: #fff; }
+.apidoc-hero p { color: #cbd5e1; max-width: 720px; margin: 0 0 20px; font-size: 15px; line-height: 1.7; }
+.apidoc-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.apidoc-actions .btn { border-radius: 10px; font-size: 13px; font-weight: 700; padding: 8px 14px; }
+.apidoc-actions .btn-light { background: #fff; color: #1e3a8a; border-color: #fff; }
+.apidoc-actions .btn-outline-light { color: #e2e8f0; border-color: rgba(255,255,255,.35); }
+.apidoc-actions .btn-outline-light:hover { background: rgba(255,255,255,.12); color: #fff; }
+.apidoc-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 999px; font-size: 12px;
+    background: rgba(251,191,36,.16); color: #fde68a;
+    border: 1px solid rgba(251,191,36,.35);
+}
+.apidoc-layout { display: flex; gap: 26px; align-items: flex-start; padding-bottom: 50px; }
+.apidoc-sidebar {
+    width: 260px; flex: 0 0 260px;
+    position: sticky; top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(15,23,42,.05);
+}
+.apidoc-search {
+    width: 100%; height: 36px; padding: 0 11px;
+    border: 1px solid #e2e8f0; border-radius: 9px;
+    font-size: 13px; outline: none; margin-bottom: 12px;
+}
+.apidoc-search:focus { border-color: #2563eb; box-shadow: 0 0 0 3px #dbeafe; }
+.apidoc-toc { list-style: none; margin: 0; padding: 0; }
+.apidoc-toc li { margin: 0; }
+.apidoc-toc a {
+    display: block; padding: 6px 9px; border-radius: 8px;
+    color: #475569; font-size: 13px; line-height: 1.4;
+    text-decoration: none; transition: all .15s ease;
+}
+.apidoc-toc a:hover { background: #f1f5f9; color: #1d4ed8; }
+.apidoc-toc a.active { background: #dbeafe; color: #1d4ed8; font-weight: 700; }
+.apidoc-toc .toc-h3 a { padding-left: 20px; font-size: 12px; color: #64748b; }
+.apidoc-toc .toc-hidden { display: none; }
+.apidoc-content {
+    flex: 1; min-width: 0;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+    padding: 30px 34px;
+    box-shadow: 0 8px 24px rgba(15,23,42,.05);
+    color: #0f172a; font-size: 15px; line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+.apidoc-content > h2 {
+    margin: 38px 0 14px; padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 25px; font-weight: 800; letter-spacing: -.02em;
+    scroll-margin-top: 16px;
+}
+.apidoc-content > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.apidoc-content h3 { margin: 26px 0 10px; font-size: 18px; font-weight: 750; scroll-margin-top: 16px; }
+.apidoc-content h4 { margin: 20px 0 8px; font-size: 15px; font-weight: 700; }
+.apidoc-content p { margin: 0 0 12px; }
+.apidoc-content a { color: #1d4ed8; }
+.apidoc-content ul, .apidoc-content ol { padding-left: 22px; margin: 0 0 14px; }
+.apidoc-content li { margin: 4px 0; }
+.apidoc-content code {
+    padding: 2px 6px; border-radius: 5px;
+    background: #f1f5f9; color: #be123c;
+    font-size: .88em; font-family: SFMono-Regular, Menlo, Consolas, monospace;
+}
+.apidoc-content pre {
+    position: relative; margin: 14px 0 18px; padding: 16px;
+    background: #0f172a; color: #e2e8f0; border-radius: 10px;
+    overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+.apidoc-content pre code { padding: 0; background: transparent; color: inherit; font-size: 13px; }
+.apidoc-content table {
+    width: 100%; margin: 14px 0 20px; border-collapse: collapse;
+    font-size: 13px; display: block; overflow-x: auto;
+}
+.apidoc-content th, .apidoc-content td { padding: 9px 11px; border: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+.apidoc-content th { background: #f8fafc; font-weight: 700; white-space: nowrap; }
+.apidoc-content tr:nth-child(even) td { background: #fbfdff; }
+.apidoc-content blockquote {
+    margin: 14px 0; padding: 10px 16px;
+    border-left: 3px solid #3b82f6; background: #eff6ff; color: #334155;
+    border-radius: 0 8px 8px 0;
+}
+.apidoc-copy {
+    position: absolute; top: 8px; right: 8px;
+    border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08);
+    color: #cbd5e1; border-radius: 6px; font-size: 11px; padding: 3px 8px;
+    cursor: pointer; opacity: 0; transition: opacity .15s ease;
+}
+.apidoc-content pre:hover .apidoc-copy { opacity: 1; }
+.apidoc-mobile-toggle { display: none; }
+@media (max-width: 991px) {
+    .apidoc-hero { padding: 36px 0 30px; }
+    .apidoc-hero h1 { font-size: 28px; }
+    .apidoc-layout { display: block; }
+    .apidoc-sidebar {
+        position: static; width: 100%; max-height: none;
+        margin-bottom: 16px;
+    }
+    .apidoc-content { padding: 20px 16px; border-radius: 12px; }
+    .apidoc-content > h2 { font-size: 21px; }
+    .apidoc-mobile-toggle {
+        display: inline-flex; margin-bottom: 10px;
+        border: 1px solid #e2e8f0; background: #fff; border-radius: 8px;
+        padding: 6px 12px; font-size: 13px;
+    }
+    .apidoc-sidebar .apidoc-toc,
+    .apidoc-sidebar .apidoc-search { display: none; }
+    .apidoc-sidebar.expanded .apidoc-toc,
+    .apidoc-sidebar.expanded .apidoc-search { display: block; }
+    .apidoc-sidebar.expanded { max-height: 65vh; overflow: auto; }
+}
+@media (prefers-color-scheme: dark) {
+    .apidoc-sidebar, .apidoc-content { background: #111a2e; border-color: #1e293b; color: #e2e8f0; }
+    .apidoc-content > h2 { border-color: #1e293b; }
+    .apidoc-content th { background: #0f172a; }
+    .apidoc-content td { border-color: #1e293b; }
+    .apidoc-content tr:nth-child(even) td { background: #0d1526; }
+    .apidoc-search { background: #0f172a; border-color: #1e293b; color: #e2e8f0; }
+    .apidoc-toc a { color: #94a3b8; }
+    .apidoc-toc a:hover { background: #1e293b; color: #93c5fd; }
+    .apidoc-toc a.active { background: #172554; color: #93c5fd; }
+    .apidoc-content code { background: #1e293b; color: #fda4af; }
+}
+/* 站点主题由 data-dark 驱动，与系统 prefers-color-scheme 解耦。
+   站长切到深色但系统仍是浅色时，上面 media query 不触发，而站点全局深色规则
+   会把文字转浅 → 浅字白底。这里同步一套 data-dark 规则，并修正移动端“显示目录”按钮。 */
+html[data-dark="1"] .apidoc-sidebar,
+html[data-dark="1"] .apidoc-content,
+html[data-dark="1"] .apidoc-search { background: #111a2e; border-color: #1e293b; color: #e2e8f0; }
+html[data-dark="1"] .apidoc-content > h2 { color: #e2e8f0; border-color: #1e293b; }
+html[data-dark="1"] .apidoc-content th { background: #0f172a; }
+html[data-dark="1"] .apidoc-content td { border-color: #1e293b; }
+html[data-dark="1"] .apidoc-content tr:nth-child(even) td { background: #0d1526; }
+html[data-dark="1"] .apidoc-toc a { color: #94a3b8; }
+html[data-dark="1"] .apidoc-toc a.active { background: #172554; color: #93c5fd; }
+html[data-dark="1"] .apidoc-content code { background: #1e293b; color: #fda4af; }
+html[data-dark="1"] .apidoc-mobile-toggle {
+    background: #1e293b; color: #e2e8f0; border-color: #334155;
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="提示信息">
+  <circle cx="32" cy="32" r="30" fill="#0084FF"/>
+  <path d="M36 29 29 45" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linecap="round"/>
+  <circle cx="39" cy="19" r="4" fill="#FFFFFF"/>
+</svg>

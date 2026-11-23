@@ -1,0 +1,1026 @@
+// 由 npm run css:build 编译到 public/static。请只修改本文件，不要直接编辑产物。
+@use "breakpoints" as *;
+
+/* DudaCMS 统一组件层：列表 / 弹窗 / 下拉 / 通知 / 状态页。
+   全部使用 tokens.css 变量，深浅色与四语共用同一套几何尺寸。 */
+
+/* ---------- InfiniteList ---------- */
+.dask-infinite-list { position: relative; }
+.dask-infinite-list [data-dask-list-items] { min-height: 1px; }
+.dask-list-sentinel { height: 1px; width: 100%; }
+.dask-list-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--dask-gap-3) var(--dask-gap-4);
+  color: var(--dask-text-2);
+  font-size: var(--dask-fs-meta);
+  line-height: var(--dask-lh-body);
+  text-align: center;
+}
+.dask-list-status[hidden] { display: none !important; }
+.dask-list-status .dask-list-more {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-sm);
+  background: var(--dask-surface);
+  color: var(--dask-text);
+  cursor: pointer;
+  transition: background var(--dask-transition), border-color var(--dask-transition);
+}
+.dask-list-status .dask-list-more:hover { background: var(--dask-blue-tint); border-color: var(--dask-blue); color: var(--dask-blue); }
+.dask-list-status .dask-list-more:focus-visible { outline: none; box-shadow: var(--dask-focus); }
+.dask-list-status.is-error { color: var(--dask-danger); }
+.dask-list-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border: 2px solid var(--dask-line-2);
+  border-top-color: var(--dask-blue);
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: dask-spin .7s linear infinite;
+}
+@keyframes dask-spin { to { transform: rotate(360deg); } }
+
+/* ---------- 状态页 / 空状态 ---------- */
+.dask-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dask-gap-3);
+  min-height: 180px;
+  padding: var(--dask-gap-6);
+  color: var(--dask-text-2);
+  text-align: center;
+}
+.dask-state__icon { width: 48px; height: 48px; color: var(--dask-line-2); }
+.dask-state__title { color: var(--dask-text); font-size: var(--dask-fs-h3); font-weight: 600; }
+.dask-state__desc { max-width: 36em; overflow-wrap: anywhere; line-height: var(--dask-lh-body); }
+.dask-state__action {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--dask-r-sm);
+  background: var(--dask-primary-bg);
+  color: #fff;
+  cursor: pointer;
+}
+.dask-state__action:hover { background: var(--dask-primary-bg-hover); }
+.dask-state__action:focus-visible { outline: none; box-shadow: var(--dask-focus); }
+
+/* ---------- Dialog / 浮层 ---------- */
+dialog.dask-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-lg);
+  background: var(--dask-elevated);
+  color: var(--dask-text);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .24);
+}
+dialog.dask-dialog::backdrop { background: rgba(0, 0, 0, .48); }
+.dask-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dask-gap-3);
+  min-height: 48px;
+  padding: 0 var(--dask-gap-4);
+  border-bottom: 1px solid var(--dask-line);
+}
+.dask-dialog__title { overflow-wrap: anywhere; font-size: var(--dask-fs-h3); font-weight: 600; }
+.dask-dialog__close {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--dask-text-2);
+  font-size: 22px;
+  cursor: pointer;
+}
+.dask-dialog__close:hover { color: var(--dask-text); }
+.dask-dialog__body { padding: var(--dask-gap-4); line-height: var(--dask-lh-body); }
+.dask-dialog__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--dask-gap-2);
+  padding: var(--dask-gap-3) var(--dask-gap-4);
+  border-top: 1px solid var(--dask-line);
+}
+.dask-dialog__foot button { min-height: 44px; padding: 8px 18px; }
+
+/* ---------- Dropdown ---------- */
+.dask-dropdown { position: relative; display: inline-flex; }
+.dask-dropdown__trigger { min-height: 44px; }
+.dask-dropdown__panel {
+  position: absolute;
+  z-index: var(--dask-z-dropdown, 1080);
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: var(--dask-gap-2) 0;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-md);
+  background: var(--dask-elevated);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .16);
+}
+.dask-dropdown__panel[hidden] { display: none !important; }
+.dask-dropdown__item {
+  display: block;
+  min-height: 44px;
+  padding: 10px var(--dask-gap-4);
+  color: var(--dask-text);
+  overflow-wrap: anywhere;
+}
+.dask-dropdown__item:hover,
+.dask-dropdown__item:focus-visible { background: var(--dask-blue-tint); color: var(--dask-blue); text-decoration: none; outline: none; }
+
+/* ---------- Toast / 通知 ---------- */
+.dask-toast-stack {
+  position: fixed;
+  z-index: var(--dask-z-toast, 2000);
+  top: calc(var(--dask-topbar-h) + 12px);
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dask-gap-2);
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.dask-toast {
+  padding: 12px var(--dask-gap-4);
+  border: 1px solid var(--dask-line);
+  border-left: 4px solid var(--dask-blue);
+  border-radius: var(--dask-r-md);
+  background: var(--dask-elevated);
+  color: var(--dask-text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
+  line-height: var(--dask-lh-body);
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+}
+.dask-toast--success { border-left-color: var(--dask-success); }
+.dask-toast--error { border-left-color: var(--dask-danger); }
+.dask-toast--warning { border-left-color: #B26A00; }
+/* 自定义元素默认 inline，显式块级化以保持与<div> 完全一致的排版。 */
+dask-toast { display: block; }
+dask-list-item { display: block; }
+.dask-notice-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--dask-r-pill);
+  background: var(--dask-danger);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+.dask-notice-badge[hidden] { display: none !important; }
+
+/* ---------- 深浅色补强 ---------- */
+html[data-theme="dark"] .dask-dialog__foot button.dask-btn-secondary,
+html[data-theme="auto"][data-dark="1"] .dask-dialog__foot button.dask-btn-secondary {
+  background: var(--dask-elevated);
+  color: var(--dask-text);
+  border-color: var(--dask-line);
+}
+
+/* 全站统一使用服务端页码分页，服务端页码器在所有尺寸显示。
+   分页条容器补深色表面，避免浅色孤岛。 */
+.dask-ui-pager { display: block !important; }
+html[data-dark="1"] .dask-ui-pager,
+html[data-dark="1"] .dask-ui-pager .pagination,
+html[data-dark="1"] .dask-ui-pager .pagination li,
+html[data-dark="1"] .dask-ui-pager .pagination li a,
+html[data-dark="1"] .dask-ui-pager .pagination li span {
+  background-color: var(--dask-surface) !important;
+  border-color: var(--dask-line) !important;
+  color: var(--dask-text-3) !important;
+}
+html[data-dark="1"] .dask-ui-pager .pagination li.active a {
+  background-color: var(--dask-primary-bg) !important;
+  color: #fff !important;
+}
+
+/* 追加列表条目的统一最小排版， 重写模板时可继续复用。 */
+.dask-list-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dask-line);
+  color: var(--dask-text);
+}
+.dask-list-item__title {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--dask-fs-body);
+  font-weight: 600;
+  line-height: var(--dask-lh-body);
+  overflow-wrap: anywhere;
+}
+.dask-list-item__title:hover { color: var(--dask-blue); }
+.dask-list-item__meta { color: var(--dask-text-2); font-size: var(--dask-fs-meta); }
+
+/* ---------- 列表项组件类 ----------
+   用途：把 zhihu-blue.css / app.min.css 中 .dask-common-list dl/dt/dd 的生效规则
+   复制为类选择器，二者渲染一致。 */
+.dask-common-list .dask-list-item {
+  margin: 0 !important;
+  padding: var(--dask-gap-5) var(--dask-gap-6) !important;
+  border-bottom: 1px solid var(--dask-line);
+  color: var(--dask-text);
+  transition: background var(--dask-transition);
+}
+.dask-common-list .dask-list-item:last-child { border-bottom: 0; }
+.dask-common-list .dask-list-item:hover { background: #FCFDFF; }
+
+.dask-common-list .dask-list-item__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  font-size: var(--dask-fs-meta);
+  color: var(--dask-text-3);
+  font-weight: 400;
+  margin-bottom: 8px;
+  line-height: 22px;
+}
+.dask-common-list .dask-list-item__meta .dask-user-name {
+  color: var(--dask-text-2) !important;
+  font-size: var(--dask-fs-meta);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dask-common-list .dask-list-item__meta .dask-user-name img { width: 20px; height: 20px; border-radius: 50%; margin-right: 4px; }
+/* 匿名用户头像走 .dask-username（非 .dask-user-name），缺少尺寸约束导致 SVG 按默认 128px 渲染撑破列表项 */
+.dask-common-list .dask-list-item__meta .dask-username img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; flex: 0 0 20px; }
+.dask-common-list .dask-list-item__meta i { font-style: normal; color: var(--dask-text-3); }
+.dask-common-list .dask-list-item__meta em.time { margin-left: auto; float: none; font-style: normal; color: var(--dask-text-3); font-size: var(--dask-fs-meta); font-weight: 400; }
+.dask-common-list .dask-list-item__meta .tag,
+.dask-common-list .dask-list-item__meta .tags { display: inline-flex !important; align-items: center; flex-wrap: wrap; gap: 4px; margin: 0 !important; }
+.dask-common-list .dask-list-item__meta .tag .dask-topic { display: inline-flex; align-items: center; }
+.dask-common-list .dask-list-item__meta span { display: inline-block; font-size: var(--dask-fs-body); }
+
+.dask-common-list .dask-list-item__body { margin: 0; display: block; }
+.dask-common-list .dask-list-item__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: var(--dask-gap-3) 0 0; /* 封面/描述与操作栏之间保留呼吸间距（默认间距为 0） */
+  /* 保持像素一致 */
+  min-height: 32px;
+}
+/* 操作栏数字需要比元信息更高的对比度：#6B7280(4.83:1) → #5F6368(7:1)
+   必须用 #wrapMain + !important 覆盖 zhihu-blue.css 的
+   #wrapMain .dask-common-list label { color: text-3 !important } 原规则 */
+html body #wrapMain .dask-common-list .dask-list-item__actions label {
+  color: var(--dask-text-2) !important;
+}
+html body .dask-common-list .dask-list-item__actions label { font-size: 13px; margin-right: 0 !important; }
+.dask-common-list .dask-list-item__actions .gz { font-size: 13px; padding: 4px 12px; }
+.dask-common-list .dask-list-item__actions .focus-count { background: rgba(255,255,255,.2); margin-left: 4px; }
+
+/* 图标动作按钮：dask.js 把文字包成 .dask-action-label、数字包成 .dask-action-count。
+   桌面保留文字；窄屏只隐藏文字，保留图标和数字，并统一 icon/text 间距。 */
+.dask-action-compact { display: inline-flex !important; align-items: center !important; column-gap: 6px; white-space: nowrap; }
+.dask-action-compact > i,
+.dask-action-compact > svg,
+.dask-action-compact > [class*="icon-"],
+.dask-action-compact .dask-action-count,
+.dask-action-compact .dask-action-label { flex: 0 0 auto; }
+.dask-action-compact > i,
+.dask-action-compact > svg,
+.dask-action-compact > .iconfont { margin-right: 0 !important; }
+.dask-action-compact .dask-action-count { font-variant-numeric: tabular-nums; }
+@media (max-width: $dask-bp-mobile) {
+  .dask-action-compact .dask-action-label { display: none !important; }
+  /* 分享按钮原本小屏隐藏 icon、显示文字；现在反向保留 icon */
+  .dask-action-compact .d-none.d-sm-inline-block { display: inline-block !important; }
+}
+
+/* ---------- 全站对比度收口（浅色）----------
+   --dask-blue #0084FF 对白字仅 3.66:1，不满足 WCAG AA；品牌蓝只保留给
+   Logo/图标/focus/大号强调，实心按钮与正文链接统一用可读色阶。 */
+html:not([data-dark="1"]) body .btn-primary,
+html:not([data-dark="1"]) body .gradientBtn,
+html:not([data-dark="1"]) body .logon-but,
+html:not([data-dark="1"]) body .btn.btn-primary {
+  background: var(--dask-primary-bg) !important;
+  border-color: var(--dask-primary-bg) !important;
+  color: #fff !important;
+}
+html:not([data-dark="1"]) body .btn-primary:hover,
+html:not([data-dark="1"]) body .gradientBtn:hover,
+html:not([data-dark="1"]) body .logon-but:hover {
+  background: var(--dask-primary-bg-hover) !important;
+  border-color: var(--dask-primary-bg-hover) !important;
+}
+/* 选中 tab / 主色正文链接：品牌蓝 → 可读蓝 #0069CC（5.39:1）
+   仅处理白/浅底蓝字场景；蓝底白字的 .nav-tabs/.nav-pills active 保持白字不动 */
+html:not([data-dark="1"]) body #wrapMain .nav-link.active:not(.dask-ajax-agree),
+html:not([data-dark="1"]) body .navbox-2 .navbar-new-nav .nav-link.active,
+html:not([data-dark="1"]) body .setting-nav .active {
+  color: var(--dask-blue-strong) !important;
+}
+/* 深色主题：分类/排序 active tab 走蓝底(#2563EB)，浅蓝字仅 4.1:1 → 用纯白 */
+html[data-dark="1"] body #wrapMain .dask-category-tabs .nav-link.active,
+html[data-dark="1"] body #wrapMain .nav-link.active.c-active,
+html[data-dark="1"] body .dask-pjax-tabs .nav-link.active {
+  color: #fff !important;
+}
+/* 认证徽标：#0084FF on tint(3.3:1) → 可读蓝 */
+html:not([data-dark="1"]) .dask-badge-group { color: var(--dask-blue-strong) !important; }
+/* 分类筛选未选中文字：#6E7583 on #F6F7F9 略低 → text-2 */
+html:not([data-dark="1"]) #wrapMain .nav-link:not(.active):not(.dask-ajax-agree) { color: var(--dask-text-2) !important; }
+/* 深色实心按钮白字：确保纯白，避免继承出偏灰 rgb(232,234,237) */
+html[data-dark="1"] body .btn-primary,
+html[data-dark="1"] body .gradientBtn { color: #fff !important; }
+/* 导航链接 hover/cur/active 文字：白底品牌蓝 3.66:1 → 可读蓝；短线 ::after 保持品牌蓝 */
+html:not([data-dark="1"]) body .navbox-2 .navbar-new-nav .nav-link:hover,
+html:not([data-dark="1"]) body .navbox-2 .navbar-new-nav .nav-item.cur .nav-link,
+html:not([data-dark="1"]) body .w-top-img .navbox.suspension .nav-link:hover,
+html:not([data-dark="1"]) body .w-top-img .navbox.suspension .nav-item.cur .nav-link,
+html:not([data-dark="1"]) body .w-top-img .navbox.suspension .nav-link.active {
+  color: var(--dask-blue-strong) !important;
+}
+/* 反对/次要表态按钮：#6B7280 on tint(4.35:1) → text-2(#5F6368 ≈5.4:1)
+   zhihu-blue.css 的 #wrapMain .answer-btn-actions a{text-3 !important} 特异性更高，需同级覆盖 */
+html:not([data-dark="1"]) #wrapMain .dask-ajax-against,
+html:not([data-dark="1"]) #wrapMain .answer-btn-actions a.dask-ajax-against,
+html:not([data-dark="1"]) #wrapMain .fw-bold.dask-ajax-against { color: var(--dask-text-2) !important; }
+/* 话题关注按钮：#0069CC on tint-2(4.3:1) → strong-hover(#005BB5 ≈5.3:1) */
+html:not([data-dark="1"]) #wrapMain .dask-topic-page .dask-topic-head__focus,
+html:not([data-dark="1"]) #wrapMain .dask-topic-page .dask-topic-head__focus:hover,
+html:not([data-dark="1"]) #wrapMain a[class*="dask-topic-head__fo"] { color: var(--dask-blue-strong-hover) !important; }
+/* 侧栏三快捷入口（写回答/提问题/写文章）：col-4 列窄，英文文案在 16px 下被按音节
+   断成 “Write an/swers”。缩到 12px + 单行省略，任何语言都不折断、不溢出。 */
+html body .w-fun .row > a h6 {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+/* 描边主按钮（含 hover）：#wrapMain 原规则把 hover 字色设 active(#0069CC)，
+   在变灰的 hover 底上仅 4.36:1 → strong-hover */
+html:not([data-dark="1"]) #wrapMain .btn-outline-primary,
+html:not([data-dark="1"]) #wrapMain .btn-outline-primary:hover,
+html:not([data-dark="1"]) #wrapMain .btn-outline-primary:focus { color: var(--dask-blue-strong-hover) !important; }
+/* 深色实心按钮白字：.text-white 用 rgba(--bs-white-rgb,--bs-text-opacity) !important，
+   深色下 text-opacity<1 使白字偏灰 rgb(232,234,237) on 蓝底仅 4.29:1 → 强制纯白 */
+html[data-dark="1"] body .btn-primary.text-white,
+html[data-dark="1"] body a.btn-primary,
+html[data-dark="1"] body #wrapMain .btn-primary.text-white { color: #fff !important; }
+
+/* 浅底蓝字按钮（赞同/关注/反对）内的计数徽标：覆盖 zhihu-blue.css 原有的
+   “半透明白底 + 白字”原规则——该规则在浅蓝底 #EAF4FF 上白字几乎不可见。
+   统一为浅色=深蓝字+浅蓝底、深色=浅蓝字+深蓝底，统一对比度方案。 */
+html body a[data-action="user-agree"].btn-primary .badge,
+html body a[data-action="user-focus"].btn-primary .badge,
+html body a[data-action="user-against"].btn-primary .badge,
+html body a.dask-ajax-agree .badge,
+html body a.dask-ajax-against .badge,
+html body .answer-btn-actions a.dask-ajax-agree .badge,
+html body .actions a.dask-ajax-agree .badge {
+  background: var(--dask-blue-tint-2) !important;
+  /* 用更深的 strong-hover 而非 active：active(#0069CC) 在 tint-2(#D3E8FF) 上仅约 4.4:1，
+     加深到 #005BB5 后约 5.3:1，稳定通过 WCAG AA，数字更清晰 */
+  color: var(--dask-blue-strong-hover) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+html[data-theme="dark"] body a[data-action="user-agree"].btn-primary .badge,
+html[data-theme="dark"] body a[data-action="user-focus"].btn-primary .badge,
+html[data-theme="dark"] body a.dask-ajax-agree .badge,
+html[data-dark="1"] body a[data-action="user-agree"].btn-primary .badge,
+html[data-dark="1"] body a[data-action="user-focus"].btn-primary .badge,
+html[data-dark="1"] body a.dask-ajax-agree .badge {
+  background: var(--dask-blue-tint-2) !important;
+  color: #A9CDFF !important;
+}
+
+/* ---------- 12C 图左文右卡片组件（替代 float + width:calc） ----------
+   .dask-hcard__media 固定宽（由模板内联 width 或 modifier 指定），
+   __body 用 flex:1 + min-width:0 自适应占位，__extra 放右上角操作区。 */
+.dask-hcard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.dask-hcard__media {
+  flex: 0 0 auto;
+  position: relative;
+  line-height: 0;
+}
+.dask-hcard__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.dask-hcard__extra {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* 语义定义列表的行内布局：术语左、值右，替代 clearfix + float */
+dl.dask-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* 友情链接：flex + gap 自动换行的标签式布局，替代 BS4 失效的 me-3 */
+.dask-links__title { font-size: 14px; font-weight: 600; color: var(--dask-text-2); margin: 0 0 12px; }
+.dask-link-list { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+.dask-link-chip {
+  display: inline-block;
+  padding: 5px 14px;
+  border: 1px solid var(--dask-line);
+  border-radius: 999px;
+  background: var(--dask-bg);
+  color: var(--dask-text-2) !important;
+  font-size: 13px;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.dask-link-chip:hover { color: var(--dask-blue) !important; border-color: var(--dask-blue); background: var(--dask-surface); }
+.dask-kv-row > dt { flex: 0 0 auto; }
+.dask-kv-row > dd {
+  flex: 1 1 auto;
+  margin: 0;
+  text-align: right;
+  min-width: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/*  文章列表项组件：时间、标题、媒体图、摘要都在同一个 dd 内。
+   .dask-article-row__time 绝对定位在标题行右侧，不再占用独立行的高度。 */
+html body .dask-common-list .dask-article-row .dask-article-row__title {
+  position: relative;
+}
+html body .dask-common-list .dask-article-row .dask-article-row__time {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  font-style: normal;
+  color: var(--dask-text-3);
+  font-size: var(--dask-fs-meta);
+  line-height: 1.4;
+}
+
+@media (max-width: $dask-bp-mobile) {
+  .dask-common-list .dask-list-item { padding: 16px !important; }
+}
+
+@media (max-width: $dask-bp-mobile) {
+  .dask-dropdown__panel { position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; max-width: none; }
+  .dask-toast-stack { top: 12px; left: 16px; right: 16px; width: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dask-list-spinner { animation: none; }
+  .dask-list-status .dask-list-more,
+  .dask-state__action { transition: none; }
+}
+
+/* 12D 收尾：侧栏两行列表（原布局型 dl/dt/dd → div）。视觉等价 + 令牌化深浅色 */
+.dask-side-list__title { margin: 0; font-weight: 400; }
+.dask-side-list__meta,
+.dask-side-list__meta label { margin-bottom: 0; color: var(--dask-text-3); line-height: 1.5; }
+.dask-side-list__meta { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.dask-side-list__meta label { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+.dask-side-list__meta label i { flex: 0 0 auto; font-size: 12px; color: var(--dask-text-3); }
+
+/* §14 CodeMirror 6：编辑器容器令牌化，跟随站点深浅色 */
+.dask-cm6 {
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-sm, 4px);
+  overflow: hidden;
+  min-height: 220px;
+  font-size: 13px;
+}
+.dask-cm6 .cm-editor { min-height: 220px; }
+.dask-cm6 .cm-scroller { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+html[data-dark="1"] .dask-cm6 { border-color: rgba(255, 255, 255, .12); }
+
+/* ===========================================================================
+   弹窗皮肤统一（layer 弹窗 + 原生 <dialog>）
+   说明：layer 默认皮肤标题栏灰底、按钮方形/凸起，原生 dialog 的
+   .dask-btn-primary/.dask-btn-secondary 类从未定义，按钮退回浏览器
+   2px outset 老式样式。这里统一为圆角卡片 + 胶囊主次按钮 + 柔和阴影，
+   完整跟随站点深浅色令牌，窄屏自动收窄留白。
+   =========================================================================== */
+
+/* ---- layui layer 外壳：所有弹窗共用的圆角卡片 + 柔和阴影 ---- */
+html body .layui-layer.layui-layer-dialog,
+html body .layui-layer.layui-layer-page {
+  border: 1px solid var(--dask-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .20) !important;
+  overflow: hidden !important;
+  background: var(--dask-elevated) !important;
+}
+html body .layui-layer .layui-layer-title {
+  background: var(--dask-elevated) !important;
+  color: var(--dask-text) !important;
+  border-bottom: 0 !important;
+  line-height: 1.4 !important;
+}
+html body .layui-layer .layui-layer-content {
+  background: var(--dask-elevated) !important;
+  color: var(--dask-text-2) !important;
+}
+html body .layui-layer .layui-layer-setwin .layui-layer-close1 {
+  background: transparent !important;
+  color: var(--dask-text-3) !important;
+  font-size: 20px !important;
+}
+
+/* 确认/提示类（confirm/alert）：大留白 + 胶囊主次按钮，替换复古默认皮肤 */
+html body .layui-layer.layui-layer-dialog .layui-layer-title {
+  padding: 22px 26px 8px !important;
+  height: auto !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+html body .layui-layer.layui-layer-dialog .layui-layer-content {
+  padding: 6px 26px 20px !important;
+  height: auto !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+}
+html body .layui-layer.layui-layer-dialog .layui-layer-setwin { top: 18px !important; right: 18px !important; }
+html body .layui-layer .layui-layer-btn {
+  background: var(--dask-elevated) !important;
+  border-top: 1px solid var(--dask-line) !important;
+  padding: 16px 26px 20px !important;
+  text-align: right !important;
+  height: auto !important;
+  display: flex !important;
+  justify-content: flex-end;
+  gap: 12px;
+}
+/* 表单/iframe 类（.layui-layer-page，如话题选择/私信）：只升级视觉，
+   保留原有紧凑 padding 与内容内边距，避免撑大高度、破坏按钮右对齐。 */
+html body .layui-layer.layui-layer-page .layui-layer-title {
+  padding: 12px 18px !important;
+  height: auto !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+html body .layui-layer .layui-layer-btn a {
+  margin: 0 !important;
+  height: 38px !important;
+  line-height: 36px !important;
+  min-width: 84px !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 1px solid var(--dask-line) !important;
+  background: var(--dask-elevated) !important;
+  color: var(--dask-text-2) !important;
+}
+html body .layui-layer .layui-layer-btn .layui-layer-btn0 {
+  background: var(--dask-primary-bg) !important;
+  color: #fff !important;
+  border-color: var(--dask-primary-bg) !important;
+}
+html body .layui-layer .layui-layer-btn a:hover { filter: brightness(.96); }
+html[data-dark="1"] .layui-layer .layui-layer-btn .layui-layer-btn0,
+html[data-theme="auto"][data-dark="1"] .layui-layer .layui-layer-btn .layui-layer-btn0 {
+  background: var(--dask-primary-bg) !important;
+  color: #fff !important;
+  border-color: var(--dask-primary-bg) !important;
+}
+
+/* layer msg / tips 轻提示：去老式尖角与硬边框 */
+html body .layui-layer-msg,
+html body .layui-layer-tipsG { border-radius: 10px !important; }
+
+/* ---- 原生 <dialog>：补齐从未定义的按钮类，视觉与 layer 统一 ---- */
+html body dialog.dask-dialog { border-radius: 16px !important; }
+html body .dask-dialog__head { border-bottom: 0 !important; padding-top: 6px; }
+html body .dask-dialog__body { padding-top: 0 !important; color: var(--dask-text-2); }
+html body .dask-dialog__foot { border-top-color: var(--dask-line); }
+html body .dask-dialog__foot button.dask-btn-primary,
+html body .dask-dialog__foot button.dask-btn-secondary {
+  height: 40px; min-height: 40px; padding: 0 22px; border-radius: 999px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--dask-line);
+}
+html body .dask-dialog__foot button.dask-btn-secondary {
+  background: var(--dask-elevated); color: var(--dask-text-2);
+}
+html body .dask-dialog__foot button.dask-btn-primary {
+  background: var(--dask-primary-bg); color: #fff; border-color: var(--dask-primary-bg);
+}
+
+/* ---- 窄屏：确认弹窗减小留白，按钮不溢出 ---- */
+@media (max-width: $dask-bp-xs) {
+  html body .layui-layer.layui-layer-dialog .layui-layer-title { padding: 18px 20px 6px !important; font-size: 16px !important; }
+  html body .layui-layer.layui-layer-dialog .layui-layer-content { padding: 4px 20px 16px !important; }
+  html body .layui-layer .layui-layer-btn { padding: 14px 20px 18px !important; gap: 10px; }
+  html body .layui-layer .layui-layer-btn a { min-width: 72px !important; padding: 0 16px !important; }
+  html body .dask-dialog__foot button.dask-btn-primary,
+  html body .dask-dialog__foot button.dask-btn-secondary { min-width: 72px; padding: 0 16px; }
+}
+
+/* ===========================================================================
+   Dask UI primitives — 全站统一交互原子
+   供 P1–P4 模板渐进接入；全部走 tokens.css，不写死品牌色。
+   =========================================================================== */
+
+.dask-btn {
+  --dask-btn-h: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--dask-btn-h);
+  padding: 0 14px;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-sm);
+  background: var(--dask-surface);
+  color: var(--dask-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background var(--dask-transition), border-color var(--dask-transition), color var(--dask-transition);
+}
+.dask-btn:hover { background: var(--dask-hover-bg); border-color: var(--dask-line-2); color: var(--dask-text); text-decoration: none; }
+.dask-btn:active { background: var(--dask-active-bg); }
+.dask-btn:focus-visible { outline: none; box-shadow: var(--dask-focus); }
+.dask-btn[disabled],
+.dask-btn[aria-disabled="true"],
+.dask-btn.is-disabled {
+  background: var(--dask-disabled-bg);
+  border-color: var(--dask-line);
+  color: var(--dask-disabled-text);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.dask-btn--primary,
+.dask-btn-primary {
+  background: var(--dask-primary-bg);
+  border-color: var(--dask-primary-bg);
+  color: #fff;
+}
+.dask-btn--primary:hover,
+.dask-btn-primary:hover { background: var(--dask-primary-bg-hover); border-color: var(--dask-primary-bg-hover); color: #fff; }
+.dask-btn--ghost { background: transparent; border-color: transparent; color: var(--dask-blue-strong); }
+.dask-btn--ghost:hover { background: var(--dask-blue-tint); border-color: transparent; color: var(--dask-blue-strong-hover); }
+.dask-btn--danger { background: var(--dask-danger); border-color: var(--dask-danger); color: #fff; }
+.dask-btn--danger:hover { filter: brightness(.94); color: #fff; }
+.dask-btn--sm { --dask-btn-h: 30px; padding: 0 10px; font-size: 12px; }
+.dask-btn--lg { --dask-btn-h: 40px; padding: 0 20px; font-size: 14px; }
+.dask-btn--block { display: flex; width: 100%; }
+.dask-btn--round { border-radius: var(--dask-r-pill); }
+.dask-btn.is-loading { position: relative; color: transparent !important; pointer-events: none; }
+.dask-btn.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  color: var(--dask-blue);
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: dask-spin .7s linear infinite;
+}
+
+.dask-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--dask-gap-5);
+  min-height: 44px;
+  border-bottom: 1px solid var(--dask-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dask-tabs::-webkit-scrollbar { display: none; }
+.dask-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--dask-text-2);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dask-tab:hover { color: var(--dask-blue-strong); text-decoration: none; }
+.dask-tab[aria-selected="true"],
+.dask-tab.is-active { color: var(--dask-blue-strong); font-weight: 600; }
+.dask-tab[aria-selected="true"]::after,
+.dask-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--dask-primary-bg);
+  transform: translateX(-50%);
+}
+.dask-tab:focus-visible { outline: none; box-shadow: var(--dask-focus); }
+
+.dask-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 2px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--dask-r-sm);
+  background: var(--dask-blue-tint);
+  color: var(--dask-blue-strong);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+a.dask-chip:hover { background: var(--dask-active-bg); color: var(--dask-blue-strong-hover); text-decoration: none; }
+.dask-chip--neutral { background: var(--dask-hover-bg); color: var(--dask-text-2); border-color: var(--dask-line); }
+
+.dask-avatar {
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: visible;
+}
+.dask-avatar > img,
+.dask-avatar > svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.dask-avatar--sm { width: 28px; height: 28px; }
+.dask-avatar--lg { width: 64px; height: 64px; }
+.dask-avatar__badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--dask-surface);
+  border-radius: 50%;
+  background: var(--dask-primary-bg);
+  color: #fff;
+  font-size: 10px;
+  line-height: 12px;
+  text-align: center;
+}
+
+.dask-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--dask-gap-5) 0;
+}
+.dask-pagination a,
+.dask-pagination span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-sm);
+  background: var(--dask-surface);
+  color: var(--dask-text-2);
+  font-size: 13px;
+  text-decoration: none;
+}
+.dask-pagination a:hover { border-color: var(--dask-blue); color: var(--dask-blue-strong); }
+.dask-pagination .is-active { background: var(--dask-primary-bg); border-color: var(--dask-primary-bg); color: #fff; }
+.dask-pagination .is-disabled { color: var(--dask-disabled-text); pointer-events: none; }
+
+.dask-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 180px;
+  padding: 32px 20px;
+  color: var(--dask-text-2);
+  text-align: center;
+}
+.dask-empty__title { color: var(--dask-text); font-size: 15px; font-weight: 600; }
+.dask-empty__desc { max-width: 36em; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.dask-empty__action { margin-top: 4px; }
+
+.dask-skeleton {
+  border-radius: var(--dask-r-sm);
+  background: linear-gradient(90deg, var(--dask-hover-bg) 25%, var(--dask-active-bg) 37%, var(--dask-hover-bg) 63%);
+  background-size: 400% 100%;
+  animation: dask-skeleton-shimmer 1.4s ease infinite;
+}
+.dask-skeleton--line { height: 12px; }
+.dask-skeleton--title { height: 18px; width: 62%; }
+.dask-skeleton--avatar { width: 40px; height: 40px; border-radius: 50%; }
+@keyframes dask-skeleton-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dask-btn.is-loading::after { animation: none; }
+  .dask-skeleton { animation: none; }
+}
+
+@media (max-width: $dask-bp-mobile) {
+  .dask-btn { --dask-btn-h: 40px; }
+  .dask-btn--sm { --dask-btn-h: 34px; }
+  .dask-tabs { gap: var(--dask-gap-4); }
+  .dask-pagination a,
+  .dask-pagination span { min-width: 38px; height: 38px; }
+}
+
+/* ---------- Alert：弱色块状态提示，替代 Bootstrap 默认高饱和底色 ---------- */
+.alert {
+  border: 1px solid var(--dask-line);
+  background: var(--dask-surface);
+  color: var(--dask-text);
+}
+.alert .btn-close { filter: none; }
+html[data-dark="1"] .alert .btn-close { filter: invert(1) grayscale(1); }
+.alert-danger,
+.alert[data-status="danger"] {
+  border-color: var(--dask-danger-tint-2);
+  background: var(--dask-danger-tint);
+  color: var(--dask-danger);
+}
+.alert-warning,
+.alert[data-status="warning"] {
+  border-color: var(--dask-warning-tint-2);
+  background: var(--dask-warning-tint);
+  color: var(--dask-warning);
+}
+.alert-success,
+.alert[data-status="success"] {
+  border-color: var(--dask-success-tint-2);
+  background: var(--dask-success-tint);
+  color: var(--dask-success);
+}
+.alert-info,
+.alert[data-status="info"] {
+  border-color: var(--dask-blue-tint-2);
+  background: var(--dask-blue-tint);
+  color: var(--dask-blue-strong);
+}
+.alert a { color: inherit; text-decoration: underline; }
+
+/* ---------- Button pair：双按钮等宽组，空间不足自动分行、文字不折断 ---------- */
+.dask-btn-pair {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dask-btn-pair > .btn {
+  flex: 1 1 140px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* ---------- Column hero 操作区：闭合 float-end，避免窄屏后续列表被挤成窄列 ---------- */
+.htinfo .htfun {
+  display: flow-root;
+}
+@media (max-width: $dask-bp-mobile) {
+  html body .htinfo .htfun > .float-end {
+    float: none !important;
+    display: inline-block;
+    margin-top: 8px;
+  }
+  html body .htinfo .htfun > label .btn {
+    white-space: nowrap;
+  }
+}
+
+/* ---------- 按钮居中、描边按钮 hover、关注态、输入框与列表细节 ---------- */
+/* 老 .btn 依赖 line-height 居中，发布页/设置页/个人页按钮文字会偏高；统一 flex 居中 */
+html body .btn,
+html body a.btn,
+html body button.btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1.25 !important;
+}
+/* 搜索框：外层 line-height 与内层 height 不一致会让文字偏上 */
+html body .searchbox { display: flex !important; align-items: center; line-height: 1 !important; }
+html body .dask-search-input { line-height: 34px !important; }
+/* 描边按钮 hover 变实心蓝后必须换成白字，否则是蓝底深蓝字 */
+html:not([data-dark="1"]) body #wrapMain .btn-outline-primary:hover,
+html:not([data-dark="1"]) body #wrapMain .btn-outline-primary:focus,
+html:not([data-dark="1"]) body #wrapMain .btn-outline-primary:active {
+  background: var(--dask-primary-bg-hover) !important;
+  border-color: var(--dask-primary-bg-hover) !important;
+  color: #fff !important;
+}
+/* 关注/已关注：首页与关注页完全同款，边框 1px，不再出现深描边或 focus 外发光 */
+html body #wrapMain a.gz[data-action="user-focus"].btn-primary,
+html body #wrapMain a.ygz[data-action="user-focus"].btn-primary,
+html body #wrapMain a.ygz.active[data-action="user-focus"].btn-primary,
+html body #wrapMain a.ygz[data-action="user-focus"].btn-primary:hover {
+  background: var(--dask-blue-tint) !important;
+  border: 1px solid var(--dask-blue-tint) !important;
+  color: var(--dask-blue-strong) !important;
+  border-radius: var(--dask-r-sm) !important;
+  box-shadow: none !important;
+}
+/* input-group 前缀与输入框圆角必须连续，不能一个圆角一个直角 */
+html body #wrapMain .input-group > .form-control:not(:first-child) {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+html body #wrapMain .input-group > .input-group-text:first-child {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+/* 记录页：每个 item 外层有 .record-item，导致 :last-child 规则把所有分割线清掉 */
+html body .dask-common-list .record-item .dask-list-item {
+  border-bottom: 1px solid var(--dask-line) !important;
+}
+html body .dask-common-list .record-item:has(+ .dask-ui-pager) .dask-list-item,
+html body .dask-common-list .record-item:last-child .dask-list-item {
+  border-bottom: 0 !important;
+}
+/* 话题侧栏：根/父/子话题分组各自独立成卡，不再粘成一片白底 */
+html body .dask-topic-page .dask-topic-side-card dl {
+  margin: 0 0 12px !important;
+  padding: 10px 12px;
+  border: 1px solid var(--dask-line);
+  border-radius: var(--dask-r-sm);
+  background: var(--dask-surface);
+}
+html body .dask-topic-page .dask-topic-side-card dl:last-child { margin-bottom: 0 !important; }
+/* 认证角标缩小并贴齐头像边缘，容器不能 overflow:hidden 裁切 */
+html body .dask-ui-card-tips-user .dask-mod-head .img,
+html body .dask-avatar-wrap,
+html body .authorAvatar { overflow: visible !important; }
+html body .dask-verified-badge,
+html body .authorAvatar .dask-verified-badge {
+  --dask-badge-size: 14px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-width: 2px !important;
+}
+/* 话题管理四个图标按钮：图标与文字上下居中且留 6px */
+html body .dask-topic-side-card .bh-mobile > a {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+html body .dask-topic-side-card .bh-mobile > a > i {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 !important;
+}
+/* 设置项标题与模块分割线之间留呼吸 */
+html body .dask-mod-head + .dask-mod-body .dask-setting-field:first-child { padding-top: 12px; }
+/* .dask-grid 与 Bootstrap .row 同特异性竞争，显式锁定两栏 */
+html body .dask-grid { display: grid !important; }

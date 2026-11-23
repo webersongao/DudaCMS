@@ -1,0 +1,608 @@
+openapi: 3.0.3
+info:
+  title: DudaCMS API v1
+  description: |
+    DudaCMS 独立 API v1，供 App / PWA / H5 调用。
+    统一响应结构、JWT 认证、分页与错误码见文档。
+  version: 1.0.0
+servers:
+  - url: https://bihu.cms/api.php/v1
+    description: 当前部署环境
+  - url: /api.php/v1
+    description: 任意部署域名的相对路径
+tags:
+  - name: Auth
+  - name: Common
+  - name: Question
+  - name: Article
+  - name: Topic
+  - name: User
+  - name: Upload
+security:
+  - bearerAuth: []
+paths:
+  /common/health:
+    get:
+      tags: [Common]
+      summary: 健康检查
+      security: []
+      responses:
+        '200':
+          description: OK
+  /feed:
+    get:
+      tags: [Common]
+      summary: 首页混合信息流
+      security: []
+      parameters:
+        - name: tab
+          in: query
+          schema: { type: string, enum: [new, recommend, hot], default: new }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 10, maximum: 20 }
+      responses:
+        '200':
+          description: OK
+  /common/config:
+    get:
+      tags: [Common]
+      summary: 站点配置
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigEnvelope'
+  /common/categories:
+    get:
+      tags: [Common]
+      summary: 分类树
+      security: []
+      parameters:
+        - name: type
+          in: query
+          schema: { type: string, enum: [question, article, common], default: question }
+      responses:
+        '200':
+          description: OK
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 登录
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account, password]
+              properties:
+                account: { type: string, example: uitest }
+                password: { type: string, format: password, example: Test123456 }
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: 注册
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, example: newuser }
+                password: { type: string, format: password, example: Test123456 }
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthEnvelope'
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: 当前用户
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: 刷新 Token
+      responses:
+        '200':
+          description: OK
+  /questions:
+    get:
+      tags: [Question]
+      summary: 问题列表
+      security: []
+      parameters:
+        - name: sort
+          in: query
+          schema: { type: string, enum: [new, hot, recommend, unresponsive], default: new }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 10, maximum: 20 }
+        - name: category_id
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionListEnvelope'
+    post:
+      tags: [Question]
+      summary: 发布问题
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, detail]
+              properties:
+                title: { type: string, minLength: 5, maxLength: 120 }
+                detail: { type: string, description: HTML 正文 }
+                topics:
+                  type: array
+                  items: { type: string }
+                category_id: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: 发布成功
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /questions/search:
+    get:
+      tags: [Question]
+      summary: 搜索问题
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 10, maximum: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionListEnvelope'
+  /questions/{id}:
+    get:
+      tags: [Question]
+      summary: 问题详情
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: answer_page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: answer_size
+          in: query
+          schema: { type: integer, default: 10, maximum: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionDetailEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /questions/{id}/answers:
+    post:
+      tags: [Question]
+      summary: 回答问题
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string, description: HTML 正文 }
+      responses:
+        '200':
+          description: 回答成功
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /questions/{id}/vote:
+    post:
+      tags: [Question]
+      summary: 问题投票（1 赞同 / -1 反对）
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: { type: integer, enum: [1, -1] }
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [Question]
+      summary: 取消投票（RESTful DELETE，幂等）
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /questions/{id}/favorite:
+    post:
+      tags: [Question]
+      summary: 收藏/取消收藏（toggle；明确取消请用 DELETE）
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [Question]
+      summary: 取消收藏（RESTful DELETE，幂等）
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /articles:
+    get:
+      tags: [Article]
+      summary: 文章列表
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 10, maximum: 20 }
+      responses:
+        '200':
+          description: OK
+  /articles/{id}:
+    get:
+      tags: [Article]
+      summary: 文章详情
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+  /topics:
+    get:
+      tags: [Topic]
+      summary: 话题列表
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 20, maximum: 30 }
+        - name: keyword
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+  /topics/{id}:
+    get:
+      tags: [Topic]
+      summary: 话题详情
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+  /users/me:
+    get:
+      tags: [User]
+      summary: 当前用户资料
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/{id}:
+    get:
+      tags: [User]
+      summary: 用户主页
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+  /users/me/notifications:
+    get:
+      tags: [User]
+      summary: 通知列表
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 15, maximum: 30 }
+      responses:
+        '200':
+          description: OK
+  /users/me/notifications/{id}/read:
+    post:
+      tags: [User]
+      summary: 标记通知已读
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+  /upload/image:
+    post:
+      tags: [Upload]
+      summary: 上传图片
+      parameters:
+        - name: path
+          in: query
+          schema: { type: string, enum: [question, answer, article, avatar, common], default: common }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+  responses:
+    Unauthorized:
+      description: 未登录
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: 参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: integer, example: 1001 }
+        message: { type: string, example: 请先登录 }
+        data: { nullable: true }
+        request_id: { type: string }
+        timestamp: { type: integer }
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        page_size: { type: integer }
+        total_pages: { type: integer }
+        has_more: { type: boolean }
+    User:
+      type: object
+      properties:
+        uid: { type: integer }
+        user_name: { type: string }
+        nick_name: { type: string }
+        avatar: { type: string }
+        signature: { type: string }
+        credit: { type: integer }
+        answer_count: { type: integer }
+        question_count: { type: integer }
+        fans_count: { type: integer }
+        verified: { type: integer }
+    Topic:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        url_token: { type: string }
+        description: { type: string }
+        pic: { type: string }
+        discuss: { type: integer }
+        focus: { type: integer }
+    Question:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        excerpt: { type: string }
+        images:
+          type: array
+          items: { type: string }
+        answer_count: { type: integer }
+        view_count: { type: integer }
+        agree_count: { type: integer }
+        comment_count: { type: integer }
+        is_top: { type: integer }
+        has_focus: { type: integer }
+        vote_value: { type: integer }
+        create_time: { type: integer }
+        create_time_text: { type: string }
+        author: { $ref: '#/components/schemas/User' }
+        topics:
+          type: array
+          items: { $ref: '#/components/schemas/Topic' }
+        url: { type: string }
+    Answer:
+      type: object
+      properties:
+        id: { type: integer }
+        content: { type: string }
+        excerpt: { type: string }
+        agree_count: { type: integer }
+        against_count: { type: integer }
+        comment_count: { type: integer }
+        is_best: { type: integer }
+        is_anonymous: { type: integer }
+        vote_value: { type: integer }
+        create_time: { type: integer }
+        create_time_text: { type: string }
+        author: { $ref: '#/components/schemas/User' }
+    QuestionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Question'
+        - type: object
+          properties:
+            detail: { type: string }
+            focus_count: { type: integer }
+            is_favorite: { type: integer }
+            answers:
+              type: object
+              properties:
+                list:
+                  type: array
+                  items: { $ref: '#/components/schemas/Answer' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+    AuthData:
+      type: object
+      properties:
+        access_token: { type: string }
+        token_type: { type: string, example: Bearer }
+        expires_in: { type: integer }
+        expires_at: { type: integer }
+        user: { $ref: '#/components/schemas/User' }
+    Envelope:
+      type: object
+      properties:
+        code: { type: integer, example: 0 }
+        message: { type: string }
+        data: {}
+        request_id: { type: string }
+        timestamp: { type: integer }
+    AuthEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AuthData' }
+    UserEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/User' }
+    QuestionListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                list:
+                  type: array
+                  items: { $ref: '#/components/schemas/Question' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+    QuestionDetailEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/QuestionDetail' }
+    ConfigEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                site_name: { type: string }
+                site_logo: { type: string }
+                site_description: { type: string }
+                topic_enable: { type: boolean }
+                enable_category: { type: boolean }
+                contents_per_page: { type: integer }
+                register_type: { type: string }

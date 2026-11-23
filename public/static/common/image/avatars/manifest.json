@@ -1,0 +1,98 @@
+[
+  {
+    "file": "/static/common/image/avatars/avatar-01.svg",
+    "name": "墨镜",
+    "tag": "装逼必备",
+    "color": "#0084FF"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-02.svg",
+    "name": "领结",
+    "tag": "绅士修养",
+    "color": "#0069CC"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-03.svg",
+    "name": "猫",
+    "tag": "猫系青年",
+    "color": "#005BB5"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-04.svg",
+    "name": "咖啡",
+    "tag": "续命之水",
+    "color": "#3A8DE8"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-05.svg",
+    "name": "公式",
+    "tag": "理工の浪漫",
+    "color": "#2E6FA8"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-06.svg",
+    "name": "灯泡",
+    "tag": "灵光乍现",
+    "color": "#1B5E9E"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-07.svg",
+    "name": "音符",
+    "tag": "文艺魂",
+    "color": "#0EA5A5"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-08.svg",
+    "name": "相机",
+    "tag": "随手一拍",
+    "color": "#0F766E"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-09.svg",
+    "name": "书本",
+    "tag": "阅卷无数",
+    "color": "#6B7280"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-10.svg",
+    "name": "火箭",
+    "tag": "格局拉满",
+    "color": "#4B5563"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-11.svg",
+    "name": "皇冠",
+    "tag": "逼王之王",
+    "color": "#374151"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-12.svg",
+    "name": "耳机",
+    "tag": "与世隔绝",
+    "color": "#0369A1"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-13.svg",
+    "name": "地球",
+    "tag": "见多识广",
+    "color": "#5B7A99"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-14.svg",
+    "name": "鸡尾酒",
+    "tag": "微醺时刻",
+    "color": "#A8681A"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-15.svg",
+    "name": "问号",
+    "tag": "一切始于发问",
+    "color": "#1E40AF"
+  },
+  {
+    "file": "/static/common/image/avatars/avatar-16.svg",
+    "name": "钢笔",
+    "tag": "落笔成金",
+    "color": "#334155"
+  }
+]

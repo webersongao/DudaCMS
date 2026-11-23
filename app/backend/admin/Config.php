@@ -102,7 +102,7 @@ class Config extends Backend
             }
             $columns[$key] = array_values($val);
         }
-        // 第三方登录：按平台拆为顶部切换式 tab，避免 19 个配置项平铺堆在一页。
+        // 第三方登录（一级入口 Config::third()）：按平台拆为顶部切换式 tab，避免 19 个配置项平铺堆在一页。
         if ((int) $group === 11) {
             $groups = $this->groupThirdColumns($columns);
             return $this->formBuilder
@@ -128,8 +128,8 @@ class Config extends Backend
                 ->fetch();
         }
 
-        // 编辑器/短信配置为系统管理一级入口，固定渲染，不再并列显示配置 tab。
-        $showTabs = $showTabs && !in_array((int) $group, [13, 14], true);
+        // 第三方登录/主题风格/编辑器/短信配置为系统管理一级入口，固定渲染，不再并列显示配置 tab。
+        $showTabs = $showTabs && !in_array((int) $group, [11, 12, 13, 14], true);
         $links = [];
         if ($showTabs) {
             // 配置分组为内置常量，group id 作为常量 key。
@@ -297,5 +297,13 @@ class Config extends Backend
     public function sms()
     {
         return $this->config(14, false);
+    }
+
+    /**
+     * 第三方登录：系统管理一级入口，固定渲染 group=11 的配置表单。
+     */
+    public function third()
+    {
+        return $this->config(11, false);
     }
 }

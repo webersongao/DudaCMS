@@ -1955,7 +1955,7 @@ DROP PROCEDURE IF EXISTS `dask_drop_index_600`;
 INSERT IGNORE INTO `dask_admin_auth` (`id`, `pid`, `name`, `title`, `type`, `status`, `condition`, `sort`, `auth_open`, `icon`, `create_time`, `update_time`, `param`, `group`) VALUES
 (410, 2, 'admin.Config/theme', '主题风格', 1, 1, '', 0, 1, 'fas fa-palette', 0, 0, '', NULL),
 (411, 2, 'admin.Config/editor', '编辑器', 1, 1, '', 1, 1, 'fas fa-code', 0, 0, '', NULL),
-(412, 2, 'admin.Config/sms', '短信配置', 1, 1, '', 2, 1, 'fas fa-comment-sms', 0, 0, '', NULL),
+(412, 2, 'admin.Config/sms', '短信配置', 1, 1, '', 2, 1, 'fas fa-sms', 0, 0, '', NULL),
 (413, 50, 'member.Users/third', 'OAuth登录', 1, 0, '', 10, 1, 'fas fa-key', 0, 0, '', NULL),
 (414, 413, 'member.Users/third_delete', '操作-删除', 1, 0, '', 0, 1, 'fa fa-trash', 0, 0, '', NULL);
 

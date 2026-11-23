@@ -1,8 +1,11 @@
 -- +----------------------------------------------------------------------
--- | DudaCMS 1.0.0 -> 后续版本 升级 SQL：合并「系统拓展」三项为「系统运维」
+-- | DudaCMS 1.0.0 -> 后续版本 升级 SQL：系统拓展菜单合并与图标修复
 -- +----------------------------------------------------------------------
--- 用途：把后台侧边栏「本地升级 / 数据库备份 / 数据库还原」三项合并为
---       单一「系统运维」页面（extend.System/index），三项作为页内 Tab。
+-- 用途：
+--   1. 把后台侧边栏「本地升级 / 数据库备份 / 数据库还原」三项合并为
+--      单一「系统运维」页面（extend.System/index），三项作为页内 Tab；
+--   2. 修复 downFile 权限命名、前台管理员幽灵权限；
+--   3. 修复「短信配置」菜单图标（旧图标类在 FontAwesome 6 已移除）。
 --
 -- 使用方式（二选一）：
 --   A. 作为本地升级包的一部分：把本文件内容作为升级包 sql/update.sql，
@@ -34,6 +37,10 @@ UPDATE `dask_admin_group`
 SET `rules` = REPLACE(`rules`, '118,119,120,124,125,121,122,123', '118,119,120,124,389,81')
 WHERE `id` = 2 AND `rules` LIKE '%125,121,122,123%';
 
+-- 5) 修复「短信配置」菜单图标：fa-comment-sms 在 FontAwesome 6 已移除，改用 fa-sms
+UPDATE `dask_admin_auth` SET `icon` = 'fas fa-sms'
+WHERE `name` = 'admin.Config/sms' AND `icon` = 'fas fa-comment-sms';
+
 -- 事后核对（手动执行时可运行，升级包内忽略）：
--- SELECT id,pid,name,title,status FROM `dask_admin_auth` WHERE id IN (77,81,83,118,389) ORDER BY id;
--- 预期：389 显示(status=1)；77/81/118 隐藏(status=0) 且 pid=389；83 name 含 downfile。
+-- SELECT id,pid,name,title,status,icon FROM `dask_admin_auth` WHERE id IN (77,81,83,118,389) OR name='admin.Config/sms' ORDER BY id;
+-- 预期：389 显示(status=1)；77/81/118 隐藏(status=0) 且 pid=389；83 name 含 downfile；短信配置 icon=fa-sms。

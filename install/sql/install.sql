@@ -462,9 +462,7 @@ INSERT INTO `dask_config` VALUES (118,'best_agree_min_count','9','自动设定�
 INSERT INTO `dask_config` VALUES (119,'content_popular_value_show','9','热度值大于多少参与热度排序','热度值达到多少参与热度排序,默认大于0即参与热门排序','number','0','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (120,'upload_image_thumb_enable','4','是否启用图片压缩','是否启用图片压缩，PNG图片压缩会失去透明效果','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (121,'upload_image_thumb_percent','4','上传图片默认压缩比例','默认为0.7','text','0.7','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (122,'db_version','1','数据库版本','','hidden','100','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (125,'api_doc_public','7','公开展示API文档','开启后所有访客可访问 /api-docs；关闭后仅管理员可预览','radio','Y','{\"Y\":\"公开\",\"N\":\"仅管理员\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (126,'system_version','1','系统版本','当前代码与数据库结构版本','hidden','1.0.0','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (302,'t_hm_search_title_text','12','题图主标题','留空时使用“站点名称 - 当前频道”','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (303,'t_hm_search_min_text','12','题图副标题','留空时使用默认文案','textarea','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (304,'t_hm_sidebar_show_items','12','侧边栏项目','侧边栏显示的项目','checkbox','write_nav,announce,focus_topic,column,hot_topic,hot_users,side_footer','{\"write_nav\":\"快速发起\",\"announce\":\"网站公告\",\"focus_topic\":\"关注话题\",\"column\":\"热门专栏\",\"hot_topic\":\"热门话题\",\"hot_users\":\"热门用户\",\"diy_content\":\"自定义内容\",\"side_footer\":\"边栏页脚\"}',0,NULL,1,0);

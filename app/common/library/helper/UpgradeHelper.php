@@ -32,14 +32,19 @@ class UpgradeHelper
 
     /**
      * 当前程序与数据库版本信息。
+     *
+     * 采用单一版本源：数据库版本不再单独存于配置表，直接复用 config/version.php
+     * 的程序版本号，避免 db_version / system_version 与程序版本各自维护导致不一致。
+     * 保留 db_version 键名仅为兼容升级页模板展示。
      */
     public function getLocalInfo(): array
     {
         $version = config('version');
+        $versionText = (string) ($version['version'] ?? '0.0.0');
         return [
-            'version'   => (string) ($version['version'] ?? '0.0.0'),
+            'version'   => $versionText,
             'build'     => (string) ($version['build'] ?? ''),
-            'db_version'=> (string) get_setting('db_version', '404'),
+            'db_version'=> $versionText,
         ];
     }
 

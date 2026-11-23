@@ -311,7 +311,45 @@ body.sidebar-expand-lg.sidebar-collapse .app-sidebar .nav .nav-link.active {
 .table tbody tr:hover { background: #F8FBFF !important; }
 .table .btn { padding: 4px 10px !important; font-size: 12px !important; margin: 2px !important; }
 .table .label, .table .badge { border-radius: var(--adm-radius-sm); font-weight: 500; }
-.table .fa-toggle-on, .table .fa-toggle-off { cursor: pointer; }
+/* 精致细线条状态开关：用纯 CSS 替代 FontAwesome 实心 toggle 图标（fa-2x 放大导致线条过粗） */
+.table .fa-toggle-on,
+.table .fa-toggle-off {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+  font-size: 0;
+  line-height: 1;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, opacity .18s ease;
+
+  /* 屏蔽 FontAwesome 原始字形 */
+  &::before { display: none; }
+
+  /* 滑块 */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: currentColor;
+    transition: transform .18s ease, background-color .18s ease;
+  }
+
+  &:hover { opacity: .8; }
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+}
+.table .fa-toggle-on {
+  background: currentColor;
+  &::after { background: #fff; transform: translateX(14px); }
+}
 
 /* dashboard cards & alerts */
 .dask-upload-form { padding: 14px 16px; background: var(--adm-surface-2); border: 1px dashed var(--adm-line-2); border-radius: var(--adm-radius-sm); }

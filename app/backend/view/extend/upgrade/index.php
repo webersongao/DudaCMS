@@ -81,17 +81,16 @@
         <div class="col-xl-4">
             <div class="card card-rounded border-left border-primary" style="border-left-width:4px!important">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-database text-primary me-1"></i> 版本信息</h3>
+                    <h3 class="card-title"><i class="fas fa-circle-info text-primary me-1"></i> 升级说明</h3>
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3" style="font-size:13px">
                         后续升级请通过上传官方 ZIP 升级包完成，全新安装使用 <code>install/sql/install.sql</code>。
                     </p>
-                    <p class="mb-3" style="font-size:13px">
-                        当前程序版本：<span class="badge text-bg-info">V{$info.version}</span>
-                        当前数据库版本：<span class="badge text-bg-info">V{$info.db_version}</span>
+                    <p class="text-muted mb-3" style="font-size:13px">
+                        数据库备份与还原可在上方「数据库备份」「数据库还原」页签中操作。程序与数据库版本已统一为单一版本源，此处「当前版本」即为数据库版本。
                     </p>
-                    <div class="text-muted mt-2" style="font-size:12px">升级前请备份数据库与 <code>public/storage</code>。</div>
+                    <div class="text-muted mt-2" style="font-size:12px">升级前请务必先备份数据库与 <code>public/storage</code>。</div>
                 </div>
             </div>
         </div>

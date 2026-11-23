@@ -1239,35 +1239,6 @@ if(!function_exists('replacePic'))
     }
 }
 
-//执行sql文件
-if(!function_exists('executeSql')) {
-    function executeSql($lines = []): bool
-    {
-        if (!$lines) return false;
-        $tempLine = '';
-        foreach ($lines as $line) {
-            if (strpos($line, '--') === 0 || $line == '' || strpos($line, '/*') === 0) {
-                continue;
-            }
-            $tempLine .= $line;
-            if (substr(trim($line), -1, 1) == ';') {
-                // 不区分大小写替换前缀
-                $tempLine = str_ireplace('dask_', \think\facade\Config::get('database.connections.mysql.prefix'), $tempLine);
-                // 忽略数据库中已经存在的数据
-                $tempLine = str_ireplace('INSERT INTO ', 'INSERT IGNORE INTO ', $tempLine);
-                try {
-                    \think\facade\Db::execute($tempLine);
-                } catch (Exception $e) {
-                    return false;
-                }
-                $tempLine = '';
-            }
-        }
-
-        return true;
-    }
-}
-
 /**
  * 注册异步处理任务
  * @param string $title 任务名称
@@ -1310,47 +1281,6 @@ if(!function_exists('getLoginUid'))
         session('login_uid', $uid);
         return $uid;
     }
-}
-
-/**
- * 执行sql文件
- * @param string $sql_query 要执行的目录
- * @return array 成功与否
- */
-function fetchSql(string $sql_query)
-{
-    \think\facade\Db::startTrans();
-    $prefix = config('database.connections.mysql.prefix');
-    try {
-        foreach ($sql_query as $line) {
-            if (strpos($line, '--') === 0 || $line == '' || strpos($line, '/*') === 0) {
-                continue;
-            }
-            $tempLine .= $line;
-            if (substr(trim($line), -1, 1) == ';') {
-                // 不区分大小写替换前缀
-                $tempLine = str_ireplace('dask_', $prefix, $tempLine);
-                // 忽略数据库中已经存在的数据
-                $tempLine = str_ireplace('INSERT INTO ', 'INSERT IGNORE INTO ', $tempLine);
-                $sql_res = \think\facade\Db::execute($tempLine);
-                $tempLine = '';
-            }
-        }
-        \think\facade\Db::commit();
-    }catch (\Exception $e)
-    {
-        \think\facade\Db::rollback();
-        return  [
-            'code'=>0,
-            'msg'=>$e->getMessage(),
-            'data'=>''
-        ];
-    }
-    return  [
-        'code'=>1,
-        'msg'=>'',
-        'data'=>''
-    ];
 }
 
 function checkTableExist($table)

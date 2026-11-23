@@ -250,7 +250,7 @@ class Database extends Backend
                 'icon'  => 'fa fa-download',
                 'target' => '_blank',
                 'class' => 'btn btn-flat btn-success btn-xs confirm',
-                'href'  => (string)url('downFile', ['id' => '__time__'])
+                'href'  => (string)url('downfile', ['id' => '__time__'])
             ]) // 添加额外按钮
             ->addRightButton('delete')
             ->fetch();
@@ -264,8 +264,8 @@ class Database extends Backend
         return json(['error' => 0, 'msg' => '还原成功！']);
     }
 
-    // 下载
-    public function downFile(int $id)
+    // 下载（方法名全小写，避免与权限规则的 snake_case 校验不一致）
+    public function downfile(int $id)
     {
         $this->db->downloadFile($id);
     }

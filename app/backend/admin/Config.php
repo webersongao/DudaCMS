@@ -38,6 +38,9 @@ class Config extends Backend
      */
     public function config($group = null, $showTabs = true)
     {
+        // 分组在 GET 与 POST 阶段都需要：POST 时用于补齐未提交的 checkbox 空值。
+        $group = $group !== null ? (int) $group : (int) $this->request->param('group', 1);
+
         if ($this->request->isPost()) {
             if ($data = $this->request->post()) {
                 foreach ($data as $k => $v) {
@@ -47,6 +50,15 @@ class Config extends Backend
                             $value[$v1] = $v['value'][$k1];
                         }
                         $data[$k] = $value;
+                    }
+                }
+                // checkbox 全部取消勾选时浏览器不会提交该字段，服务端显式补空值，
+                // 否则 isset 判断跳过该项，出现"提示成功但刷新后未保存"的问题。
+                // 仅补当前分组的 checkbox，避免影响其他分组表单。
+                $checkboxNames = $this->model->where('group', $group)->where('type', 'checkbox')->column('name');
+                foreach ($checkboxNames as $checkboxName) {
+                    if (!isset($data[$checkboxName])) {
+                        $data[$checkboxName] = '';
                     }
                 }
                 $configList = [];
@@ -74,7 +86,8 @@ class Config extends Backend
             }
         }
 
-        $group = $group !== null ? (int) $group : (int) $this->request->param('group', 1);
+        // 让表单提交地址携带 group，POST 时才能按分组补齐未提交的 checkbox。
+        $this->formBuilder->setFormUrl((string) url('config', ['group' => $group]));
         $columns = [];
         $list = $this->model->where('group', $group)->order(['sort' => 'ASC', 'id' => 'ASC'])->column('type,name,title,tips,option,value');
         foreach ($list as $key => $val) {
@@ -88,6 +101,14 @@ class Config extends Backend
                 unset($val['option']);
             }
             $columns[$key] = array_values($val);
+        }
+        // 第三方登录：按平台拆为顶部切换式 tab，避免 19 个配置项平铺堆在一页。
+        if ((int) $group === 11) {
+            $groups = $this->groupThirdColumns($columns);
+            return $this->formBuilder
+                ->setPageTitle('第三方登录')
+                ->addGroup($groups)
+                ->fetch();
         }
         // 主题风格已提升为系统管理一级入口：按其配置项前缀拆为顶部切换式 tab，
         // 按功能分组展示（发现页/问答页面/…），避免 32 个配置项堆在一页。
@@ -117,6 +138,50 @@ class Config extends Backend
         return $this->formBuilder
             ->addLinkGroup($columns, $links)
             ->fetch();
+    }
+
+    /**
+     * 第三方登录配置项按平台拆分为顶部切换式 tab。
+     *
+     * 分组顺序：通用设置 / QQ / 微信 / 微博 / GitHub / Google / Twitter。
+     * 字段名格式：third_{platform}_xxx；启用方式 third_enable 归入通用设置。
+     *
+     * @param array $columns add{Type} 入参格式：[type, name, title, tips, option, value, ...]
+     * @return array 关联数组：tab 标题 => 字段数组
+     */
+    private function groupThirdColumns(array $columns): array
+    {
+        $tabs = [
+            'qq'      => 'QQ',
+            'wechat'  => '微信',
+            'weibo'   => '微博',
+            'github'  => 'GitHub',
+            'google'  => 'Google',
+            'twitter' => 'Twitter/X',
+        ];
+        $generalTitle = '通用设置';
+        $grouped = [$generalTitle => []];
+        foreach ($tabs as $title) {
+            $grouped[$title] = [];
+        }
+        foreach ($columns as $column) {
+            $name = (string) ($column[1] ?? '');
+            $tabTitle = $generalTitle;
+            foreach ($tabs as $platform => $title) {
+                if (strpos($name, 'third_' . $platform . '_') === 0) {
+                    $tabTitle = $title;
+                    break;
+                }
+            }
+            $grouped[$tabTitle][] = $column;
+        }
+        // 移除空 tab，避免出现无内容分组。
+        foreach ($grouped as $title => $items) {
+            if (!$items) {
+                unset($grouped[$title]);
+            }
+        }
+        return $grouped;
     }
 
     /**

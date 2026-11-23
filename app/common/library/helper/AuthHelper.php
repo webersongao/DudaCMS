@@ -402,42 +402,24 @@ class AuthHelper
         if ($select_id) {
             $selectParentIds = $tree->getParentsIds($select_id, true);
         }
-        if (get_setting('admin_menu_type') == 'top' && !Request::isMobile()) {
-            $topList = [];
-            foreach ($_menu as $index => $item) {
-                if (!$item['pid']) {
-                    $topList[] = $item;
-                }
+        // 后台菜单固定侧边展示，不再提供顶部/侧边切换。
+        // 构造菜单数据
+        // TreeHelper 的 @current 基于 selectedids 生成 active（当前项高亮），保留在 <a> 上。
+        // 但 @class(展开) 基于 treeview 判断，对顶层节点(pid=0)恒为 false、对非顶层又误判，
+        // 不能用于侧栏展开。改为给 <li> 标记 data-menu-id，生成后用选中项的父链精确加 menu-open。
+        TreeHelper::instance()->init($_menu);
+        $menu = TreeHelper::instance()->getTreeMenu(0, '<li class="nav-item" data-menu-id="@id"><a href="@url" class="nav-link @current" data-lte-toggle="treeview" data-accordion="true" data-pjax="mainTab"><i class="@icon"></i> <p>@title @caret</p></a> @childlist</li>', [$select_id], '', 'ul', 'class="nav nav-treeview"');
+        // 仅让"当前选中项所在的父链"展开，避免所有有子菜单的项都展开
+        foreach ($selectParentIds as $parentId) {
+            if ((int) $parentId === (int) $select_id) {
+                continue; // 父链含自身，自身是叶子无需展开
             }
-            $tree = TreeHelper::instance();
-            $tree->init($_menu);
-            foreach ($topList as $index => $item) {
-                $childList = TreeHelper::instance()->getTreeMenu($item['id'], '<li class="nav-item" data-pid="@pid"><a href="@url" class="nav-link @current" data-url="@url" data-id="@id" data-pjax="mainTab"><i class="nav-icon @icon"></i><p>@title <i class="nav-arrow fas fa-angle-left"></i></p></a> @childlist</li>', [$select_id], '', 'ul', 'class="nav nav-treeview"');
-                $current = in_array($item['id'], $selectParentIds);
-                $url = $childList ? 'javascript:;' : $item['url'];
-                $childList = str_replace('" data-pid="' . $item['id'] . '"', ' has-treeview ' . ($current ? '' : 'd-none') . '" data-pid="' . $item['id'] . '"', $childList);
-                $nav .= '<li class="nav-item swiper-slide ' . ($current ? 'active' : '') . '"><a href="' . $url . '"  data-id="' . $item['id'] . '" data-url="' . $url . '" class="nav-link" data-pjax="wrapMain"><i class="' . $item['icon'] . '"></i> <span>' . $item['title'] . '</span></a> </li>';
-                $menu .= $childList;
-            }
-        } else {
-            // 构造菜单数据
-            // TreeHelper 的 @current 基于 selectedids 生成 active（当前项高亮），保留在 <a> 上。
-            // 但 @class(展开) 基于 treeview 判断，对顶层节点(pid=0)恒为 false、对非顶层又误判，
-            // 不能用于侧栏展开。改为给 <li> 标记 data-menu-id，生成后用选中项的父链精确加 menu-open。
-            TreeHelper::instance()->init($_menu);
-            $menu = TreeHelper::instance()->getTreeMenu(0, '<li class="nav-item" data-menu-id="@id"><a href="@url" class="nav-link @current" data-lte-toggle="treeview" data-accordion="true" data-pjax="mainTab"><i class="@icon"></i> <p>@title @caret</p></a> @childlist</li>', [$select_id], '', 'ul', 'class="nav nav-treeview"');
-            // 仅让"当前选中项所在的父链"展开，避免所有有子菜单的项都展开
-            foreach ($selectParentIds as $parentId) {
-                if ((int) $parentId === (int) $select_id) {
-                    continue; // 父链含自身，自身是叶子无需展开
-                }
-                $menu = preg_replace(
-                    '/<li class="nav-item" data-menu-id="' . intval($parentId) . '"/',
-                    '<li class="nav-item menu-open" data-menu-id="' . intval($parentId) . '"',
-                    $menu,
-                    1
-                );
-            }
+            $menu = preg_replace(
+                '/<li class="nav-item" data-menu-id="' . intval($parentId) . '"/',
+                '<li class="nav-item menu-open" data-menu-id="' . intval($parentId) . '"',
+                $menu,
+                1
+            );
         }
         return ['_menu' => $menu, '_nav' => $nav, '_current_menu' => $selected];
     }

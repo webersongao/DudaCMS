@@ -14,7 +14,6 @@ namespace app\frontend;
 
 use app\common\controller\Frontend;
 use app\common\library\helper\NotifyHelper;
-use app\common\library\helper\ThirdAuthHelper;
 use app\model\Users;
 use think\App;
 
@@ -24,7 +23,7 @@ use think\App;
  */
 class Setting extends Frontend
 {
-    protected $needLogin = ['profile', 'notify', 'inbox', 'security', 'openid', 'nav'];
+    protected $needLogin = ['profile', 'notify', 'inbox', 'security', 'nav'];
     public function __construct(App $app)
     {
         parent::__construct($app);
@@ -105,22 +104,6 @@ class Setting extends Frontend
      */
     public function security()
     {
-        return $this->fetch();
-    }
-
-    /**
-     * 账号绑定
-     */
-    public function openid()
-    {
-        $config = ThirdAuthHelper::config()['base'] ?? [];
-        if ($config) {
-            $third = db('oauth')->where(['uid' => $this->user_id])->column('platform,uid');
-            $this->assign([
-                'config' => $config,
-                'third' => array_column($third, 'platform')
-            ]);
-        }
         return $this->fetch();
     }
 

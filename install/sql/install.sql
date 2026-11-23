@@ -380,7 +380,6 @@ INSERT INTO `dask_config` VALUES (10,'upload_file_size','4','文件限制','单�
 INSERT INTO `dask_config` VALUES (11,'upload_file_ext','4','文件格式','多个格式请用英文逗号（,）隔开 ','text','rar,zip,avi,rmvb,3gp,flv,mp3,mp4,txt,doc,xls,ppt,pdf,xls,docx,xlsx,doc','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (12,'upload_image_size','4','图片限制','单位：KB，0表示不限制上传大小,直接填写数字,不需要带单位','text','2048','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (13,'upload_image_ext','4','图片格式','多个格式请用英文逗号（,）隔开 ','text','jpg,png,gif,jpeg,webp','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (14,'admin_menu_type','1','菜单类型','后台菜单类型，侧边或顶部显示','radio','left','{\"top\":\"顶部\",\"left\":\"侧边\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (15,'seo_title','1','站点标题','站点标题','text','','null',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (16,'seo_keywords','1','站点关键词','站点关键词','textarea','','null',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (17,'seo_description','1','站点描述','站点描述','textarea','','null',1,NULL,1,0);
@@ -510,7 +509,6 @@ INSERT INTO `dask_config` VALUES (410,'editor_cache_enable','13','本地草稿�
 INSERT INTO `dask_config` VALUES (411,'editor_counter_enable','13','显示字数统计','在工具栏右侧显示编辑器字数','radio','Y','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (413,'editor_upload_timeout','13','上传超时时间','单位：毫秒','number','30000','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (414,'third_enable','11','启用的登录方式','勾选后前台登录页显示对应入口；回调地址由系统按当前域名自动组装为 /ThirdAuth/callback.html?platform=平台','checkbox','qq,wechat,weibo,github,google,twitter','{\"qq\":\"QQ\",\"wechat\":\"微信\",\"weibo\":\"微博\",\"github\":\"GitHub\",\"google\":\"Google\",\"twitter\":\"Twitter/X\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (415,'third_bind_account','11','账号绑定确认','开启后首次第三方登录需确认绑定或注册','radio','1','{\"1\":\"开启\",\"0\":\"关闭\"}',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (416,'third_qq_app_id','11','QQ AppID','QQ互联申请的 AppID','text','','',10,NULL,1,0);
 INSERT INTO `dask_config` VALUES (417,'third_qq_app_secret','11','QQ AppKey','QQ互联申请的 AppKey','text','','',11,NULL,1,0);
 INSERT INTO `dask_config` VALUES (418,'third_qq_scope','11','QQ 授权范围','回调地址：/ThirdAuth/callback.html?platform=qq（按实际域名补全）','text','get_user_info','',12,NULL,1,0);

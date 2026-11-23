@@ -46,8 +46,7 @@ class ThirdAuthHelper
 
         $config = [
             'base' => [
-                'enable'       => $enabled,
-                'bind_account' => (int) get_setting('third_bind_account', 1),
+                'enable' => $enabled,
             ],
         ];
 

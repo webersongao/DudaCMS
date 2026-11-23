@@ -16,7 +16,6 @@ use app\common\library\helper\ThirdAuthHelper;
 use app\model\Users;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use app\model\Third;
 
 /**
  * 第三方登录控制器共用逻辑（前台与移动端）。
@@ -111,12 +110,6 @@ trait ThirdAuthTrait
             $this->error('第三方授权失败，请重试', $returnUrl);
         }
         $userInfo['token'] = (string) $this->request->get('token', '');
-        session($platform . '-user-info', $userInfo);
-
-        // 需要绑定账号时进入确认页
-        if (($this->config['base']['bind_account'] ?? 1)) {
-            return redirect((string) url('ThirdAuth/prepare', ['platform' => $platform, 'url' => $returnUrl]));
-        }
 
         if (Service::connect($platform, $userInfo)) {
             return redirect($returnUrl);
@@ -165,103 +158,4 @@ trait ThirdAuthTrait
         $this->ajaxResult(['code' => 0]);
     }
 
-    /**
-     * 准备绑定 / 注册确认。
-     */
-    public function prepare()
-    {
-        $platform = $this->safePlatform($this->request->param('platform'));
-        $returnUrl = $this->safeReturnUrl($this->request->param('url'));
-        if ($platform === '') {
-            $this->error('无效的登录方式', $returnUrl);
-        }
-
-        if ($this->user_id) {
-            return redirect((string) url('ThirdAuth/bind', ['platform' => $platform, 'url' => $returnUrl]));
-        }
-
-        $userInfo = session($platform . '-user-info');
-        if (is_array($userInfo) && !empty($userInfo['openid'])) {
-            $third = db('oauth')->where(['platform' => $platform, 'openid' => $userInfo['openid']])->find();
-            if ($third && $third['uid'] && Service::connect($platform, $userInfo)) {
-                return redirect($returnUrl);
-            }
-        }
-
-        $this->assign('url', $returnUrl);
-        $this->assign('platform', $platform);
-        $this->assign('bind_url', (string) url('ThirdAuth/bind', ['platform' => $platform, 'url' => $returnUrl]));
-        return $this->fetch();
-    }
-
-    /**
-     * 绑定第三方账号到当前用户。
-     */
-    public function bind()
-    {
-        $platform = $this->safePlatform($this->request->param('platform'));
-        $returnUrl = $this->safeReturnUrl($this->request->param('url', $this->request->server('HTTP_REFERER', '')));
-        if ($platform === '') {
-            $this->error('无效的登录方式', $returnUrl);
-        }
-
-        $userInfo = session($platform . '-user-info');
-        if (!is_array($userInfo) || empty($userInfo['openid'])) {
-            return redirect((string) url('ThirdAuth/connect', ['platform' => $platform, 'url' => $returnUrl]));
-        }
-
-        if ($this->user_id && db('oauth')->where('uid', $this->user_id)->where('platform', $platform)->find()) {
-            $this->error('已绑定该平台账号，请勿重复绑定', $returnUrl);
-        }
-
-        if (!$this->user_id) {
-            if (Service::connect($platform, $userInfo)) {
-                return redirect($returnUrl);
-            }
-            $this->error('账号绑定失败，请重试', $returnUrl);
-        }
-
-        $time = time();
-        $values = [
-            'platform'      => $platform,
-            'uid'           => $this->user_id,
-            'openid'        => $userInfo['openid'],
-            'open_username' => $userInfo['user_info']['nickname'] ?? '',
-            'access_token'  => $userInfo['access_token'] ?? '',
-            'refresh_token' => $userInfo['refresh_token'] ?? '',
-            'expires_in'    => (int) ($userInfo['expires_in'] ?? 0),
-            'login_time'    => $time,
-            'expire_time'   => $time + (int) ($userInfo['expires_in'] ?? 0),
-            'token'         => $userInfo['token'] ?? '',
-        ];
-
-        try {
-            $id = db('oauth')->where(['openid' => $values['openid'], 'platform' => $platform])->value('id');
-            if ($id) {
-                db('oauth')->where(['id' => $id])->update($values);
-            } else {
-                Third::create($values);
-            }
-            $this->success('账号绑定成功', $returnUrl);
-        } catch (\Throwable $e) {
-            $this->error('账号绑定失败，请重试', $returnUrl);
-        }
-    }
-
-    /**
-     * 解绑第三方账号。
-     */
-    public function unbind()
-    {
-        $platform = $this->safePlatform($this->request->param('platform'));
-        if ($platform === '') {
-            $this->error('无效的登录方式');
-        }
-        $third = Third::where('uid', $this->user_id)->where('platform', $platform)->find();
-        if (!$third) {
-            $this->error('未找到指定的账号绑定信息');
-        }
-        $third->delete();
-        $this->success('账号解绑成功');
-    }
 }

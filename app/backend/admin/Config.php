@@ -119,6 +119,14 @@ class Config extends Backend
                 ->addGroup($groups)
                 ->fetch();
         }
+        // 短信配置：按服务商拆为顶部切换式 tab，避免通用开关与两家平台凭证堆在一页。
+        if ((int) $group === 14) {
+            $groups = $this->groupSmsColumns($columns);
+            return $this->formBuilder
+                ->setPageTitle('短信配置')
+                ->addGroup($groups)
+                ->fetch();
+        }
 
         // 编辑器/短信配置为系统管理一级入口，固定渲染，不再并列显示配置 tab。
         $showTabs = $showTabs && !in_array((int) $group, [13, 14], true);
@@ -138,6 +146,46 @@ class Config extends Backend
         return $this->formBuilder
             ->addLinkGroup($columns, $links)
             ->fetch();
+    }
+
+    /**
+     * 短信配置项按服务商拆分为顶部切换式 tab。
+     *
+     * 分组顺序：通用设置 / 阿里云短信 / 腾讯云短信。
+     * 字段名格式：sms_{platform}_xxx；服务商开关 sms_enable 归入通用设置。
+     *
+     * @param array $columns add{Type} 入参格式：[type, name, title, tips, option, value, ...]
+     * @return array 关联数组：tab 标题 => 字段数组
+     */
+    private function groupSmsColumns(array $columns): array
+    {
+        $tabs = [
+            'ali'     => '阿里云短信',
+            'tencent' => '腾讯云短信',
+        ];
+        $generalTitle = '通用设置';
+        $grouped = [$generalTitle => []];
+        foreach ($tabs as $title) {
+            $grouped[$title] = [];
+        }
+        foreach ($columns as $column) {
+            $name = (string) ($column[1] ?? '');
+            $tabTitle = $generalTitle;
+            foreach ($tabs as $platform => $title) {
+                if (strpos($name, 'sms_' . $platform . '_') === 0) {
+                    $tabTitle = $title;
+                    break;
+                }
+            }
+            $grouped[$tabTitle][] = $column;
+        }
+        // 移除空 tab，避免出现无内容分组。
+        foreach ($grouped as $title => $items) {
+            if (!$items) {
+                unset($grouped[$title]);
+            }
+        }
+        return $grouped;
     }
 
     /**

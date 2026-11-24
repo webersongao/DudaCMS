@@ -11,7 +11,15 @@
   if (Turbo.config && Turbo.config.forms) Turbo.config.forms.mode = 'off';
 
   // 后台“pjax_enable”开关继续作为整站页面导航开关使用（语义等价，不再需要 jquery-pjax）。
-  if (window.pjaxEnable === 0 && Turbo.session) Turbo.session.drive = false;
+  // 同时支持 window.pjaxEnable === 'N'（配置项 pjax_enable 的字符串值）。
+  if ((window.pjaxEnable === 0 || window.pjaxEnable === 'N') && Turbo.session) Turbo.session.drive = false;
+
+  // 后台管理界面禁用 Turbo Drive：后台大量列表/表单页依赖模板内联 <script>
+  // （bootstrap-table / layui / select2 的 $(function(){...}) 初始化）。Turbo 用
+  // innerHTML 替换 <body> 时不会执行新插入的内联脚本，导致点击左侧菜单后
+  // 页面框架出现但表格数据为空。管理后台无需 PJAX 无刷新体验，统一回退到
+  // 传统整页导航，一次性规避所有同类页面。前台不受影响（不设置此标志）。
+  if (window.daskDisableTurboDrive === true && Turbo.session) Turbo.session.drive = false;
 
   function pageRendered() {
     document.dispatchEvent(new CustomEvent('dask:page:rendered'));

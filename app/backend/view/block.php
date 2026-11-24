@@ -5,6 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta name="csrf-token" content="{:csrf_token()}">
+    <!-- 后台管理界面强制整页导航：后台列表/表单页依赖内联 script 初始化
+         bootstrap-table/layui/select2，Turbo 替换 body 时不会重放这些脚本，
+         会造成点击菜单后表格数据空白。此 meta 让 Turbo 导航回退为完整加载。 -->
+    <meta name="turbo-visit-control" content="reload">
     <script src="{$assetBase}common/js/dask-csrf.js?v={:asset_version('common/js/dask-csrf.js')}"></script>
     <title>{:isset($page_title) && $page_title  ? $page_title : (isset($breadCrumb['left']) ? $breadCrumb['left'][0] : get_setting('site_name'))} - 后台管理</title>
     <meta name="description" content="">
@@ -60,6 +64,11 @@
         window.upload_file_size = "{$setting.upload_file_size}";
         window.isAjax = "{$_ajax}";
         window.isAjaxOpen = "{$_ajax_open}";
+        // 后台禁用 Turbo Drive（必须在 dask-turbo.js 加载前定义）：后台页面依赖
+        // 内联脚本初始化，Turbo 的 body 替换不重放内联脚本会导致列表数据空白。
+        window.daskDisableTurboDrive = true;
+        // 将后台 pjax_enable 配置正确接线到 Turbo 开关（原代码从未赋值，开关一直失效）。
+        window.pjaxEnable = "{:get_setting('pjax_enable') == 'N' ? 'N' : 'Y'}";
         // 按需加载资源的逐文件版本；不能用 dask-util.js 自身的 hash 代替。
         window.assetVersions = {:asset_versions_json(['common/js/jquery.qrcode.min.js', 'vendor/dropzone/dist/dropzone-min.js', 'vendor/photoswipe/dist/photoswipe.css', 'vendor/photoswipe/dist/umd/photoswipe.umd.min.js'])};
     </script>

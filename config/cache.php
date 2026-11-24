@@ -23,5 +23,18 @@ return [
             'tag_prefix' => 'tag:',
             'serialize'  => ['dask_serialize', 'dask_unserialize'],
         ],
+        // 生产环境可在 .env 设置 cache.driver=redis 启用 Redis
+        'redis' => [
+            'type'       => 'Redis',
+            'host'       => env('cache.redis_host', '127.0.0.1'),
+            'port'       => (int) env('cache.redis_port', 6379),
+            'password'   => env('cache.redis_password', ''),
+            'select'     => (int) env('cache.redis_select', 0),
+            'timeout'    => 0,
+            'prefix'     => config('app.cache')['prefix'],
+            'expire'     => 0,
+            'tag_prefix' => 'tag:',
+            'serialize'  => ['dask_serialize', 'dask_unserialize'],
+        ],
     ],
 ];

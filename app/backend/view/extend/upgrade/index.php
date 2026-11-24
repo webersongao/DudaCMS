@@ -149,7 +149,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3" style="font-size:13px">
-                        SQL 升级文件位于 <code>install/sql/upgrade/</code>，随代码一起同步。同步后刷新本页即可看到待升级版本。
+                        SQL 升级文件位于 <code>update/upgrade/</code>，随代码一起同步。同步后刷新本页即可看到待升级版本。
                     </p>
                     <p class="text-muted mb-3" style="font-size:13px">
                         升级按版本逐级进行，不支持跨版本；每次升级前自动全库备份，失败自动回滚。

@@ -358,9 +358,10 @@ class Answer extends BaseModel
         // 单次批量查询避免 N+1；字段口径与 decorateAnswers 一致。
         $list = QuestionViewService::decorateAnswers($list, $uid);
         $ip = new IpLocation();
+        $show_ip = get_setting('show_answer_user_ip') == 'Y';
         foreach ($list as $key => $val) {
             $list[$key]['content'] = \app\common\library\helper\HtmlHelper::purify(htmlspecialchars_decode($val['content']));
-            if (get_setting('show_answer_user_ip') == 'Y' && $val['answer_user_ip'] && !$val['answer_user_local']) {
+            if ($show_ip && $val['answer_user_ip'] && !$val['answer_user_local']) {
                 $list[$key]['answer_user_local'] = $ip->getLocation($val['answer_user_ip'])['country'];
             }
         }

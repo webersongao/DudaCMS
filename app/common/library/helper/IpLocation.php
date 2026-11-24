@@ -27,6 +27,9 @@ class IpLocation
      */
     private $totalIp;
 
+    /** 进程内 IP 查询结果缓存，避免列表中重复二分查找磁盘 */
+    private static $locationCache = [];
+
     /**
      * 构造函数，打开 QQWry.Dat 文件并初始化类中的信息
      */
@@ -123,8 +126,12 @@ class IpLocation
      * @return array
      */
     public function getLocation($ip='') {
-        if (!$this->fp) return null;            // 如果数据文件没有被正确打开，则直接返回空
         if(empty($ip)) $ip = IpHelper::getRealIp();
+        $cacheKey = (string) $ip;
+        if (array_key_exists($cacheKey, self::$locationCache)) {
+            return self::$locationCache[$cacheKey];
+        }
+        if (!$this->fp) return null;            // 如果数据文件没有被正确打开，则直接返回空
         $location['ip'] = gethostbyname($ip);   // 将输入的域名转化为IP地址
         $ip = $this->packIp($location['ip']);   // 将输入的IP地址转化为可比较的IP地址
         // 不合法的IP地址会被转化为255.255.255.255
@@ -196,6 +203,7 @@ class IpLocation
         if (trim($location['area']) == 'CZ88.NET') {
             $location['area'] = '';
         }
+        self::$locationCache[$cacheKey] = $location;
         return $location;
     }
 

@@ -168,8 +168,8 @@
         </div>
     </div>
 </div>
-<script src="/static/common/js/echarts.js"></script>
-<script src="/static/backend/js/echat.js?v={:asset_version('backend/js/echat.js')}"></script>
+<script defer src="/static/common/js/echarts.js"></script>
+<script defer src="/static/backend/js/echat.js?v={:asset_version('backend/js/echat.js')}"></script>
 <script>
     $(function () {
         var dateArr = getDate();

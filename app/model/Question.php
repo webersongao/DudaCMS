@@ -120,7 +120,7 @@ class Question extends BaseModel
                 unset($insertData['uid'], $insertData['create_time']);
                 try {
                     $question_info = db('question')->where('id', $question_id)->find();
-                    if (!$question_info) return false;
+                    if (!$question_info) throw new \RuntimeException('问题不存在');
                     $insertData['modify_count'] = intval($question_info['modify_count']) + 1;
                     $result = db('question')->where('id', $question_id)->update($insertData);
                     self::clearRequestCache($question_id);
@@ -166,15 +166,14 @@ class Question extends BaseModel
                     //ES索引
                     ElasticSearch::instance()->update('question', $question_info);
                 } catch (Exception $e) {
-                    self::setError($e->getMessage());
-                    return false;
+                    throw $e;
                 }
             } else {
                 try {
                     if ($question_id = db('question')->insertGetId($insertData)) {
                         //更新用户问题数量
                         $question_count = db('question')->where(['uid' => $uid, 'status' => 1])->count();
-                        Users::updateUserFiled($uid, ['question_count' => $question_count]);
+                        Users::updateUserFiled($uid, ['question_count' => $question_count], null, true);
 
                         //添加行为日志
                         LogHelper::addActionLog('publish_question', 'question', $question_id, $uid, $insertData['is_anonymous'], 0, '', 0, $insertData);
@@ -188,8 +187,7 @@ class Question extends BaseModel
                         ElasticSearch::instance()->create('question', self::getQuestionInfo($question_id));
                     }
                 } catch (Exception $e) {
-                    self::setError($e->getMessage());
-                    return false;
+                    throw $e;
                 }
             }
 
@@ -636,8 +634,7 @@ class Question extends BaseModel
         } else {
             try {
                 if (!db('question')->whereIn('id', $id)->update(['status' => 0])) {
-                    self::setError('删除失败');
-                    return false;
+                    throw new \RuntimeException('删除失败');
                 }
                 //更新首页表
                 foreach ($question_infos as $question_info) {
@@ -671,13 +668,11 @@ class Question extends BaseModel
         Db::startTrans();
         try {
             if (!$question_infos) {
-                self::setError('问题不存在');
-                return false;
+                throw new \RuntimeException('问题不存在');
             }
 
             if (!db('question')->whereIn('id', $id)->update(['status' => 1])) {
-                self::setError('恢复失败');
-                return false;
+                throw new \RuntimeException('恢复失败');
             }
             db('question_focus')->whereIn('question_id', $id)->update(['status' => 1]);
             db('browse_records')->whereIn('item_id', $id)->where(['item_type' => 'question'])->update(['status' => 1]);

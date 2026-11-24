@@ -845,7 +845,7 @@ class Users extends BaseModel
     public static function updateNotifyUnread($recipient_uid)
     {
         $unread_num = db('users_notify')->where(['recipient_uid' => (int)$recipient_uid, 'read_flag' => 0])->count();
-        return self::updateUserFiled($recipient_uid, ['notify_unread' => $unread_num]);
+        return self::updateUserFiled($recipient_uid, ['notify_unread' => $unread_num], null, true);
     }
 
     /**
@@ -858,7 +858,7 @@ class Users extends BaseModel
         $sender_unread_num = db('users_inbox_dialog')->where(['sender_uid' => (int)$uid])->sum('sender_unread');
         $recipient_unread_num = db('users_inbox_dialog')->where(['recipient_uid' => (int)$uid])->sum('recipient_unread');
         $unread_num = (int)($sender_unread_num + $recipient_unread_num);
-        return self::updateUserFiled($uid, ['inbox_unread' => $unread_num]);
+        return self::updateUserFiled($uid, ['inbox_unread' => $unread_num], null, true);
     }
 
     /**
@@ -887,18 +887,20 @@ class Users extends BaseModel
                 ->toArray();
 
             $avatar = request()->domain() . '/static/common/image/default-avatar.svg';
-            // 批量查询关注状态，避免 N+1
-            $uids = array_column($list, 'uid');
-            $focusUids = $uids
-                ? db('users_follow')->whereIn('fans_uid', $uids)->column('fans_uid')
+            // 批量查询“当前用户是否关注这些热门用户”，避免 N+1 且纠正方向
+            $uids = array_map('intval', array_column($list, 'uid'));
+            $focusUids = ($uid && $uids)
+                ? db('users_follow')->where(['fans_uid' => (int) $uid, 'status' => 1])
+                    ->whereIn('friend_uid', $uids)->column('friend_uid')
                 : [];
+            $focusUids = array_map('intval', $focusUids);
 
             foreach ($list as $key => $val) {
                 if ($is_api) {
                     $list[$key]['avatar'] = $val['avatar'] ? ImageHelper::replaceImageUrl($val['avatar']) : $avatar;
                 }
                 $list[$key]['url'] = get_user_url($val['uid']);
-                $list[$key]['is_focus'] = in_array($val['uid'], $focusUids, true) ? 1 : 0;
+                $list[$key]['is_focus'] = in_array((int) $val['uid'], $focusUids, true) ? 1 : 0;
             }
             cache($cacheKey, $list, 120);
         }

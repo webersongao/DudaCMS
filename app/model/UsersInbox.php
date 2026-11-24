@@ -239,7 +239,7 @@ class UsersInbox extends BaseModel
 		self::updateDialogCount($users_inbox_dialog_id, $sender_uid);
 		$recipient_unread = db('users_inbox_dialog')->whereRaw('recipient_uid = ' . intval($recipient_uid))->sum('recipient_unread');
 		$sender_unread = db('users_inbox_dialog')->where('sender_uid = ' . intval($recipient_uid))->sum('sender_unread');
-		Users::updateUserFiled($recipient_uid, ['inbox_unread' => $recipient_unread + $sender_unread]);
+		Users::updateUserFiled($recipient_uid, ['inbox_unread' => $recipient_unread + $sender_unread], null, true);
 		/*if ($user_info = Users::getUserInfo($sender_uid))
 		{
 			//发送邮件

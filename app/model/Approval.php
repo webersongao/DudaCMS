@@ -47,69 +47,85 @@ class Approval extends BaseModel
             return false;
         }
 
-        foreach ($approval_list as $key => $val) {
-            $dataId = 0;
-            //更新审核
-            $val['data'] = json_decode($val['data'], true);
-            $access_key = $val['access_key'];
-            if ($val['type'] == 'question') {
-                $val['data']['from'] = 'approval';
-                $dataId = Question::saveQuestion($val['uid'], $val['data'], $access_key);
-                if ($dataId) {
-                    db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
-                    send_notify(0, $val['uid'], 'TYPE_QUESTION_APPROVAL', 'question', $dataId);
+        $notifications = [];
+        \think\facade\Db::startTrans();
+        try {
+            foreach ($approval_list as $key => $val) {
+                $dataId = 0;
+                //更新审核
+                $val['data'] = json_decode($val['data'], true);
+                $access_key = $val['access_key'];
+                if ($val['type'] == 'question') {
+                    $val['data']['from'] = 'approval';
+                    $dataId = Question::saveQuestion($val['uid'], $val['data'], $access_key);
+                    if ($dataId) {
+                        db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
+                        $notifications[] = [0, $val['uid'], 'TYPE_QUESTION_APPROVAL', 'question', $dataId];
+                    } else {
+                        self::setError(Question::getError());
+                    }
+                } elseif ($val['type'] == 'modify_question') {
+                    $val['data']['from'] = 'approval';
+                    $dataId = Question::saveQuestion($val['uid'], $val['data'], $access_key);
+                    if ($dataId) {
+                        db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
+                        $notifications[] = [0, $val['uid'], 'TYPE_QUESTION_MODIFY_APPROVAL', 'question', $dataId];
+                    } else {
+                        self::setError(Question::getError());
+                    }
+                } elseif ($val['type'] == 'answer') {
+                    $val['data']['uid'] = $val['uid'];
+                    $answerInfos = Answer::saveAnswer($val['data'], $access_key);
+                    $dataId = $answerInfos['info']['id'] ?? 0;
+                    if ($dataId) {
+                        db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
+                        $notifications[] = [0, $val['uid'], 'TYPE_ANSWER_APPROVAL', 'question', $val['data']['question_id']];
+                    } else {
+                        self::setError(Answer::getError());
+                    }
+                } elseif ($val['type'] == 'modify_answer') {
+                    $val['data']['uid'] = $val['uid'];
+                    $answerInfos = Answer::saveAnswer($val['data'], $access_key);
+                    $dataId = $answerInfos['info']['id'] ?? 0;
+                    if ($dataId) {
+                        db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
+                        $notifications[] = [0, $val['uid'], 'TYPE_ANSWER_MODIFY_APPROVAL', 'question', $val['data']['question_id']];
+                    } else {
+                        self::setError(Answer::getError());
+                    }
+                } elseif ($val['type'] == 'article') {
+                    $dataId = Article::saveArticle($val['uid'], $val['data'], $access_key);
+                    if ($dataId) {
+                        db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
+                        $notifications[] = [0, $val['uid'], 'TYPE_ARTICLE_APPROVAL', 'article', $dataId];
+                    } else {
+                        self::setError(Article::getError());
+                    }
+                } elseif ($val['type'] == 'modify_article') {
+                    $dataId = Article::updateArticle($val['uid'], $val['data'], $access_key);
+                    if ($dataId) {
+                        db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
+                        $notifications[] = [0, $val['uid'], 'TYPE_ARTICLE_MODIFY_APPROVAL', 'article', $dataId];
+                    } else {
+                        self::setError(Article::getError());
+                    }
                 } else {
-                    self::setError(Question::getError());
+                    //审核钩子
                 }
-            } elseif ($val['type'] == 'modify_question') {
-                $val['data']['from'] = 'approval';
-                $dataId = Question::saveQuestion($val['uid'], $val['data'], $access_key);
-                if ($dataId) {
-                    db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
-                    send_notify(0, $val['uid'], 'TYPE_QUESTION_MODIFY_APPROVAL', 'question', $dataId);
-                } else {
-                    self::setError(Question::getError());
+                if (!$dataId) {
+                    throw new \RuntimeException('审核保存失败');
                 }
-            } elseif ($val['type'] == 'answer') {
-                $val['data']['uid'] = $val['uid'];
-                $answerInfos = Answer::saveAnswer($val['data'], $access_key);
-                $dataId = $answerInfos['info']['id'] ?? 0;
-                if ($dataId) {
-                    db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
-                    send_notify(0, $val['uid'], 'TYPE_ANSWER_APPROVAL', 'question', $val['data']['question_id']);
-                } else {
-                    self::setError(Answer::getError());
-                }
-            } elseif ($val['type'] == 'modify_answer') {
-                $val['data']['uid'] = $val['uid'];
-                $answerInfos = Answer::saveAnswer($val['data'], $access_key);
-                $dataId = $answerInfos['info']['id'] ?? 0;
-                if ($dataId) {
-                    db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
-                    send_notify(0, $val['uid'], 'TYPE_ANSWER_MODIFY_APPROVAL', 'question', $val['data']['question_id']);
-                } else {
-                    self::setError(Answer::getError());
-                }
-            } elseif ($val['type'] == 'article') {
-                $dataId = Article::saveArticle($val['uid'], $val['data'], $access_key);
-                if ($dataId) {
-                    db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
-                    send_notify(0, $val['uid'], 'TYPE_ARTICLE_APPROVAL', 'article', $dataId);
-                } else {
-                    self::setError(Article::getError());
-                }
-            } elseif ($val['type'] == 'modify_article') {
-                $dataId = Article::updateArticle($val['uid'], $val['data'], $access_key);
-                if ($dataId) {
-                    db('approval')->where(['id' => $val['id']])->update(['status' => 1, 'item_id' => $dataId]);
-                    send_notify(0, $val['uid'], 'TYPE_ARTICLE_MODIFY_APPROVAL', 'article', $dataId);
-                } else {
-                    self::setError(Article::getError());
-                }
-            } else {
-                //审核钩子
             }
-            if (!$dataId) return false;
+            \think\facade\Db::commit();
+        } catch (\Throwable $e) {
+            \think\facade\Db::rollback();
+            self::setError($e->getMessage());
+            return false;
+        }
+
+        //事务提交后再发送通知，避免回滚后仍通知用户
+        foreach ($notifications as $notify) {
+            send_notify(...$notify);
         }
         return true;
     }

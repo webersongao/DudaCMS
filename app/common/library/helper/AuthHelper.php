@@ -191,13 +191,9 @@ class AuthHelper
         $authList = []; //
         foreach ($rules as $rule) {
             if (!empty($rule['condition'])) {
-                //根据condition进行验证
-                $user = $this->getUserInfo($uid); //获取用户信息,一维数组
-                /*$command = preg_replace('/\{(\w*?)\}/', '$user[\'\\1\']', $rule['condition']);
-                $condition = null;
-                @(eval('$condition =(' . $command . ');'));*/
-                $condition = preg_replace('/\{(\w*?)\}/', '$user[\'\\1\']', $rule['condition']);
-                if ($condition) {
+                //根据condition进行验证：只支持字段比较表达式，解析失败一律拒绝
+                $user = $this->getUserInfo($uid);
+                if ($this->evaluateCondition((string) $rule['condition'], (array) $user)) {
                     $authList[] = $rule['name'];
                 }
             } else {
@@ -528,5 +524,61 @@ class AuthHelper
         session('admin_user_info', $userInfo);
         session('admin_login_uid', $userInfo['uid']);
         return true;
+    }
+
+    /**
+     * 安全解析权限条件：支持 {field} 与常量比较，&& / || 组合。
+     * 任何无法识别的表达式都返回 false，避免权限被无条件授予。
+     */
+    private function evaluateCondition(string $condition, array $user): bool
+    {
+        $user = array_change_key_case($user, CASE_LOWER);
+        $condition = trim($condition);
+        if ($condition === '') {
+            return false;
+        }
+
+        $branches = preg_split('/\s*\|\|\s*/', $condition);
+        foreach ($branches as $branch) {
+            $terms = preg_split('/\s*&&\s*/', trim($branch));
+            $branchOk = true;
+            foreach ($terms as $term) {
+                $term = trim($term);
+                if (preg_match('/^\{(\w+)\}\s*(==|!=|>=|<=|>|<)\s*([\w\-.]+|\'[^\']*\'|"[^"]*")$/', $term, $m) !== 1) {
+                    return false;
+                }
+                $field = strtolower($m[1]);
+                $operator = $m[2];
+                $right = trim($m[3], '\'"');
+                $left = $user[$field] ?? null;
+                if ($left === null) {
+                    $branchOk = false;
+                    continue;
+                }
+                if (is_numeric($left) && is_numeric($right)) {
+                    $left = (float) $left;
+                    $right = (float) $right;
+                } else {
+                    $left = (string) $left;
+                    $right = (string) $right;
+                }
+                $termOk = match ($operator) {
+                    '=='  => $left == $right,
+                    '!='  => $left != $right,
+                    '>='  => $left >= $right,
+                    '<='  => $left <= $right,
+                    '>'   => $left > $right,
+                    '<'   => $left < $right,
+                };
+                if (!$termOk) {
+                    $branchOk = false;
+                    break;
+                }
+            }
+            if ($branchOk) {
+                return true;
+            }
+        }
+        return false;
     }
 }

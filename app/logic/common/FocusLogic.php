@@ -214,7 +214,7 @@ class FocusLogic
                 $countWhere = ['fans_uid' => (int)$item_id];
                 $count = db($dbName)->where($countWhere)->count();
                 $fans_count = db($dbName)->where(['friend_uid' => (int)$item_id])->count();
-                Users::updateUserFiled($item_id, ['friend_count' => $count, 'fans_count' => $fans_count]);
+                Users::updateUserFiled($item_id, ['friend_count' => $count, 'fans_count' => $fans_count], null, true);
                 break;
             case 'column':
                 $dbName = 'column_focus';

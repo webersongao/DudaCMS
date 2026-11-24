@@ -230,7 +230,7 @@ class Topic extends BaseModel
         $focus_count = db('topic_focus')->where(['uid' => (int)$uid])->count();
         Users::updateUserFiled($uid, (array(
             'topic_focus_count' => $focus_count,
-        )));
+        )), null, true);
         return $focus_id;
     }
 

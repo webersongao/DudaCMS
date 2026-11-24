@@ -143,7 +143,8 @@ class Answer extends BaseModel
                 Question::update(['answer_count' => $answer_count, 'last_answer' => $answer_id], ['id' => $data['question_id']]);
                 PostRelation::updatePostRelation($data['question_id'], 'question', ['answer_count' => $answer_count, 'update_time' => time()]);
                 $info = db('answer')->where('id', $answer_id)->find();
-                Users::updateUserFiled($info['uid'], ['answer_count' => $answer_count]);
+                $user_answer_count = db('answer')->where(['uid' => $info['uid'], 'status' => 1])->count();
+                Users::updateUserFiled($info['uid'], ['answer_count' => $user_answer_count], null, true);
                 $info['user_info'] = Users::getUserInfo($info['uid']);
                 /**
                  * 内容存储后操作
@@ -190,6 +191,7 @@ class Answer extends BaseModel
             self::setError('回答删除失败');
             return false;
         }
+        $affectedUids = [];
         foreach ($answer_infos as $answer_info) {
             $answer_count = db('answer')->where(['question_id' => $answer_info['question_id'], 'status' => 1])->count();
             $last_answer = db('question')->where('id', $answer_info['question_id'])->value('last_answer');
@@ -198,6 +200,13 @@ class Answer extends BaseModel
             }
             Question::update(['answer_count' => $answer_count, 'last_answer' => $last_answer], ['id' => $answer_info['question_id']]);
             PostRelation::updatePostRelation($answer_info['question_id'], 'question', ['answer_count' => $answer_count]);
+            if (!empty($answer_info['uid'])) {
+                $affectedUids[(int) $answer_info['uid']] = true;
+            }
+        }
+        foreach (array_keys($affectedUids) as $affectedUid) {
+            $userAnswerCount = db('answer')->where(['uid' => $affectedUid, 'status' => 1])->count();
+            Users::updateUserFiled($affectedUid, ['answer_count' => $userAnswerCount], null, true);
         }
         return true;
     }

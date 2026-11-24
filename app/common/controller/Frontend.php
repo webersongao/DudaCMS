@@ -237,11 +237,13 @@ class Frontend extends Base
                 }
             }
 
-            //跨天
+            //跨天：例如 23:00-05:00，凌晨时段也属于审核时间窗
             if($publish_approval_time_start > $publish_approval_time_end)
             {
-                if (time() >= strtotime(date('Y-m-d',time()).$this->user_info['permission']['publish_approval_time_start']) && time() <= strtotime(date('Y-m-d',strtotime('+1 day')).$this->user_info['permission']['publish_approval_time_end']))
-                {
+                $now = time();
+                $todayStart = strtotime(date('Y-m-d', $now) . $this->user_info['permission']['publish_approval_time_start']);
+                $todayEnd = strtotime(date('Y-m-d', $now) . $this->user_info['permission']['publish_approval_time_end']);
+                if ($now >= $todayStart || $now <= $todayEnd) {
                     return true;
                 }
             }

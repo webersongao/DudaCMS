@@ -121,8 +121,7 @@ class Article extends BaseModel
         try {
             $article_id = db('article')->insertGetId($data);
             if (!$article_id) {
-                self::setError('文章插入失败');
-                return false;
+                throw new \RuntimeException('文章插入失败');
             }
             //添加话题关联
             if (isset($postData['topics']) && $postData['topics']) {
@@ -141,7 +140,7 @@ class Article extends BaseModel
 
             //更新用户文章数
             $article_count = self::where(['uid' => $uid, 'status' => 1])->count();
-            Users::updateUserFiled($uid, ['article_count' => $article_count]);
+            Users::updateUserFiled($uid, ['article_count' => $article_count], null, true);
 
             //更新专栏文章数量
             if ($column_id) {
@@ -255,15 +254,15 @@ class Article extends BaseModel
             //ES索引
             ElasticSearch::instance()->update('article', $article_info);
 
-            if (isset($postData['topics']) && $postData['topics']) {
-                $topics = is_array($postData['topics']) ? $postData['topics'] : explode(',', $postData['topics']);
-                //更新话题关联
-                if ($topics && db('topic_relation')->where(['item_type' => 'article', 'item_id' => $postData['id']])->delete()) {
-                    foreach (array_unique($topics) as $key => $title) {
-                        $topic_id = Topic::saveTopic($title, $uid);
-                        Topic::saveTopicRelation($uid, $topic_id, $postData['id'], 'article');
-                    }
-                }
+            $topics = isset($postData['topics']) && $postData['topics']
+                ? (is_array($postData['topics']) ? $postData['topics'] : explode(',', $postData['topics']))
+                : [];
+            $topics = array_values(array_unique(array_filter(array_map('trim', $topics))));
+            //无论是否已有关联，都先清理旧关联，再写入本次提交的话题
+            db('topic_relation')->where(['item_type' => 'article', 'item_id' => $postData['id']])->delete();
+            foreach ($topics as $title) {
+                $topic_id = Topic::saveTopic($title, $uid);
+                Topic::saveTopicRelation($uid, $topic_id, $postData['id'], 'article');
             }
 
             //更新编辑器附件
@@ -330,7 +329,7 @@ class Article extends BaseModel
                 }
             } else {
                 if (!db('article')->whereIn('id', $ids)->update(['status' => 0])) {
-                    return false;
+                    throw new \RuntimeException('文章删除失败');
                 }
                 //更新专栏文章数
                 foreach ($article_infos as $article_info) {
@@ -370,12 +369,12 @@ class Article extends BaseModel
             return false;
         }
 
-        if (!db('article')->whereIn('id', $ids)->update(['status' => 1])) {
-            return false;
-        }
-        db('browse_records')->whereIn('item_id', $ids)->where(['item_type' => 'article'])->update(['status' => 1]);
         \think\facade\Db::startTrans();
         try {
+            if (!db('article')->whereIn('id', $ids)->update(['status' => 1])) {
+                throw new \RuntimeException('文章恢复失败');
+            }
+            db('browse_records')->whereIn('item_id', $ids)->where(['item_type' => 'article'])->update(['status' => 1]);
             //更新专栏文章数
             foreach ($article_infos as $article_info) {
                 if ($article_info['column_id']) {

@@ -130,7 +130,7 @@ class Vote extends BaseModel
 		$user_article_agree_count = db('article_vote')->where(['vote_value' => 1, 'item_uid' => $vote_uid])->count();
 		$user_agree_count = $user_article_agree_count + $user_question_agree_count;
 
-		Users::updateUserFiled(intval($vote_uid), ['agree_count' => intval($user_agree_count)]);
+		Users::updateUserFiled(intval($vote_uid), ['agree_count' => intval($user_agree_count)], null, true);
 
 		return ['vote_value' => $vote_result, 'agree_count' => $agree_count, 'against_count' => $against_count];
 	}

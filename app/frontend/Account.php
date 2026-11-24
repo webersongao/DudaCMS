@@ -242,7 +242,7 @@ class Account extends Frontend
             $this->error('激活链接不正确,请重新发送验证链接','/');
         }
 
-        $codeInfo = db('users_active')->where(['active_code'=>$active_code_hash])->find();
+        $codeInfo = db('users_active')->where(['active_code'=>$active_code_hash, 'active_type'=>'VALID_EMAIL'])->find();
         if(!$codeInfo)
         {
             $this->error('激活链接不可用,请重新发送验证链接','/');
@@ -335,7 +335,7 @@ class Account extends Frontend
         $url = (string) url('account/find_password');
         if (!$active_code = $this->request->param('active_code')) $this->error('密码重置链接错误，请重新提交', $url);
 
-        if (!$codeInfo = db('users_active')->where(['active_code' => $active_code])->find()) $this->error('密码重置链接错误，请重新提交', $url);
+        if (!$codeInfo = db('users_active')->where(['active_code' => $active_code, 'active_type' => 'RESET_PASSWORD'])->find()) $this->error('密码重置链接错误，请重新提交', $url);
 
         if ($codeInfo['active_time']) $this->error('密码重置链接已被使用', $url);
         if ($codeInfo['expire_time'] < time()) $this->error('密码重置链接已过期，请重新提交', $url);
@@ -573,14 +573,21 @@ class Account extends Frontend
     {
         if($this->request->isPost())
         {
+            $rateKey = 'check_mobile_' . IpHelper::getRealIp();
+            $hits = (int) cache($rateKey);
+            if ($hits >= 10) {
+                $this->error('操作过于频繁，请稍后再试');
+            }
+            cache($rateKey, $hits + 1, 600);
+
             $postData = $this->request->post();
-            $uid = Users::checkUserExist($postData['mobile'],'uid');
+            $uid = Users::checkUserExist($postData['mobile'] ?? '', 'uid');
             if($uid && $uid!=$this->user_id)
             {
-                $this->error('该手机号已存在');
+                $this->error('该手机号不可用');
             }
 
-            $this->success('手机号正确');
+            $this->success('手机号可用');
         }
     }
 

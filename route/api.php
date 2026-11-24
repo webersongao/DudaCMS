@@ -11,6 +11,7 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 use app\common\middleware\ApiAuth;
+use app\common\middleware\ApiRateLimit;
 
 // ============================ 公开路由（可选鉴权） ============================
 Route::group('v1', function () {
@@ -41,7 +42,7 @@ Route::group('v1', function () {
 
     // 用户资料（:id 有 \d+ 约束，不会吞掉私有组的 users/me）
     Route::get('users/:id', 'v1.User/profile')->pattern(['id' => '\d+']);
-});
+})->middleware(ApiRateLimit::class);
 
 // ============================ 私有路由（强制鉴权） ============================
 Route::group('v1', function () {
@@ -65,4 +66,4 @@ Route::group('v1', function () {
     // 上传
     Route::post('upload/image', 'v1.Upload/image');
     Route::post('upload/file', 'v1.Upload/file');
-})->middleware(ApiAuth::class);
+})->middleware([ApiAuth::class, ApiRateLimit::class]);

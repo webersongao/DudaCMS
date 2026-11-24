@@ -17,9 +17,9 @@ class ApiCors
         $allow = array_filter(array_map('trim', explode(',', (string) env('api.allow_origins', ''))));
         $originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?: '') : '';
 
+        //通配符不得与凭证请求共存：只接受白名单中的精确 Origin 或同源 Origin
         $allowed = $origin && (
-            in_array('*', $allow, true)
-            || in_array($origin, $allow, true)
+            in_array($origin, $allow, true)
             || ($originHost && $originHost === $request->host(true))
         );
 

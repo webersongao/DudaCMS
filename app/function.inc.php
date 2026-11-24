@@ -1293,7 +1293,11 @@ function checkTableExist($table)
 {
     $prefix = app()->db->getConfig('connections.mysql.prefix');
     $table = strstr($table,$prefix) ? $table : $prefix.$table;
-    return \think\facade\Db::query("SELECT COUNT(*) FROM information_schema.TABLES WHERE table_name ='{$table}'")[0]['COUNT(*)'];
+    $row = \think\facade\Db::query(
+        "SELECT COUNT(*) AS num FROM information_schema.TABLES WHERE table_schema = DATABASE() AND table_name = ?",
+        [$table]
+    );
+    return (int) ($row[0]['num'] ?? 0);
 }
 
 

@@ -250,7 +250,7 @@ if (isPost()) {
 
             // 判断是否有特殊字符
             if ($adminUrl) {
-                $check = preg_match('/[0-9a-zA-Z]+$/', $adminUrl, $matches);
+                $check = preg_match('/^[A-Za-z0-9]{2,32}$/', $adminUrl, $matches);
                 if (!$check) {
                     $validateError = '后台地址不能含有特殊字符, 只能包含字母或数字。';
                     $data = [
@@ -474,7 +474,11 @@ function install($username, $password, $config, $adminUrl)
         !is_dir(INSTALL_PATH . 'lock' . DS) && !mkdir($concurrentDirectory = INSTALL_PATH . 'lock' . DS) && !is_dir($concurrentDirectory);
         @file_put_contents(INSTALL_PATH . 'lock' . DS . 'install.lock', date('Y-m-d H:i:s'));
         @file_put_contents(CONFIG_PATH . 'app.php', getAppConfig($adminUrl));
-        @file_put_contents(ROOT_PATH . 'public' . DS . $adminUrl, getAdminUrl());
+        $adminFile = basename($adminUrl);
+        if (preg_match('/^[A-Za-z0-9]{2,32}\.php$/', $adminFile) !== 1) {
+            throw new \RuntimeException('后台地址不合法');
+        }
+        @file_put_contents(ROOT_PATH . 'public' . DS . $adminFile, getAdminUrl());
         @file_put_contents(CONFIG_PATH . 'database.php', getDatabaseConfig($config));
         Db::commit();
         return true;

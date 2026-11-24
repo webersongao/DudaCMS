@@ -514,6 +514,7 @@ class AuthHelper
         if (!$password || !$username) return false;
         $userInfo = Users::checkUserExist($username);
         if (!$userInfo) return false;
+        if ((int) ($userInfo['status'] ?? 0) !== 1) return false;
 
         if (!verify_password($password, (string) $userInfo['password'], (string) $userInfo['salt'])) {
             return false;

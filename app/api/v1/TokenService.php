@@ -6,19 +6,14 @@ class TokenService
     public static function secret(): string
     {
         $secret = (string) env('api.jwt_secret', '');
-        if ($secret !== '') {
+        if (strlen($secret) >= 32) {
             return $secret;
         }
 
-        // 未配置时使用站点密钥 + 数据库信息派生，保证不同站点不一致
-        return hash('sha256', implode('|', [
-            (string) config('app.token.key'),
-            (string) config('database.connections.mysql.hostname'),
-            (string) config('database.connections.mysql.database'),
-        ]));
+        throw new \RuntimeException('API JWT 密钥未配置或长度不足，请在 .env 中设置 api.jwt_secret（至少 32 字节随机字符串）');
     }
 
-    public static function issue(int $uid, int $ttl = 604800): array
+    public static function issue(int $uid, int $ttl = 7200): array
     {
         $now = time();
         $payload = [

@@ -27,6 +27,10 @@ class ApiAuth
             $payload = TokenService::parse(trim($m[1]));
             if ($payload) {
                 $uid = (int) $payload['sub'];
+                $status = (int) \think\facade\Db::name('users')->where('uid', $uid)->value('status');
+                if ($status !== 1) {
+                    $uid = 0;
+                }
             }
         }
 

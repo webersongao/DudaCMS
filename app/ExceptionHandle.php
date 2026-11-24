@@ -81,17 +81,18 @@ class ExceptionHandle extends Handle
                 $trace[] = $name;
             }
 
+            $debug = app()->isDebug();
             $context = [
-                'error_message'   => $message,
-                'error_hint'      => $this->adminExceptionHint((string) $message),
+                'error_message'   => $debug ? $message : '服务暂时不可用，请稍后重试',
+                'error_hint'      => $debug ? $this->adminExceptionHint((string) $message) : '详细错误已写入日志',
                 'error_module'    => defined('ENTRANCE') ? strtolower((string) ENTRANCE) : 'frontend',
                 'error_controller'=> (string) $request->controller(),
                 'error_action'    => (string) $request->action(),
                 'error_url'       => (string) $request->url(true),
-                'error_file'      => str_replace(root_path(), '', $e->getFile()),
-                'error_line'      => $e->getLine(),
-                'error_type'      => get_class($e),
-                'error_trace'     => implode(' ← ', $trace),
+                'error_file'      => $debug ? str_replace(root_path(), '', $e->getFile()) : '',
+                'error_line'      => $debug ? $e->getLine() : 0,
+                'error_type'      => $debug ? get_class($e) : '',
+                'error_trace'     => $debug ? implode(' ← ', $trace) : '',
                 'back_url'        => (string) ($_SERVER['HTTP_REFERER'] ?? ''),
                 'home_url'        => (string) url('Index/index'),
             ];

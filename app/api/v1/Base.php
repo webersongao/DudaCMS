@@ -26,8 +26,12 @@ abstract class Base
         if (preg_match('/^Bearer\s+(.+)$/i', trim($header), $m)) {
             $payload = TokenService::parse(trim($m[1]));
             if ($payload) {
-                $this->tokenPayload = $payload;
-                $this->uid = (int) $payload['sub'];
+                $uid = (int) $payload['sub'];
+                $status = (int) \think\facade\Db::name('users')->where('uid', $uid)->value('status');
+                if ($status === 1) {
+                    $this->tokenPayload = $payload;
+                    $this->uid = $uid;
+                }
             }
         }
     }

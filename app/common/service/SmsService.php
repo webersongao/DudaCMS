@@ -24,6 +24,10 @@ final class SmsService
     /** 验证码有效期与同号码发送间隔（秒）。 */
     private const CODE_TTL = 300;
 
+    /** 验证码校验失败锁定：10 分钟内最多 5 次。 */
+    private const MAX_VERIFY_FAILS = 5;
+    private const FAIL_WINDOW = 600;
+
     public static function isEnabled(): bool
     {
         return self::driver() !== 'N';
@@ -68,14 +72,29 @@ final class SmsService
         }
     }
 
-    /** 校验验证码，成功时不主动删除缓存，保持原有“5 分钟内可复用”语义。 */
+    /** 校验验证码：一次性使用，并对同一手机号+IP 的失败次数限流。 */
     public static function verify($mobile, $code): bool
     {
-        $cached = Cache::get(self::cacheKey((string) $mobile));
-        if ($cached === null || $cached === '' || $code === null || $code === '') {
+        $mobile = (string) $mobile;
+        $cacheKey = self::cacheKey($mobile);
+        $failKey = 'sms_fail_' . md5($mobile . '|' . IpHelper::getRealIp());
+        $fails = (int) Cache::get($failKey, 0);
+        if ($fails >= self::MAX_VERIFY_FAILS) {
             return false;
         }
-        return hash_equals((string) $cached, (string) $code);
+
+        $cached = Cache::get($cacheKey);
+        $ok = $cached !== null && $cached !== '' && $code !== null && $code !== ''
+            && hash_equals((string) $cached, (string) $code);
+
+        if ($ok) {
+            Cache::delete($cacheKey);
+            Cache::delete($failKey);
+            return true;
+        }
+
+        Cache::set($failKey, $fails + 1, self::FAIL_WINDOW);
+        return false;
     }
 
     public static function cacheKey(string $mobile): string

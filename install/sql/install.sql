@@ -1900,6 +1900,16 @@ ALTER TABLE `dask_answer` ADD INDEX `idx_a_uid_status_time` (`uid`,`status`,`cre
 ALTER TABLE `dask_topic_relation` ADD INDEX `idx_tr_topic` (`topic_id`,`item_type`,`status`);
 ALTER TABLE `dask_topic_relation` ADD INDEX `idx_tr_item` (`item_type`,`item_id`,`status`);
 
+-- 1.0.2 查询优化索引
+ALTER TABLE `dask_article` ADD INDEX `idx_article_status_time` (`status`,`create_time`);
+ALTER TABLE `dask_article` ADD INDEX `idx_article_status_popular` (`status`,`popular_value`);
+ALTER TABLE `dask_answer` ADD INDEX `idx_answer_question_status_time` (`question_id`,`status`,`create_time`);
+ALTER TABLE `dask_topic_relation` ADD INDEX `idx_tr_topic_status_time` (`topic_id`,`status`,`create_time`);
+ALTER TABLE `dask_question` ADD INDEX `idx_q_status_time` (`status`,`create_time`);
+ALTER TABLE `dask_question` ADD FULLTEXT INDEX `ft_question_search_text` (`search_text`) WITH PARSER ngram;
+ALTER TABLE `dask_article` ADD FULLTEXT INDEX `ft_article_search_text` (`search_text`) WITH PARSER ngram;
+ALTER TABLE `dask_answer` ADD FULLTEXT INDEX `ft_answer_search_text` (`search_text`) WITH PARSER ngram;
+
 ALTER TABLE `dask_users_notify` ADD INDEX `idx_n_recipient` (`recipient_uid`,`read_flag`,`status`,`create_time`);
 ALTER TABLE `dask_action_log` ADD INDEX `idx_al_uid_action` (`uid`,`action_id`,`status`);
 ALTER TABLE `dask_users_favorite` ADD INDEX `idx_fav_uid_item` (`uid`,`item_type`,`item_id`);
@@ -1976,7 +1986,7 @@ CREATE TABLE `dask_upgrade_log` (
 
 -- 新装即为当前程序版本，写入一条成功记录作为版本基准，避免误报待升级
 INSERT INTO `dask_upgrade_log` (`version`, `status`, `sql_file`, `sql_count`, `remark`, `add_time`)
-VALUES ('1.0.1', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
+VALUES ('1.0.2', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
 
 SET FOREIGN_KEY_CHECKS = 1;
 

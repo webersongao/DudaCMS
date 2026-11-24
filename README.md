@@ -1,6 +1,6 @@
 # DudaCMS 简介
 
-> 当前版本：**DudaCMS 1.0.1**（Build 20261123）
+> 当前版本：**DudaCMS 1.0.2**（Build 20261124）
 
 ---
 

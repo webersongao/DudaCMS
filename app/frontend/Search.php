@@ -53,7 +53,7 @@ class Search extends Frontend
             return $this->fetch();
         }
 
-        $cache_key = 'search_result_q' . md5(trim($keywords) . '_search_type' . $type . '_page' . $page);
+        $cache_key = 'search_result_q' . md5(trim($keywords) . '_search_type' . $type . '_page' . $page . '_sort' . $order . '_uid' . $this->user_id);
         $data = cache($cache_key);
         if (!$data) {
             $handle = new \app\logic\search\Search(get_setting('search_handle'));

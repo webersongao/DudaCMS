@@ -92,11 +92,13 @@ class Topic extends Frontend
                 $total = $rows;
             }elseif($keyWord)
             {
-                $topics = db('topic')->page($page,$rows)->where([['title','like','%'.$keyWord.'%']])->column('id,title');
-                $total = db('topic')->page($page,$rows)->where([['title','like','%'.$keyWord.'%']])->count();
+                $query = db('topic')->where([['title','like','%'.$keyWord.'%']]);
+                $topics = (clone $query)->page($page,$rows)->column('id,title');
+                $total = (clone $query)->count();
             }else{
-                $topics = db('topic')->page($page,$rows)->column('id,title');
-                $total = db('topic')->page($page,$rows)->count();
+                $query = db('topic');
+                $topics = (clone $query)->page($page,$rows)->column('id,title');
+                $total = (clone $query)->count();
             }
 
             $result = [];

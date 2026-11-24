@@ -47,7 +47,7 @@ class CheckHelper
                         db('users_online')->insert($updateData);
                     }
 
-                    cache('last_login_time_' . $user_info['uid'], $last_login_time, 60);
+                    cache('last_login_time_' . $user_info['uid'], time(), 60);
                 }
             }
         }

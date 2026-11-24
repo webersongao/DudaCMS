@@ -191,22 +191,35 @@ class Answer extends BaseModel
             self::setError('回答删除失败');
             return false;
         }
-        $affectedUids = [];
-        foreach ($answer_infos as $answer_info) {
-            $answer_count = db('answer')->where(['question_id' => $answer_info['question_id'], 'status' => 1])->count();
-            $last_answer = db('question')->where('id', $answer_info['question_id'])->value('last_answer');
-            if ($last_answer == $answer_info['id']) {
-                $last_answer = db('answer')->where(['question_id' => $answer_info['question_id'], 'status' => 1])->order('create_time', 'DESC')->value('id');
-            }
-            Question::update(['answer_count' => $answer_count, 'last_answer' => $last_answer], ['id' => $answer_info['question_id']]);
-            PostRelation::updatePostRelation($answer_info['question_id'], 'question', ['answer_count' => $answer_count]);
-            if (!empty($answer_info['uid'])) {
-                $affectedUids[(int) $answer_info['uid']] = true;
+        $questionIds = array_values(array_unique(array_filter(array_map('intval', array_column($answer_infos, 'question_id')))));
+        $affectedUids = array_values(array_unique(array_filter(array_map('intval', array_column($answer_infos, 'uid')))));
+
+        $answerCounts = $lastAnswers = $userAnswerCounts = [];
+        if ($questionIds) {
+            $answerCounts = db('answer')->where(['status' => 1])->whereIn('question_id', $questionIds)
+                ->field('question_id, COUNT(*) AS cnt')->group('question_id')->column('cnt', 'question_id');
+            $rows = db('answer')->where(['status' => 1])->whereIn('question_id', $questionIds)
+                ->order('create_time', 'DESC')->field('question_id,id')->select();
+            foreach ($rows as $row) {
+                if (!isset($lastAnswers[(int) $row['question_id']])) {
+                    $lastAnswers[(int) $row['question_id']] = $row['id'];
+                }
             }
         }
-        foreach (array_keys($affectedUids) as $affectedUid) {
-            $userAnswerCount = db('answer')->where(['uid' => $affectedUid, 'status' => 1])->count();
-            Users::updateUserFiled($affectedUid, ['answer_count' => $userAnswerCount], null, true);
+        if ($affectedUids) {
+            $userAnswerCounts = db('answer')->where(['status' => 1])->whereIn('uid', $affectedUids)
+                ->field('uid, COUNT(*) AS cnt')->group('uid')->column('cnt', 'uid');
+        }
+
+        foreach ($answer_infos as $answer_info) {
+            $questionId = (int) $answer_info['question_id'];
+            $answer_count = (int) ($answerCounts[$questionId] ?? 0);
+            $last_answer = $lastAnswers[$questionId] ?? 0;
+            Question::update(['answer_count' => $answer_count, 'last_answer' => $last_answer], ['id' => $questionId]);
+            PostRelation::updatePostRelation($questionId, 'question', ['answer_count' => $answer_count]);
+        }
+        foreach ($affectedUids as $affectedUid) {
+            Users::updateUserFiled($affectedUid, ['answer_count' => (int) ($userAnswerCounts[$affectedUid] ?? 0)], null, true);
         }
         return true;
     }
@@ -624,7 +637,7 @@ class Answer extends BaseModel
         $questions = db('question')->whereRaw("create_time < " . $start_time . " AND  best_answer = 0 AND answer_count > " . get_setting('best_answer_min_count', 0))->column('id');
         if ($questions) {
             foreach ($questions as $question_id) {
-                $best_answer = db('answer')->where(['question_id' => $question_id])->order('agree_count', 'DESC')->find();
+                $best_answer = db('answer')->where(['question_id' => $question_id, 'status' => 1])->order('agree_count', 'DESC')->find();
                 if ($best_answer['agree_count'] > get_setting('best_agree_min_count')) {
                     if (db('question')->where(['id' => $best_answer['question_id']])->update(['best_answer' => $best_answer['id']])) {
                         db('answer')->where(['id' => $best_answer['id']])->update(['is_best' => 1, 'best_uid' => 1, 'best_time' => time()]);

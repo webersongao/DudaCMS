@@ -118,7 +118,7 @@ class Frontend extends Base
             $this->siteCloseNotify();
         }
 
-        if ($this->user_id && $this->user_info['status'] === 3) {
+        if ($this->user_id && (int) $this->user_info['status'] === 3) {
             $users_forbidden = db('users_forbidden')->where(['uid' => $this->user_info['uid'], 'status' => 1])->find();
             if($users_forbidden && $users_forbidden['forbidden_time']>time())
             {

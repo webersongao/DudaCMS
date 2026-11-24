@@ -227,20 +227,22 @@ class Users extends BaseModel
             // MD5 摘要密码在登录成功后自动升级为 bcrypt
             db('users')->where('uid', $user['uid'])->update(['password' => hash_password($password)]);
         }
-        if (!$passwordOk || cache($user['uid'] . '_error_time')) {
+        $password_error_limit_time = intval(get_setting('password_error_limit_time'));
+        if (!$passwordOk || ($password_error_limit_time > 0 && cache($user['uid'] . '_error_time'))) {
             $errors_exceeds_limit_password = intval(get_setting('errors_exceeds_limit_password'));
-            $password_error_limit_time = intval(get_setting('password_error_limit_time'));
 
             //限制时长
-            if (cache($user['uid'] . '_error_time') && $password_error_limit_time) {
+            if (cache($user['uid'] . '_error_time') && $password_error_limit_time > 0) {
                 $time = $password_error_limit_time - round((time() - (int)cache($user['uid'] . '_error_time')) / 60);
                 self::setError('请等待' . $time . '分钟后重试');
                 cache($user['uid'] . '_error_count', null);
             } else {
                 ++$errorCount;
-                if ($errors_exceeds_limit_password && $errors_exceeds_limit_password <= $errorCount) {
+                if ($errors_exceeds_limit_password && $errors_exceeds_limit_password <= $errorCount && $password_error_limit_time > 0) {
                     cache($user['uid'] . '_error_time', time(), ['expire' => $password_error_limit_time * 60]);
                     self::setError('您已达到最大重试次数,请等待' . $password_error_limit_time . '分钟后重试');
+                } elseif ($errors_exceeds_limit_password && $errors_exceeds_limit_password <= $errorCount) {
+                    self::setError('账号已锁定，请联系管理员');
                 } else {
                     if ($errors_exceeds_limit_password) {
                         self::setError('用户密码不正确,您还可继续重试' . (int)($errors_exceeds_limit_password - $errorCount) . '次');
@@ -689,8 +691,24 @@ class Users extends BaseModel
 
             $content_uid = $content;
 
+            $userMap = [];
+            if ($match_name) {
+                $rows = db('users')->whereIn('user_name', $match_name)
+                    ->whereOr('nick_name', 'in', $match_name)
+                    ->whereOr('email', 'in', $match_name)
+                    ->whereOr('mobile', 'in', $match_name)
+                    ->select()->toArray();
+                foreach ($rows as $row) {
+                    foreach (['user_name', 'nick_name', 'email', 'mobile'] as $field) {
+                        if (!empty($row[$field])) {
+                            $userMap[$row[$field]] = $row;
+                        }
+                    }
+                }
+            }
+
             foreach ($match_name as $user_name) {
-                $user_info = self::checkUserExist($user_name);
+                $user_info = $userMap[$user_name] ?? null;
                 if ($user_info) {
                     $content = str_replace('@' . $user_name, '<a href="' . get_user_url($user_info['uid'])  . '" class="dask-username text-primary me-1" data-id="' . $user_info['uid'] . '" target="_blank">@' . $user_info['nick_name'] . '</a>', $content);
                     if ($to_uid) {
@@ -1085,7 +1103,7 @@ class Users extends BaseModel
             $map[] = ['uid', '=', $user['uid']];
             $online_id = db('users_online')->where($map)->value('id');
             $last_url = request()->url();
-            $user_agent = $_SERVER['HTTP_USER_AGENT'];
+            $user_agent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI');
 
             $data = array();
             $data['uid'] = $user['uid'];

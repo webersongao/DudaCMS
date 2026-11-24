@@ -70,6 +70,7 @@ class Dask extends Command
                 'status'=>1,
                 'wait_time'=>0
             ]);
+            \app\model\Article::syncAfterPublish($v['id']);
             $this->setTaskProgress('正在处理【'.($k+1).'条数据】',  sprintf("%.2f",(($k+1)/$count)*100));
         }
         $this->setTaskProgress("数据处理完成", 100);

@@ -728,7 +728,7 @@ class Question extends BaseModel
 
         $return = [];
         foreach ($question_infos as $key => $val) {
-            $val['best_info'] = $infos[$val['id']];
+            $val['best_info'] = $infos[$val['id']] ?? [];
             $return[$val[$array_key]][] = $val;
         }
 

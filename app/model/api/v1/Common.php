@@ -40,7 +40,7 @@ class Common extends BaseModel
     {
         $per_page = $per_page ?: intval(get_setting('contents_per_page'));
         $list = [];
-        $key = $category_id . '-' . $item_type . '-' . $page . '-' . $per_page . '-' . $relation_uid;
+        $key = $category_id . '-' . $item_type . '-' . $page . '-' . $per_page . '-' . $relation_uid . '-' . (int) $uid;
         $cache_key = 'cache_explore_data_' . $key;
         if ($cache_explore_time = get_setting('cache_explore_time')) {
             $list = cache($cache_key);
@@ -83,7 +83,7 @@ class Common extends BaseModel
             }
         }
 
-        $list = db('post_relation')->where($where)->orderRaw('is_recommend DESC,RAND()')->field('id,item_id,item_type,uid')->paginate(
+        $list = db('post_relation')->where($where)->orderRaw('is_recommend DESC,id DESC')->field('id,item_id,item_type,uid')->paginate(
             [
                 'list_rows' => $per_page,
                 'page' => $page,
@@ -110,7 +110,7 @@ class Common extends BaseModel
     {
         $per_page = $per_page ?: intval(get_setting('contents_per_page'));
         $result_list = [];
-        $key = $sort . '-' . $item_type . '-' . $page . '-' . $per_page . '-' . $relation_uid;
+        $key = $sort . '-' . $item_type . '-' . $page . '-' . $per_page . '-' . $relation_uid . '-' . (int) $uid;
         $cache_key = 'cache_api_explore_data_' . $key;
         if ($cache_explore_time = get_setting('cache_explore_time')) {
             $result_list = cache($cache_key);

@@ -123,6 +123,7 @@ class Article extends BaseModel
             if (!$article_id) {
                 throw new \RuntimeException('文章插入失败');
             }
+            cache('article_' . $article_id, null);
             //添加话题关联
             if (isset($postData['topics']) && $postData['topics']) {
                 $topics = is_array($postData['topics']) ? array_filter($postData['topics']) : explode(',', trim($postData['topics']));
@@ -211,6 +212,7 @@ class Article extends BaseModel
             $oldCover = (string) ($article_info['cover'] ?? '');
             unset($data['uid']);
             self::update($data, ['id' => intval($postData['id'])]);
+            cache('article_' . intval($postData['id']), null);
 
             // 封面替换后旧封面不再被引用，登记物理删除（事务提交后执行）。
             if ($oldCover !== '' && $oldCover !== (string) $data['cover']) {
@@ -331,17 +333,24 @@ class Article extends BaseModel
                 if (!db('article')->whereIn('id', $ids)->update(['status' => 0])) {
                     throw new \RuntimeException('文章删除失败');
                 }
-                //更新专栏文章数
+                foreach ($ids as $id) {
+                    cache('article_' . $id, null);
+                }
+                //批量更新专栏文章数
+                $columnIds = array_values(array_unique(array_filter(array_map('intval', array_column($article_infos, 'column_id')))));
+                $columnCounts = [];
+                if ($columnIds) {
+                    $columnCounts = db('article')->where(['status' => 1])->whereIn('column_id', $columnIds)
+                        ->field('column_id, COUNT(*) AS cnt')->group('column_id')->column('cnt', 'column_id');
+                }
                 foreach ($article_infos as $article_info) {
                     if ($article_info['column_id']) {
-                        $post_count = db('article')->where(['column_id' => $article_info['column_id'], 'status' => 1])->count();
-                        Column::update(['post_count' => $post_count], ['id' => $article_info['column_id']]);
+                        Column::update(['post_count' => (int) ($columnCounts[(int) $article_info['column_id']] ?? 0)], ['id' => $article_info['column_id']]);
                     }
-                    //逻辑删除行为记录
                     LogHelper::removeActionLog('article', $article_info['id']);
                     PostRelation::updatePostRelation($article_info['id'], 'article', ['status' => 0]);
-                    db('browse_records')->whereIn('item_id', $ids)->where(['item_type' => 'article'])->update(['status' => 0]);
                 }
+                db('browse_records')->whereIn('item_id', $ids)->where(['item_type' => 'article'])->update(['status' => 0]);
             }
             // 提交事务后再删除物理文件，避免回滚导致文件先丢失。
             \think\facade\Db::commit();
@@ -374,14 +383,21 @@ class Article extends BaseModel
             if (!db('article')->whereIn('id', $ids)->update(['status' => 1])) {
                 throw new \RuntimeException('文章恢复失败');
             }
+            foreach ($ids as $id) {
+                cache('article_' . $id, null);
+            }
             db('browse_records')->whereIn('item_id', $ids)->where(['item_type' => 'article'])->update(['status' => 1]);
-            //更新专栏文章数
+            //批量更新专栏文章数
+            $columnIds = array_values(array_unique(array_filter(array_map('intval', array_column($article_infos, 'column_id')))));
+            $columnCounts = [];
+            if ($columnIds) {
+                $columnCounts = db('article')->where(['status' => 1])->whereIn('column_id', $columnIds)
+                    ->field('column_id, COUNT(*) AS cnt')->group('column_id')->column('cnt', 'column_id');
+            }
             foreach ($article_infos as $article_info) {
                 if ($article_info['column_id']) {
-                    $post_count = db('article')->where(['column_id' => $article_info['column_id'], 'status' => 1])->count();
-                    Column::update(['post_count' => $post_count], ['id' => $article_info['column_id']]);
+                    Column::update(['post_count' => (int) ($columnCounts[(int) $article_info['column_id']] ?? 0)], ['id' => $article_info['column_id']]);
                 }
-                //逻辑删除行为记录
                 LogHelper::recordActionLog('article', $article_info['id']);
                 PostRelation::updatePostRelation($article_info['id'], 'article', ['status' => 1]);
             }
@@ -416,6 +432,30 @@ class Article extends BaseModel
                 db('column')->where(['id' => $info['column_id']])->inc('view_count')->update();
             }
         }
+        return true;
+    }
+
+    /**
+     * 定时发布上线后的统计与聚合同步，供正常发布/定时任务复用
+     */
+    public static function syncAfterPublish($id): bool
+    {
+        $article = db('article')->where('id', $id)->find();
+        if (!$article || (int) $article['status'] !== 1) {
+            return false;
+        }
+        $articleCount = self::where(['uid' => $article['uid'], 'status' => 1])->count();
+        Users::updateUserFiled($article['uid'], ['article_count' => $articleCount], null, true);
+        if (!empty($article['column_id'])) {
+            $postCount = self::where(['column_id' => $article['column_id'], 'status' => 1])->count();
+            Column::update(['post_count' => $postCount], ['id' => $article['column_id']]);
+            LogHelper::addActionLog('create_column_article', 'column', $article['column_id'], $article['uid'], '0', 0, 'article', $id);
+        }
+        LogHelper::addActionLog('publish_article', 'article', $id, $article['uid']);
+        LogHelper::addCreditLog('NEW_ARTICLE', $id, 'article', $article['uid']);
+        PostRelation::savePostRelation($id, 'article');
+        ElasticSearch::instance()->update('article', $article);
+        cache('article_' . $id, null);
         return true;
     }
 

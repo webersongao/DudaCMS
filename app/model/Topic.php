@@ -466,15 +466,25 @@ class Topic extends BaseModel
      */
     public static function updateTopicDiscussCount($topic_ids): bool
     {
-        $topic_ids = is_array($topic_ids) ? $topic_ids : explode(',', $topic_ids);
+        $topic_ids = array_values(array_unique(array_filter(array_map('intval', is_array($topic_ids) ? $topic_ids : explode(',', $topic_ids)))));
+        if (!$topic_ids) {
+            return true;
+        }
+        $week = time() - 7 * 86400;
+        $month = time() - 30 * 86400;
+        $rows = db('topic_relation')->where(['status' => 1])->whereIn('topic_id', $topic_ids)
+            ->fieldRaw('topic_id, COUNT(*) AS discuss, SUM(CASE WHEN create_time > ' . $week . ' THEN 1 ELSE 0 END) AS discuss_week, SUM(CASE WHEN create_time > ' . $month . ' THEN 1 ELSE 0 END) AS discuss_month')
+            ->group('topic_id')->select();
+        $stats = [];
+        foreach ($rows as $row) {
+            $stats[(int) $row['topic_id']] = $row;
+        }
         foreach ($topic_ids as $topic_id) {
-            $discuss = db('topic_relation')->where(['topic_id' => $topic_id, 'status' => 1])->count();
-            $discuss_week = db('topic_relation')->where([['topic_id', '=', $topic_id], ['status', '=', 1], ['create_time', '>', time() - (7 * ONE_DAY)]])->count();
-            $discuss_month = db('topic_relation')->where([['topic_id', '=', $topic_id], ['status', '=', 1], ['create_time', '>', time() - (30 * ONE_DAY)]])->count();
+            $stat = $stats[$topic_id] ?? ['discuss' => 0, 'discuss_week' => 0, 'discuss_month' => 0];
             db('topic')->where('id', $topic_id)->update([
-                'discuss' => $discuss,
-                'discuss_week' => $discuss_week,
-                'discuss_month' => $discuss_month,
+                'discuss' => (int) $stat['discuss'],
+                'discuss_week' => (int) $stat['discuss_week'],
+                'discuss_month' => (int) $stat['discuss_month'],
                 'discuss_update' => time()
             ]);
         }

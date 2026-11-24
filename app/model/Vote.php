@@ -126,7 +126,8 @@ class Vote extends BaseModel
 		db($item_type)->where(['id' => $item_id])->update(['agree_count' => $agree_count, 'against_count' => $against_count]);
 
 		// 更新作者的被赞同数
-		$user_question_agree_count = db('question_vote')->where(['vote_value' => 1, 'item_uid' => $vote_uid])->count();
+		$user_question_agree_count = db('question_vote')->where(['vote_value' => 1, 'item_uid' => $vote_uid])
+			->whereIn('item_type', ['question', 'answer'])->count();
 		$user_article_agree_count = db('article_vote')->where(['vote_value' => 1, 'item_uid' => $vote_uid])->count();
 		$user_agree_count = $user_article_agree_count + $user_question_agree_count;
 

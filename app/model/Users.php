@@ -39,6 +39,16 @@ class Users extends BaseModel
     public static $_user;
     public static $_is_login;
 
+    /** 前台资料可更新字段白名单 */
+    public const PROFILE_FIELDS = [
+        'nick_name', 'avatar', 'signature', 'birthday', 'url_token', 'sex', 'user_banner', 'is_first_login',
+    ];
+
+    /** 任何入口都禁止通过通用更新接口改写的字段 */
+    public const IMMUTABLE_FIELDS = [
+        'uid', 'group_id', 'status', 'forbidden_ip', 'client', 'credit_group_id',
+    ];
+
     /**
      * 删除用户
      * @param $uid
@@ -441,6 +451,41 @@ class Users extends BaseModel
     }
 
     /**
+     * 批量获取用户展示信息，替代列表里逐行 getUserInfoByUid()
+     */
+    public static function getUserInfoMapByUids(array $uids): array
+    {
+        $uids = array_values(array_unique(array_filter(array_map('intval', $uids))));
+        if (!$uids) {
+            return [];
+        }
+        $rows = db('users')->whereIn('uid', $uids)->select()->toArray();
+        $verifyRows = db('users_verify_type')->where(['status' => 1])->field('name,icon,title')->select()->toArray();
+        $verifyTypes = [];
+        foreach ($verifyRows as $verifyRow) {
+            $verifyTypes[$verifyRow['name']] = $verifyRow;
+        }
+        $domain = request()->domain();
+        $map = [];
+        foreach ($rows as $row) {
+            $uid = (int) $row['uid'];
+            $row['avatar'] = $row['avatar']
+                ? ImageHelper::replaceImageUrl($row['avatar'])
+                : $domain . '/static/common/image/default-avatar.svg';
+            if (!isset($row['signature']) || !$row['signature']) {
+                $row['signature'] = '暂无个人签名...';
+            }
+            $row['url'] = get_user_url($uid);
+            $row['name'] = $row['nick_name'] ?? '';
+            $verifyInfo = $row['verified'] ? ($verifyTypes[$row['verified']] ?? []) : [];
+            $row['verified_icon'] = $verifyInfo['icon'] ?? '';
+            $row['verified_name'] = $verifyInfo['title'] ?? '';
+            $map[$uid] = $row;
+        }
+        return $map;
+    }
+
+    /**
      * 获取用户组信息
      * @param int $uid
      * @return array|mixed
@@ -534,12 +579,22 @@ class Users extends BaseModel
      * @param $uid
      * @param $data //主表用户信息
      * @param $extend //附加表用户信息
+     * @param bool $trusted 是否来自内部可信业务（密码/积分/认证等）
      * @return mixed
      */
-    public static function updateUserFiled($uid, $data = null, $extend = null): bool
+    public static function updateUserFiled($uid, $data = null, $extend = null, bool $trusted = false): bool
     {
         // 更新主表
         if ($data) {
+            if (!$trusted) {
+                $data = array_intersect_key($data, array_flip(self::PROFILE_FIELDS));
+            }
+            if (!$data) {
+                return false;
+            }
+            if (array_intersect_key($data, array_flip(self::IMMUTABLE_FIELDS))) {
+                return false;
+            }
             $oldAvatar = isset($data['avatar'])
                 ? (string) db('users')->where(['uid' => $uid])->value('avatar')
                 : '';
@@ -573,6 +628,18 @@ class Users extends BaseModel
         }
 
         return true;
+    }
+
+    /**
+     * 仅更新前台资料白名单字段，禁止批量赋值敏感列
+     */
+    public static function updateProfileFields($uid, array $data, $extend = null): bool
+    {
+        $clean = array_intersect_key($data, array_flip(self::PROFILE_FIELDS));
+        if (!$clean) {
+            return false;
+        }
+        return self::updateUserFiled($uid, $clean, $extend, false);
     }
 
     /**

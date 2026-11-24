@@ -261,7 +261,7 @@ class Account extends Frontend
         }
 
         //更新邮箱验证状态
-        if(Users::updateUserFiled($codeInfo['uid'],['is_valid_email'=>1]))
+        if(Users::updateUserFiled($codeInfo['uid'],['is_valid_email'=>1], null, true))
         {
             //更新用户组
             db('users')->where(['uid'=>$codeInfo['uid']])->update(['group_id'=>4]);
@@ -390,14 +390,14 @@ class Account extends Frontend
                 $this->error('该自定义链接已存在！');
             }
 
-            if(Users::updateUserFiled($this->user_id,$postData))
+            if(Users::updateProfileFields($this->user_id,$postData))
             {
-                if($postData['signature'] && $postData['signature']!=$this->user_info['signature'] && $postData['signature']!='')
+                if(!empty($postData['signature']) && $postData['signature']!=$this->user_info['signature'])
                 {
                     LogHelper::addCreditLog('UPDATE_SIGNATURE',$this->user_id,'users',$this->user_id);
                 }
 
-                if($postData['avatar'] && $postData['avatar']!=$this->user_info['avatar'] && $postData['avatar']!='/static/common/image/default-avatar.svg')
+                if(!empty($postData['avatar']) && $postData['avatar']!=$this->user_info['avatar'] && $postData['avatar']!='/static/common/image/default-avatar.svg')
                 {
                     LogHelper::addCreditLog('UPLOAD_AVATAR',$this->user_id,'users',$this->user_id);
                 }
@@ -435,7 +435,7 @@ class Account extends Frontend
             Users::updateUserFiled($this->user_id,[
                 'email'=>$postData['new_email'],
                 'is_valid_email'=>0
-            ]);
+            ], null, true);
 
             $this->success('邮箱修改成功');
         }
@@ -480,7 +480,7 @@ class Account extends Frontend
             Users::updateUserFiled($this->user_id,[
                 'url_token'=>$postData['new_url_token'],
                 'url_token_modified'=>1
-            ]);
+            ], null, true);
 
             $this->success('个性域名修改成功');
         }
@@ -558,7 +558,7 @@ class Account extends Frontend
                     {
                         $this->error('该手机号已存在');
                     }
-                    Users::updateUserFiled($this->user_id,['mobile'=>$postData['mobile']]);
+                    Users::updateUserFiled($this->user_id,['mobile'=>$postData['mobile']], null, true);
                     $this->success('修改成功','setting/profile');
                     break;
             }
@@ -608,7 +608,7 @@ class Account extends Frontend
                 $this->error($e->getError());
             }
 
-            if (!Users::updateUserFiled($this->user_id, ['salt' => RandomHelper::alnum(), 'password' => $postData['password']])) $this->error('提交失败或数据无变化');
+            if (!Users::updateUserFiled($this->user_id, ['salt' => RandomHelper::alnum(), 'password' => $postData['password']], null, true)) $this->error('提交失败或数据无变化');
 
             $this->success('密码修改成功');
         }
@@ -631,7 +631,7 @@ class Account extends Frontend
             unset($postData['uid']);
             $postData['birthday'] = strtotime($postData['birthday']);
             $postData['is_first_login'] = 0;
-            Users::updateUserFiled($this->user_id,$postData);
+            Users::updateProfileFields($this->user_id,$postData);
             $this->success('资料更新成功');
         }
         return $this->fetch();

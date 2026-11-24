@@ -218,15 +218,55 @@ trait Jump
     protected function getUrl($url)
     {
         if (is_null($url) && isset($_SERVER["HTTP_REFERER"])) {
-            $url = base64_decode(session('return_url'));
-        } elseif (is_string($url)) {
-            $url = (string)$url;
-            $url = (strpos($url, '://') || 0 === strpos($url, '/')) ? $url : app('route')->buildUrl($url)->__toString();
-        }elseif(is_object($url))
-        {
-            $url = (string)$url;
+            $url = base64_decode((string) session('return_url'));
+        } elseif (is_object($url)) {
+            $url = (string) $url;
+        } elseif (!is_string($url)) {
+            return '/';
         }
-        return $url;
+
+        $url = trim((string) $url);
+        if ($url === '') {
+            return '/';
+        }
+        if (strpos($url, '//') === 0) {
+            return '/';
+        }
+        if (strpos($url, '/') === 0) {
+            return $url;
+        }
+
+        $parts = parse_url($url);
+        if (!is_array($parts)) {
+            return '/';
+        }
+        if (isset($parts['scheme'])) {
+            $scheme = strtolower((string) $parts['scheme']);
+            $host = strtolower((string) ($parts['host'] ?? ''));
+            if (!in_array($scheme, ['http', 'https'], true) || !$this->isAllowedRedirectHost($host)) {
+                return '/';
+            }
+            return $url;
+        }
+
+        return (string) app('route')->buildUrl($url)->__toString();
+    }
+
+    /**
+     * 仅允许站内主机或 .env 中 app.allowed_redirect_hosts 白名单主机
+     */
+    protected function isAllowedRedirectHost(string $host): bool
+    {
+        if ($host === '') {
+            return false;
+        }
+        $siteHost = strtolower((string) request()->host());
+        $siteHost = (string) preg_replace('/:\d+$/', '', $siteHost);
+        if ($host === $siteHost) {
+            return true;
+        }
+        $allowed = array_filter(array_map('trim', explode(',', (string) env('app.allowed_redirect_hosts', ''))));
+        return in_array($host, array_map('strtolower', $allowed), true);
     }
 
     /**

@@ -22,6 +22,7 @@ use app\model\Question;
 use app\model\Report;
 use app\model\Topic;
 use app\model\Vote;
+use think\facade\Db;
 
 class RegexpSearch
 {
@@ -37,68 +38,80 @@ class RegexpSearch
      */
     public function search($keywords, string $type = '', int $uid = 0, array $sort = [], $page = 1, $per_page = 10)
     {
-        //$keywords = implode('|', $keywords);
-        $page = $page > 1 ? intval(intval($page) - 1) : 0;
-        $limit = $page * $per_page;
-        if (!$type) {
-            $search_type_list = db('search_engine')->where(['status' => 1, 'search_engine' => get_setting('search_handle', 'regexp')])->column('name,search_field,pk,union_sql');
-            $sql = [];
-            foreach ($search_type_list as $k => $v) {
-                $search_field = explode('|', $v['search_field']);
-                $sql1 = [];
-                foreach ($search_field as $k1 => $v1) {
-                    if (is_array($keywords)) {
-                        $tmpSql = [];
-                        foreach ($keywords as $key) {
-                            $tmpSql[] = $v1 . " regexp '(" . $key . ")'";
-                        }
-                        if ($tmpSql) {
-                            $sql1[$k1] = implode(' AND ', $tmpSql);
-                        }
-                    } else {
-                        $sql1[$k1] = $v1 . " regexp '" . $keywords . "'";
-                    }
-                }
+        $page = max(1, intval($page));
+        $per_page = max(1, intval($per_page));
+        $offset = ($page - 1) * $per_page;
 
-                $sql[$k] = '(' . db($v['name'])
-                    ->whereRaw('status=1 AND (' . implode(' OR ', $sql1) . ')')
-                    ->field($v['pk'] . " as id," . $v['union_sql'] . ",'" . $v['name'] . "' as search_type")
-                    ->order('create_time', 'DESC')
-                    ->fetchSql()
-                    ->select() . ')';
-            }
-            $union_sql = implode(' UNION ', $sql);
-            $searchResult = \think\facade\Db::query($union_sql . ' LIMIT ' . intval($limit) . ',' . intval($per_page));
-            $totalCount =  \think\facade\Db::query($union_sql);
-        } else {
-            $search_type = db('search_engine')->where(['name' => trim($type), 'status' => 1, 'search_engine' => get_setting('search_handle', 'regexp')])->field('name,search_field,pk,union_sql')->find();
-            $search_field = explode('|', $search_type['search_field']);
-            $sql1 = [];
-            foreach ($search_field as $k1 => $v1) {
-                if (is_array($keywords)) {
-                    $tmpSql = [];
-                    foreach ($keywords as $key) {
-                        $tmpSql[] = $v1 . " regexp '(" . $key . ")'";
-                    }
-                    if ($tmpSql) {
-                        $sql1[$k1] = implode(' AND ', $tmpSql);
-                    }
-                } else {
-                    $sql1[$k1] = $v1 . " regexp '" . $keywords . "'";
-                }
-            }
-
-            $sql = db($search_type['name'])
-                ->whereRaw('status=1 AND (' . implode(' OR ', $sql1) . ')')
-                ->field($search_type['pk'] . " as id," . $search_type['union_sql'] . ",'" . $search_type['name'] . "' as search_type")
-                ->order('create_time', 'DESC')
-                ->fetchSql()
-                ->select();
-            $searchResult = \think\facade\Db::query($sql . ' LIMIT ' . intval($limit) . ',' . intval($per_page));
-            $totalCount =  \think\facade\Db::query($sql);
+        $keywords = is_array($keywords) ? $keywords : explode(' ', (string) $keywords);
+        $keywords = array_values(array_filter(array_map(static function ($item) {
+            return self::normalizeKeyword((string) $item);
+        }, $keywords)));
+        if (!$keywords) {
+            return false;
         }
-        $totalCount = count($totalCount);
-        return $this->parseMixResult($keywords, $searchResult, $uid, $totalCount);
+
+        $where = [
+            ['status', '=', 1],
+            ['search_engine', '=', get_setting('search_handle', 'regexp')],
+        ];
+        if ($type !== '') {
+            if (preg_match('/^[A-Za-z0-9_]+$/', $type) !== 1) {
+                return false;
+            }
+            $where[] = ['name', '=', trim($type)];
+        }
+        $types = db('search_engine')->where($where)->field('name,search_field,pk,union_sql')->select()->toArray();
+        if (!$types) {
+            return false;
+        }
+
+        $prefix = (string) config('database.connections.mysql.prefix');
+        $mainSelects = [];
+        $countSelects = [];
+        $bindings = [];
+
+        foreach ($types as $typeInfo) {
+            $table = self::safeIdentifier((string) $typeInfo['name']);
+            $pk = self::safeIdentifier((string) $typeInfo['pk']);
+            $unionSql = self::safeUnionSql((string) $typeInfo['union_sql']);
+
+            $fields = [];
+            foreach (explode('|', (string) $typeInfo['search_field']) as $field) {
+                $field = self::safeIdentifier(trim($field));
+                if ($field !== '') {
+                    $fields[] = $field;
+                }
+            }
+            if ($table === '' || $pk === '' || $unionSql === '' || !$fields) {
+                continue;
+            }
+
+            $conditions = [];
+            foreach ($fields as $field) {
+                $parts = [];
+                foreach ($keywords as $keyword) {
+                    $parts[] = $field . ' REGEXP ?';
+                    $bindings[] = $keyword;
+                }
+                $conditions[] = '(' . implode(' AND ', $parts) . ')';
+            }
+            $conditionSql = 'status=1 AND (' . implode(' OR ', $conditions) . ')';
+            $fieldList = $pk . ' AS id,' . $unionSql . ',create_time AS sort_time,\'' . $table . '\' AS search_type';
+            $mainSelects[] = 'SELECT ' . $fieldList . ' FROM `' . $prefix . $table . '` WHERE ' . $conditionSql;
+            $countSelects[] = 'SELECT ' . $pk . ' AS id,\'' . $table . '\' AS search_type FROM `' . $prefix . $table . '` WHERE ' . $conditionSql;
+        }
+
+        if (!$mainSelects) {
+            return false;
+        }
+
+        $unionMain = '((' . implode(') UNION (', $mainSelects) . '))';
+        $unionCount = '((' . implode(') UNION (', $countSelects) . '))';
+        $searchResult = Db::query('SELECT * FROM ' . $unionMain . ' AS __search_result ORDER BY sort_time DESC LIMIT ' . $offset . ',' . $per_page, $bindings);
+        $countRow = Db::query('SELECT COUNT(*) AS total FROM ' . $unionCount . ' AS __search_count', $bindings);
+        $totalRow = isset($countRow[0]['total']) ? (int) $countRow[0]['total'] : 0;
+
+        return $this->parseMixResult($keywords, $searchResult, $uid, $totalRow);
     }
 
     /**
@@ -114,154 +127,300 @@ class RegexpSearch
         if (empty($contents)) {
             return false;
         }
+        $uid = (int) $uid;
+        $questionIds = $articleIds = $answerIds = $topicResultIds = [];
 
-        $question_ids = $article_ids = $answer_ids = $question_infos = $article_infos = $answer_infos =  array();
-
-        foreach ($contents as $key => $data) {
+        foreach ($contents as $data) {
+            $id = (int) $data['id'];
             switch ($data['search_type']) {
                 case 'question':
-                    $question_ids[] = $data['id'];
+                    $questionIds[] = $id;
                     break;
-
                 case 'article':
-                    $article_ids[] = $data['id'];
+                    $articleIds[] = $id;
                     break;
-
                 case 'answer':
-                    $answer_ids[] = $data['id'];
+                    $answerIds[] = $id;
+                    break;
+                case 'topic':
+                    $topicResultIds[] = $id;
                     break;
             }
         }
+        $questionIds = array_values(array_unique(array_filter($questionIds)));
+        $articleIds = array_values(array_unique(array_filter($articleIds)));
+        $answerIds = array_values(array_unique(array_filter($answerIds)));
+        $topicResultIds = array_values(array_unique(array_filter($topicResultIds)));
 
-        $topic_infos = array();
-
-        if ($question_ids) {
-            //$last_answers = Answer::getLastAnswerByIds($question_ids);
-            $topic_infos['question'] = Topic::getTopicByItemIds($question_ids, 'question');
-            $question_infos = Question::getQuestionByIds($question_ids);
+        $articleInfos = $answerInfos = [];
+        if ($articleIds) {
+            $articleInfos = Article::getArticleByIds($articleIds);
+        }
+        if ($answerIds) {
+            $answerInfos = Answer::getAnswerInfoByIds($answerIds);
         }
 
-        if ($article_ids) {
-            $topic_infos['article'] = Topic::getTopicByItemIds($article_ids, 'article');
-            $article_infos = Article::getArticleByIds($article_ids);
-        }
-
-        if (array_unique($answer_ids)) {
-            $answer_infos = Answer::getAnswerInfoByIds($answer_ids);
-        }
-
-        $result_list = array();
-
-        foreach ($contents as $key => $data) {
-            if ($data['search_type'] == 'question' && $question_infos && isset($question_infos[$data['id']])) {
-                $result_list[$key] = $question_infos[$data['id']];
-                $detail = $result_list[$key]['detail'];
-                $detail = htmlspecialchars_decode($detail);
-                $result_list[$key]['vote_value'] = Vote::getVoteByType($data['id'], 'question', $uid);
-                if (is_array($keyword)) {
-                    foreach ($keyword as $q) {
-                        $detail = mb_chunk_split($q, strip_tags($detail), 200);
-                        $result_list[$key]['title'] = mb_chunk_split($q, $result_list[$key]['title'], 100);
-                    }
-                } else {
-                    $detail = mb_chunk_split($keyword, strip_tags($detail), 200);
-                    $result_list[$key]['title'] = mb_chunk_split($keyword, $result_list[$key]['title'], 100);
-                }
-
-                //是否已回答
-                $result_list[$key]['is_answer'] = $uid ? db('answer')->where(['uid' => $uid, 'question_id' => $data['id'], 'status' => 1])->value('id') : 0;
-
-                $result_list[$key]['detail'] = $detail;
-                $cover = ImageHelper::srcList($detail);
-                $result_list[$key]['img_list'] = $cover;
-                $result_list[$key]['url'] = (string)url('question/detail', ['id' => $data['id']]);
-                $result_list[$key]['is_favorite'] = UsersFavorite::checkFavorite($uid, 'question', $data['id']);
-                $result_list[$key]['vote_value'] = Vote::getVoteByType($data['id'], 'question', $uid);
-                $result_list[$key]['search_type'] = 'question';
-                $result_list[$key]['topics'] = $topic_infos['question'][$data['id']] ?? [];
-                $result_list[$key]['user_info'] = Users::getUserInfoByUid($question_infos[$data['id']]['uid']);
-                $result_list[$key]['has_focus'] = FocusLogic::checkUserIsFocus($uid, 'question', $data['id']) ? 1 : 0;
-            } elseif ($data['search_type'] == 'article' && $article_infos  && isset($article_infos[$data['id']])) {
-                $result_list[$key] = $article_infos[$data['id']];
-                $result_list[$key]['img_list'] = ImageHelper::srcList(htmlspecialchars_decode($article_infos[$data['id']]['message']));
-                if (is_array($keyword)) {
-                    foreach ($keyword as $q) {
-                        $result_list[$key]['message'] = mb_chunk_split($q, strip_tags(htmlspecialchars_decode($result_list[$key]['message'])), 100);
-                        $result_list[$key]['title'] = mb_chunk_split($q, $result_list[$key]['title'], 100);
-                    }
-                } else {
-                    $result_list[$key]['message'] = mb_chunk_split($keyword, strip_tags(htmlspecialchars_decode($result_list[$key]['message'])), 100);
-                    $result_list[$key]['title'] = mb_chunk_split($keyword, $result_list[$key]['title'], 100);
-                }
-
-                $result_list[$key]['search_type'] = 'article';
-                $result_list[$key]['url'] = (string)url('article/detail', ['id' => $data['id']]);
-                $result_list[$key]['is_favorite'] = UsersFavorite::checkFavorite($uid, 'article', $data['id']);
-                $result_list[$key]['is_report'] = Report::getReportInfo($data['id'], 'article', $uid);
-                $result_list[$key]['topics'] = $topic_infos['article'][$data['id']] ?? [];
-                $result_list[$key]['user_info'] = Users::getUserInfoByUid($article_infos[$data['id']]['uid']);
-                $result_list[$key]['column_info'] = $article_infos[$data['id']]['column_id'] ? Column::where(['verify' => 1])->column('name,cover,uid,post_count,join_count') : false;
-                $result_list[$key]['vote_value'] = Vote::getVoteByType($data['id'], 'article', $uid);
-            } elseif ($data['search_type'] == 'users' && $user_info = Users::getUserInfoByUid($data['id'])) {
-                $result_list[$key] = $user_info;
-                if (is_array($keyword)) {
-                    foreach ($keyword as $q) {
-                        $user_info['name'] = mb_chunk_split($q, $user_info['name'], 100);
-                    }
-                } else {
-                    $user_info['name'] = mb_chunk_split($keyword, $user_info['name'], 100);
-                }
-                $result_list[$key]['name'] = $user_info['name'];
-                $result_list[$key]['url'] =  get_user_url($user_info['uid']);
-                $result_list[$key]['search_type'] = 'users';
-                $result_list[$key]['has_focus'] = FocusLogic::checkUserIsFocus($uid, 'user', $data['id']) ? 1 : 0;
-            } elseif ($data['search_type'] == 'topic' && $topic_info = db('topic')->where(['id' => $data['id']])->find()) {
-                $result_list[$key] = $topic_info;
-                if (is_array($keyword)) {
-                    foreach ($keyword as $q) {
-                        $topic_info['title'] = mb_chunk_split($q, $topic_info['title'], 100);
-                        $topic_info['description'] = mb_chunk_split($q, htmlspecialchars_decode($topic_info['description']), 100);
-                    }
-                } else {
-                    $topic_info['title'] = mb_chunk_split($keyword, $topic_info['title'], 100);
-                    $topic_info['description'] = mb_chunk_split($keyword, strip_tags(htmlspecialchars_decode($topic_info['description'])), 100);
-                }
-
-                $result_list[$key]['title'] = $topic_info['title'];
-                $result_list[$key]['url'] = (string)url('topic/detail', ['id' => $data['id']]);
-                $result_list[$key]['description'] = $topic_info['description'];
-                $result_list[$key]['has_focus'] = FocusLogic::checkUserIsFocus($uid, 'topic', $topic_info['id']) ? 1 : 0;
-                $result_list[$key]['search_type'] = 'topic';
-            } elseif ($data['search_type'] == 'answer') {
-                if ($answer_infos && isset($answer_infos[$data['id']])) {
-                    $answer_info = $answer_infos[$data['id']];
-                    $question_id = $answer_info['question_id'];
-                    $user_info = Users::getUserInfoByUid($answer_info['uid']);
-                    $result_list[$key] = Question::getQuestionInfo($question_id, 'title,id,detail,answer_count,set_top');
-
-                    //是否已回答
-                    $result_list[$key]['is_answer'] = $uid ? db('answer')->where(['uid' => $uid, 'question_id' => $question_id, 'status' => 1])->value('id') : 0;
-
-                    $result_list[$key]['answer_info'] = $answer_infos[$data['id']];
-                    $result_list[$key]['answer_info']['user_info'] = $user_info;
-                    $result_list[$key]['url'] = (string)url('question/detail', ['id' => $result_list[$key]['id'], 'answer' => $result_list[$key]['answer_info']['id']]);
-                    $result_list[$key]['answer_info']['vote_value'] = Vote::getVoteByType($data['id'], 'answer', $uid);
-                    $result_list[$key]['topics'] = $topic_infos['question'][$question_id] ?? [];
-
-                    if (is_array($keyword)) {
-                        foreach ($keyword as $q) {
-                            $result_list[$key]['detail'] = '<a href="' . $user_info['url'] . '" class="dask-username" >' . $user_info['nick_name'] . '</a> :' . mb_chunk_split($q, strip_tags(htmlspecialchars_decode($answer_infos[$data['id']]['content'])), 150);
-                        }
-                    } else {
-                        $result_list[$key]['detail'] = '<a href="' . $user_info['url'] . '" class="dask-username" >' . $user_info['nick_name'] . '</a> :' . mb_chunk_split($keyword, strip_tags(htmlspecialchars_decode($answer_infos[$data['id']]['content'])), 150);
-                    }
-                    $result_list[$key]['search_type'] = 'answer';
-                    $result_list[$key]['img_list'] = ImageHelper::srcList(htmlspecialchars_decode($answer_infos[$data['id']]['content']));
-                }
-            } else {
-                /*其他搜索类型从鼓励*/
+        $answerQuestionIds = [];
+        foreach ($answerInfos as $info) {
+            if (!empty($info['question_id'])) {
+                $answerQuestionIds[] = (int) $info['question_id'];
             }
         }
-        return ['list' => $result_list, 'total' => $totalRow];
+        $allQuestionIds = array_values(array_unique(array_filter(array_merge($questionIds, $answerQuestionIds))));
+
+        $questionInfos = [];
+        $topicInfos = [];
+        if ($allQuestionIds) {
+            $questionInfos = Question::getQuestionByIds($allQuestionIds);
+            $topicInfos['question'] = Topic::getTopicByItemIds($allQuestionIds, 'question');
+        }
+        if ($articleIds) {
+            $topicInfos['article'] = Topic::getTopicByItemIds($articleIds, 'article');
+        }
+
+        $userIds = [];
+        foreach ([$questionInfos, $articleInfos, $answerInfos] as $infos) {
+            foreach ($infos as $info) {
+                if (!empty($info['uid'])) {
+                    $userIds[] = (int) $info['uid'];
+                }
+            }
+        }
+        $userIds = array_values(array_unique(array_filter($userIds)));
+        $userMap = Users::getUserInfoMapByUids($userIds);
+
+        $questionVoteMap = Vote::getVoteMapByIds($questionIds, 'question', $uid);
+        $articleVoteMap = Vote::getVoteMapByIds($articleIds, 'article', $uid);
+        $answerVoteMap = Vote::getVoteMapByIds($answerIds, 'answer', $uid);
+
+        $favoriteMap = ['question' => [], 'article' => []];
+        if ($uid && ($questionIds || $articleIds)) {
+            $favTypes = [];
+            if ($questionIds) {
+                $favTypes[] = 'question';
+            }
+            if ($articleIds) {
+                $favTypes[] = 'article';
+            }
+            $rows = db('users_favorite')->where(['uid' => $uid])
+                ->whereIn('item_type', $favTypes)
+                ->whereIn('item_id', array_merge($questionIds, $articleIds))
+                ->field('item_type,item_id,id')->select();
+            foreach ($rows as $row) {
+                $favoriteMap[$row['item_type']][(int) $row['item_id']] = $row['id'];
+            }
+        }
+
+        $reportMap = [];
+        if ($uid && $articleIds) {
+            $rows = db('report')->where(['uid' => $uid, 'item_type' => 'article'])->whereIn('item_id', $articleIds)->select();
+            foreach ($rows as $row) {
+                $reportMap[(int) $row['item_id']] = $row;
+            }
+        }
+
+        $answeredMap = [];
+        if ($uid && $allQuestionIds) {
+            $rows = db('answer')->where(['uid' => $uid, 'status' => 1])
+                ->whereIn('question_id', $allQuestionIds)
+                ->field('question_id,id')->select();
+            foreach ($rows as $row) {
+                $answeredMap[(int) $row['question_id']] = $row['id'];
+            }
+        }
+
+        $topicIds = $topicResultIds;
+        foreach ($topicInfos as $byItem) {
+            foreach ($byItem as $topics) {
+                foreach ((array) $topics as $topic) {
+                    if (!empty($topic['id'])) {
+                        $topicIds[] = (int) $topic['id'];
+                    }
+                }
+            }
+        }
+        $topicIds = array_values(array_unique(array_filter($topicIds)));
+        $topicRowMap = [];
+        if ($topicIds) {
+            $rows = db('topic')->whereIn('id', $topicIds)->select();
+            foreach ($rows as $row) {
+                $topicRowMap[(int) $row['id']] = $row;
+            }
+        }
+
+        $focusMaps = [
+            'question' => FocusLogic::getFocusMapByIds($uid, 'question', $allQuestionIds),
+            'user'     => FocusLogic::getFocusMapByIds($uid, 'user', $userIds),
+            'topic'    => FocusLogic::getFocusMapByIds($uid, 'topic', $topicIds),
+        ];
+
+        $columnIds = [];
+        foreach ($articleInfos as $info) {
+            if (!empty($info['column_id'])) {
+                $columnIds[] = (int) $info['column_id'];
+            }
+        }
+        $columnIds = array_values(array_unique(array_filter($columnIds)));
+        $columnMap = [];
+        if ($columnIds) {
+            $rows = db('column')->whereIn('id', $columnIds)->where('verify', 1)
+                ->field('id,name,cover,uid,post_count,join_count')->select();
+            foreach ($rows as $row) {
+                $columnMap[(int) $row['id']] = $row;
+            }
+        }
+
+        $keywords = is_array($keyword) ? $keyword : [$keyword];
+
+        $resultList = [];
+        foreach ($contents as $key => $data) {
+            $type = $data['search_type'];
+            $id = (int) $data['id'];
+
+            if ($type === 'question' && isset($questionInfos[$id])) {
+                $row = $questionInfos[$id];
+                $detailText = strip_tags(htmlspecialchars_decode((string) ($row['detail'] ?? ''), ENT_QUOTES));
+                $titleText = strip_tags(htmlspecialchars_decode((string) ($row['title'] ?? ''), ENT_QUOTES));
+                foreach ($keywords as $q) {
+                    $row['detail'] = mb_chunk_split($q, $detailText, 200);
+                    $row['title'] = mb_chunk_split($q, $titleText, 100);
+                }
+                $row['vote_value'] = $questionVoteMap[$id] ?? 0;
+                $row['is_answer'] = $answeredMap[$id] ?? 0;
+                $row['is_favorite'] = $favoriteMap['question'][$id] ?? 0;
+                $row['has_focus'] = isset($focusMaps['question'][$id]) ? 1 : 0;
+                $row['search_type'] = 'question';
+                $row['topics'] = $topicInfos['question'][$id] ?? [];
+                $row['user_info'] = $userMap[(int) ($row['uid'] ?? 0)] ?? [];
+                $row['url'] = (string) url('question/detail', ['id' => $id]);
+                $row['img_list'] = ImageHelper::srcList($row['detail']);
+                $resultList[$key] = $row;
+            } elseif ($type === 'article' && isset($articleInfos[$id])) {
+                $row = $articleInfos[$id];
+                $messageText = strip_tags(htmlspecialchars_decode((string) ($row['message'] ?? ''), ENT_QUOTES));
+                $titleText = strip_tags(htmlspecialchars_decode((string) ($row['title'] ?? ''), ENT_QUOTES));
+                foreach ($keywords as $q) {
+                    $row['message'] = mb_chunk_split($q, $messageText, 100);
+                    $row['title'] = mb_chunk_split($q, $titleText, 100);
+                }
+                $row['img_list'] = ImageHelper::srcList($row['message']);
+                $row['is_favorite'] = $favoriteMap['article'][$id] ?? 0;
+                $row['is_report'] = $reportMap[$id] ?? null;
+                $row['topics'] = $topicInfos['article'][$id] ?? [];
+                $row['user_info'] = $userMap[(int) ($row['uid'] ?? 0)] ?? [];
+                $row['column_info'] = !empty($row['column_id']) && isset($columnMap[(int) $row['column_id']])
+                    ? $columnMap[(int) $row['column_id']] : false;
+                $row['vote_value'] = $articleVoteMap[$id] ?? 0;
+                $row['search_type'] = 'article';
+                $row['url'] = (string) url('article/detail', ['id' => $id]);
+                $resultList[$key] = $row;
+            } elseif ($type === 'users' && isset($userMap[$id])) {
+                $row = $userMap[$id];
+                $nameText = strip_tags(htmlspecialchars_decode((string) ($row['name'] ?? ''), ENT_QUOTES));
+                foreach ($keywords as $q) {
+                    $row['name'] = mb_chunk_split($q, $nameText, 100);
+                }
+                $row['url'] = get_user_url($id);
+                $row['has_focus'] = isset($focusMaps['user'][$id]) ? 1 : 0;
+                $row['search_type'] = 'users';
+                $resultList[$key] = $row;
+            } elseif ($type === 'topic' && isset($topicRowMap[$id])) {
+                $row = $topicRowMap[$id];
+                $titleText = strip_tags(htmlspecialchars_decode((string) ($row['title'] ?? ''), ENT_QUOTES));
+                $descText = strip_tags(htmlspecialchars_decode((string) ($row['description'] ?? ''), ENT_QUOTES));
+                foreach ($keywords as $q) {
+                    $row['title'] = mb_chunk_split($q, $titleText, 100);
+                    $row['description'] = mb_chunk_split($q, $descText, 100);
+                }
+                $row['url'] = (string) url('topic/detail', ['id' => $id]);
+                $row['has_focus'] = isset($focusMaps['topic'][$id]) ? 1 : 0;
+                $row['search_type'] = 'topic';
+                $resultList[$key] = $row;
+            } elseif ($type === 'answer' && isset($answerInfos[$id])) {
+                $answerInfo = $answerInfos[$id];
+                $questionId = (int) $answerInfo['question_id'];
+                if (!isset($questionInfos[$questionId])) {
+                    continue;
+                }
+                $userInfo = $userMap[(int) ($answerInfo['uid'] ?? 0)] ?? [];
+                $row = $questionInfos[$questionId];
+                $row['is_answer'] = $answeredMap[$questionId] ?? 0;
+                $row['answer_info'] = $answerInfo;
+                $row['answer_info']['user_info'] = $userInfo;
+                $row['answer_info']['vote_value'] = $answerVoteMap[$id] ?? 0;
+                $row['url'] = (string) url('question/detail', ['id' => $questionId, 'answer' => $id]);
+                $row['topics'] = $topicInfos['question'][$questionId] ?? [];
+
+                $contentText = strip_tags(htmlspecialchars_decode((string) ($answerInfo['content'] ?? ''), ENT_QUOTES));
+                $highlight = '';
+                foreach ($keywords as $q) {
+                    $highlight = mb_chunk_split($q, $contentText, 150);
+                }
+                $nick = htmlspecialchars((string) ($userInfo['nick_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $userUrl = htmlspecialchars((string) ($userInfo['url'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $row['detail'] = '<a href="' . $userUrl . '" class="dask-username" >' . $nick . '</a> :' . $highlight;
+                $row['search_type'] = 'answer';
+                $row['img_list'] = ImageHelper::srcList(htmlspecialchars_decode((string) ($answerInfo['content'] ?? ''), ENT_QUOTES));
+                $resultList[$key] = $row;
+            }
+        }
+
+        return ['list' => $resultList, 'total' => $totalRow];
+    }
+
+    /**
+     * 安全字段名/表名：仅允许字母数字下划线
+     */
+    private static function safeIdentifier(string $value): string
+    {
+        $value = trim($value);
+        return preg_match('/^[A-Za-z0-9_]+$/', $value) === 1 ? $value : '';
+    }
+
+    /**
+     * 校验搜索配置中的字段列表，例如 title,search_text as detail
+     */
+    private static function safeUnionSql(string $sql): string
+    {
+        $sql = trim($sql);
+        if ($sql === '' || preg_match('/^[A-Za-z0-9_.,\s]+$/', $sql) !== 1) {
+            return '';
+        }
+        foreach (explode(',', $sql) as $part) {
+            $part = trim($part);
+            if ($part === '') {
+                return '';
+            }
+            $segments = preg_split('/\s+as\s+/i', $part);
+            if (count($segments) > 2 || self::safeIdentifier($segments[0]) === '') {
+                return '';
+            }
+            if (isset($segments[1]) && self::safeIdentifier($segments[1]) === '') {
+                return '';
+            }
+        }
+        return $sql;
+    }
+
+    /**
+     * 只保留可读字符，转义正则元字符，保留 | 作为或语义
+     */
+    private static function normalizeKeyword(string $keyword): string
+    {
+        $keyword = trim($keyword);
+        if ($keyword === '') {
+            return '';
+        }
+        $keyword = preg_replace('/[^\p{L}\p{N}\s|]/u', '', $keyword) ?: '';
+        if (mb_substr_count($keyword, '|') > 4) {
+            $keyword = str_replace('|', '', $keyword);
+        }
+        $parts = array_filter(array_map('trim', explode('|', $keyword)), static function ($part) {
+            return $part !== '';
+        });
+        $parts = array_map(static function ($part) {
+            return preg_quote($part, '/');
+        }, $parts);
+        return implode('|', $parts);
     }
 }

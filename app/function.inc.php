@@ -198,11 +198,11 @@ if(!function_exists('mb_chunk_split'))
         while($str_len){
             $array[] = mb_substr($string, 0, $length, "utf-8");
             if($once)
-                return $array[0] . $end;
+                return htmlspecialchars($array[0] . $end, ENT_QUOTES, 'UTF-8');
             $string = mb_substr($string, $length, $str_len, "utf-8");
             $str_len = mb_strlen($string);
         }
-        $q = is_array($q) ? end($q) : $q;
+        $q = (string)(is_array($q) ? end($q) : $q);
         foreach ($array as $key => $value) {
             if(stripos($value,$q)){
                 $b=$key;
@@ -211,7 +211,13 @@ if(!function_exists('mb_chunk_split'))
         }
         $data=array_slice($array,$b,3);
         $result = count($data)>1 ? implode(" ", $data).'...':implode(" ", $data);
-        return str_ireplace($q,'<b class="'.$class.'">'.$q.'</b>',$result);
+        $result = htmlspecialchars($result, ENT_QUOTES, 'UTF-8');
+        if ($q === '') {
+            return $result;
+        }
+        $class = preg_replace('/[^A-Za-z0-9_-]/', '', $class);
+        $qSafe = htmlspecialchars($q, ENT_QUOTES, 'UTF-8');
+        return str_ireplace($qSafe, '<b class="'.$class.'">'.$qSafe.'</b>', $result);
     }
 }
 

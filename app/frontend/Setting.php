@@ -40,7 +40,7 @@ class Setting extends Frontend
     {
         if ($this->request->isPost()) {
             $postData = $this->request->post();
-            $result = Users::updateUserFiled($this->user_id, $postData);
+            $result = Users::updateProfileFields($this->user_id, $postData);
             if (!$result) {
                 $this->error('基本信息更新失败');
             }

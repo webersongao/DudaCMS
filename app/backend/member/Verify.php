@@ -211,7 +211,7 @@ class Verify extends Backend
         $status = $type == 'approval' ? 2 : 3;
         $res = db($this->table)->where(['id' => $id])->update(['status' => $status]);
         if ($status == 2 && $res) {
-            \app\model\Users::updateUserFiled($verifyInfo['uid'], ['verified' => $verifyInfo['type']]);
+            \app\model\Users::updateUserFiled($verifyInfo['uid'], ['verified' => $verifyInfo['type']], null, true);
             //用户认证通过审核钩子
         };
         $this->success('操作成功');

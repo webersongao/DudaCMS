@@ -134,7 +134,7 @@ class LogHelper
 
         db('credit_log')->insert($data);
 
-        $res = Users::updateUserFiled($uid, ['credit' => $balance]);
+        $res = Users::updateUserFiled($uid, ['credit' => $balance], null, true);
         //更新成长等级组（含邀请数量单一来源）
         Users::updateUserCreditGroup($uid);
         if (!$res) {

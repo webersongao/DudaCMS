@@ -21,6 +21,20 @@
   border-radius: 0 0 0.5rem 0.5rem;
 }
 
+/* Vditor 默认 preview.maxWidth=800 会动态注入 padding:10px Npx 把正文/工具栏居中，
+   导致编辑区远窄于外层容器（后台表单里尤其明显）。覆盖为铺满容器，编辑区与展示区同宽。 */
+.dask-editor .vditor-toolbar,
+.dask-editor .vditor-wysiwyg .vditor-reset,
+.dask-editor .vditor-ir .vditor-reset,
+.dask-editor .vditor-preview .vditor-reset {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.dask-editor .vditor-preview .vditor-reset {
+  max-width: none !important;
+}
+
 /* 编辑态块浮层：默认关闭上移/下移/删除，不影响链接编辑面板。 */
 .dask-editor--no-float .vditor-panel button[data-type="up"],
 .dask-editor--no-float .vditor-panel button[data-type="down"],

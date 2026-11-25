@@ -369,9 +369,9 @@ INSERT INTO `dask_config` VALUES (6,'email_host','3','SMTP地址','设置SMTP服
 INSERT INTO `dask_config` VALUES (7,'email_username','3','邮箱用户名','邮箱用户名,如admin@admin.com','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (8,'email_password','3','邮箱密码','邮箱密码','password','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (9,'email_secure','3','安全链接(SSL)','验证模式','radio','ssl','{\"tls\":\"否\",\"ssl\":\"是\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (10,'upload_file_size','4','文件限制','单位：KB，0表示不限制上传大小,直接填写数字,不需要带单位','text','1024','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (11,'upload_file_ext','4','文件格式','多个格式请用英文逗号（,）隔开 ','text','rar,zip,avi,rmvb,3gp,flv,mp3,mp4,txt,doc,xls,ppt,pdf,xls,docx,xlsx,doc','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (12,'upload_image_size','4','图片限制','单位：KB，0表示不限制上传大小,直接填写数字,不需要带单位','text','2048','null',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (10,'upload_file_size','4','文件限制','单位：KB，0 表示不限制上传大小','number','1024','[]',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (11,'upload_file_ext','4','文件格式','多个格式请用英文逗号（,）隔开','text','rar,zip,avi,rmvb,3gp,flv,mp3,mp4,txt,doc,xls,ppt,pdf,docx,xlsx','null',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (12,'upload_image_size','4','图片限制','单位：KB，0 表示不限制上传大小','number','2048','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (13,'upload_image_ext','4','图片格式','多个格式请用英文逗号（,）隔开 ','text','jpg,png,gif,jpeg,webp','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (15,'seo_title','1','站点标题','站点标题','text','','null',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (16,'seo_keywords','1','站点关键词','站点关键词','textarea','','null',1,NULL,1,0);
@@ -383,17 +383,11 @@ INSERT INTO `dask_config` VALUES (22,'password_max_length','5','密码最大长�
 INSERT INTO `dask_config` VALUES (23,'password_type','5','密码类型','密码类型，密码必须是选择的类型才可使用，不选则不限制','checkbox','','{\"number\":\"数字\",\"special\":\"特殊字符\",\"letter\":\"字母\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (24,'username_min_length','5','用户名最小长度','用户名最小长度','number','0','[]',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (25,'username_max_length','5','用户名最大长度','用户名最大长度','number','15','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (26,'errors_exceeds_limit_password','5','密码最大重试次数','密码最大重试次数','number','3','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (27,'password_error_limit_time','5','密码错误限制时长','密码错误限制时长，单位（分钟）','number','10','[]',50,NULL,1,0);
+INSERT INTO `dask_config` VALUES (26,'password_max_retries','5','密码最大重试次数','连续输错多少次后锁定账号，0 表示不限制','number','3','[]',50,NULL,1,0);
+INSERT INTO `dask_config` VALUES (27,'password_lock_minutes','5','账号锁定时长','触发重试上限后的锁定时长，单位：分钟，0 表示仅提示不锁定','number','10','[]',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (28,'register_agreement','5','注册协议','','textarea','当您申请用户时，表示您已经同意遵守本规章。\r\n欢迎您加入本站点参与交流和讨论，本站点为社区，为维护网上公共秩序和社会稳定，请您自觉遵守以下条款：\r\n\r\n一、不得利用本站危害国家安全、泄露国家秘密，不得侵犯国家社会集体的和公民的合法权益，不得利用本站制作、复制和传播下列信息：\r\n　（一）煽动抗拒、破坏宪法和法律、行政法规实施的；\r\n　（二）煽动颠覆国家政权，推翻社会主义制度的；\r\n　（三）煽动分裂国家、破坏国家统一的；\r\n　（四）煽动民族仇恨、民族歧视，破坏民族团结的；\r\n　（五）捏造或者歪曲事实，散布谣言，扰乱社会秩序的；\r\n　（六）宣扬封建迷信、淫秽、色情、赌博、暴力、凶杀、恐怖、教唆犯罪的；\r\n　（七）公然侮辱他人或者捏造事实诽谤他人的，或者进行其他恶意攻击的；\r\n　（八）损害国家机关信誉的；\r\n　（九）其他违反宪法和法律行政法规的；\r\n　（十）进行商业广告行为的。\r\n\r\n二、互相尊重，对自己的言论和行为负责。\r\n三、禁止在申请用户时使用相关本站的词汇，或是带有侮辱、毁谤、造谣类的或是有其含义的各种语言进行注册用户，否则我们会将其删除。\r\n四、禁止以任何方式对本站进行各种破坏行为。\r\n五、如果您有违反国家相关法律法规的行为，本站概不负责，您的登录信息均被记录无疑，必要时，我们会向相关的国家管理部门提供此类信息。','[]',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (29,'enable_column','7','启用专栏','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (30,'enable_category','7','启用分类','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (34,'popular_gravity','6','热门-刷新速度','内容变得不再热门的速度，热门刷新速度越大，一个内容刷新的就越快','number','1.5','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (35,'popular_agree_ratio','6','热门-赞同比例','计算热门时点赞数所占比例','number','2','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (36,'popular_against_ratio','6','热门-反对比例','计算热门时反对数所占比例','number','1','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (37,'popular_view_ratio','6','热门-浏览比例','计算热门时浏览数所占比例','number','2','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (38,'popular_comment_ratio','6','热门-评论比例','计算热门时评论/回复数所占比例','number','2','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (39,'popular_quality_init_value','6','热门-初始质量','内容初始质量','number','1','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (46,'cdn_url','4','资源URL','默认为空，代表当前服务器，其他服务器填写域名或IP,不带/','text','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (47,'upload_type','4','上传方式','默认为TP上传','radio','tp','{\"tp\":\"默认方式\",\"big\":\"分片上传\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (48,'footer_html','1','公共底部代码','','textarea','','null',53,NULL,1,0);
@@ -401,7 +395,7 @@ INSERT INTO `dask_config` VALUES (49,'header_html','1','公共头部代码','','
 INSERT INTO `dask_config` VALUES (50,'online_check','5','在线检测','在线检测用户在线状态','radio','N','{\"N\":\"关闭\",\"Y\":\"开启\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (51,'online_check_time','5','检测间隔','在线检测用户在线状态时间间隔，单位（分钟）','number','5','null',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (55,'sensitive_words','7','敏感词列表','内容中如出现敏感词将进入审核，支持普通字符串和正则表达式，每行一个。正则表达式请以 <code>{</code> 开始、以 <code>}</code> 结束，且需符合 <a href=\"http://cn2.php.net/manual/zh/pcre.pattern.php\" target=\"_blank\">PCRE 模式</a>，如 <code>{/敏s*感s*词/i}</code>。','textarea','','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (57,'email_port','3','邮箱端口','留空时默认服务器端口为 25，使用 SSL 协议默认端口为 465，详细参数请询问邮箱服务商','text','465','[]',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (57,'email_port','3','邮箱端口','常用端口：25（明文/STARTTLS）、465（SSL），详细参数请询问邮箱服务商','number','465','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (58,'email_from','3','显示来源','请保持和邮箱用户名同一主域下','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (59,'email_show_name','3','来源名称','显示来源名称','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (62,'search_handle','10','搜索引擎','搜索引擎选择,未安装其他搜索引擎时默认为本地数据库搜索','radio','regexp','{\"regexp\":\"系统默认\",\"ElasticSearch\":\"ElasticSearch\"}',0,NULL,1,0);
@@ -417,7 +411,6 @@ INSERT INTO `dask_config` VALUES (71,'cache_list_time','8','列表缓存周期',
 INSERT INTO `dask_config` VALUES (72,'contents_per_page','9','内容显示条数','通用内容列表显示条数','number','20','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (73,'publish_content_verify_time','9','发文验证周期','xx分钟内连续发文(问题/文章/回答)开启填写验证码，0代表不验证；单位：分钟','number','0','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (74,'publish_content_verify_num','9','发文验证','连续发文多少次开启填写验证码','number','5','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (75,'notify_type','10','通知类型','系统通知类型','checkbox','site,email','{\"site\":\"站内通知\",\"email\":\"邮件通知\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (76,'enable_frontend_captcha','7','启用前台验证码','是否启用前台登录验证码','radio','N','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (77,'enable_backend_captcha','7','启用后台验证码','是否启用后台登录验证码','radio','N','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (79,'cache_relation_list_time','8','相关数据缓存','问题/文章详情页相关数据/推荐内容缓存周期0代表不缓存，单位：分钟','number','0','[]',0,NULL,1,0);
@@ -434,13 +427,8 @@ INSERT INTO `dask_config` VALUES (91,'show_answer_user_ip','9','显示回答用�
 INSERT INTO `dask_config` VALUES (92,'invite_register_enable','5','开启邀请注册','是否开启邀请注册','radio','N','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (93,'enable_anonymous','7','是否允许匿名','是否允许匿名提问/回答问题','radio','Y','{\"Y\":\"允许\",\"N\":\"不允许\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (95,'remember_login_time','5','记住登录有效期','记住登录有效期，单位：天','number','7','null',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (96,'email_test','3','发送测试邮件','','html','','',51,'',1,0);
 INSERT INTO `dask_config` VALUES (97,'report_bug_email','1','BUG反馈接收提醒邮箱','BUG反馈接收提醒邮箱','text','','null',51,'',1,0);
 INSERT INTO `dask_config` VALUES (98,'max_topic_select','9','话题最多选择数量','话题最多选择数量','number','4','null',51,'',1,0);
-INSERT INTO `dask_config` VALUES (99,'cache_type','8','缓存方式','选择缓存方式,当选择非文件缓存时，请点击下方“检查并配置缓存链接”','radio','file','{\"file\":\"文件缓存\",\"redis\":\"Redis缓存\",\"memcached\":\"Memcached缓存\",\"memcache\":\"Memcache缓存\"}',51,'',1,0);
-INSERT INTO `dask_config` VALUES (101,'cache_host','8','链接地址','链接地址默认127.0.0.1','hidden','127.0.0.1','null',51,'',1,0);
-INSERT INTO `dask_config` VALUES (102,'cache_port','8','链接端口','链接端口','hidden','11211','null',51,'',1,0);
-INSERT INTO `dask_config` VALUES (103,'cache_password','8','链接密码','链接密码','hidden','','null',51,'',1,0);
 INSERT INTO `dask_config` VALUES (106,'pjax_enable','1','是否启用pjax','网站是否启用pjax请求','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',50,'',1,0);
 INSERT INTO `dask_config` VALUES (108,'answer_sort_type','9','默认回答排序','选择默认回答排序方式','radio','new','{\"new\":\"最新排序\",\"hot\":\"热门排序\",\"publish\":\"只看楼主\",\"focus\":\"关注的人\"}',50,'',1,0);
 INSERT INTO `dask_config` VALUES (110,'auto_question_lock_day','9','自动锁定问题天数','自动锁定问题天数 0 代表不自动锁定，单位：天','number','60','[]',0,NULL,1,0);
@@ -454,7 +442,7 @@ INSERT INTO `dask_config` VALUES (117,'default_language','7','默认站点语言
 INSERT INTO `dask_config` VALUES (118,'best_agree_min_count','9','自动设定最佳回答时该回答至少获赞数','自动设定最佳回答时该回答至少获赞数','number','3','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (119,'content_popular_value_show','9','热度值大于多少参与热度排序','热度值达到多少参与热度排序,默认大于0即参与热门排序','number','0','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (120,'upload_image_thumb_enable','4','是否启用图片压缩','是否启用图片压缩，PNG图片压缩会失去透明效果','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (121,'upload_image_thumb_percent','4','上传图片默认压缩比例','默认为0.7','text','0.7','null',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (121,'upload_image_thumb_percent','4','上传图片默认压缩比例','0 到 1 之间的小数，例如 0.7','number','0.7','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (125,'api_doc_public','7','公开展示API文档','开启后所有访客可访问 /api-docs；关闭后仅管理员可预览','radio','Y','{\"Y\":\"公开\",\"N\":\"仅管理员\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (302,'t_hm_search_title_text','12','题图主标题','留空时使用“站点名称 - 当前频道”','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (303,'t_hm_search_min_text','12','题图副标题','留空时使用默认文案','textarea','','[]',0,NULL,1,0);
@@ -481,7 +469,7 @@ INSERT INTO `dask_config` VALUES (325,'t_ad_sidebar_show_items','12','侧边栏�
 INSERT INTO `dask_config` VALUES (326,'t_ad_sidebar_diy_content','12','自定义内容','侧边栏自定义内容,支持富文本','editor','&lt;p class=&quot;p-3 bg-info mt-2&quot;&gt;这是自定义内容&lt;/p&gt;','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (327,'t_mb_index_hot_banner_enable','12','是否启用首页热门','是否启用首页热门','radio','Y','{\"N\":\"不开启\",\"Y\":\"开启\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (329,'t_mb_index_hot_user_url','12','首页热门用户URL','首页热门用户URL','text','','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (331,'t_mb_index_hot_topic_url','12','首页热门话题URL','首页热门用户URL','text','','[]',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (331,'t_mb_index_hot_topic_url','12','首页热门话题URL','首页热门话题列表链接','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (400,'editor_mode_default','13','默认编辑模式','桌面端默认模式；手机端自动使用即时渲染','radio','wysiwyg','{\"wysiwyg\":\"所见即所得\",\"ir\":\"即时渲染\",\"sv\":\"分屏预览\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (401,'editor_upload_max_image','13','图片上传上限','单位：MB；最终以“上传配置”中的服务端限制为准','number','10','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (402,'editor_upload_max_video','13','视频上传上限','单位：MB；最终以“上传配置”中的服务端限制为准','number','50','[]',0,NULL,1,0);
@@ -528,6 +516,12 @@ INSERT INTO `dask_config` VALUES (508,'sms_tencent_access_key_secret','14','腾�
 INSERT INTO `dask_config` VALUES (509,'sms_tencent_sign_name','14','腾讯云短信签名','控制台签名管理页的签名名称','text','','[]',13,NULL,1,0);
 INSERT INTO `dask_config` VALUES (510,'sms_tencent_template_code','14','腾讯云短信模板 ID','控制台模板管理页的模板 ID','text','','[]',14,NULL,1,0);
 INSERT INTO `dask_config` VALUES (511,'credit_unit','6','成长值单位','前台成长值单位','text','成长值','[]',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (512,'site_description','1','站点描述','用于页面 meta description 与侧边栏站点简介','textarea','','[]',4,NULL,1,0);
+INSERT INTO `dask_config` VALUES (513,'site_keywords','1','站点关键词','用于页面 meta keywords 与 API 输出','textarea','','[]',5,NULL,1,0);
+INSERT INTO `dask_config` VALUES (514,'upload_max_size','4','API 上传上限','供前端 API 与编辑器读取，单位：KB','number','20480','[]',1,NULL,1,0);
+INSERT INTO `dask_config` VALUES (515,'t_hm_search_enable','12','发现页搜索框','关闭后隐藏发现页顶部搜索框','radio','Y','{\"Y\":\"显示\",\"N\":\"隐藏\"}',1,NULL,1,0);
+INSERT INTO `dask_config` VALUES (516,'contact_email','1','联系邮箱','用于站点页脚与错误提示中的联系地址','text','','null',6,NULL,1,0);
+INSERT INTO `dask_config` VALUES (517,'site_favicon','1','站点图标','填写完整 URL 或以 / 开头的站内路径，留空使用默认图标','text','','null',7,NULL,1,0);
 -- ----------------------------
 -- Table structure for dask_menu_rule
 -- ----------------------------
@@ -594,10 +588,10 @@ CREATE TABLE `dask_users` (
      `birthday` BIGINT DEFAULT NULL COMMENT '生日',
      `url_token` varchar(255) DEFAULT NULL COMMENT '自定义URL',
      `url_token_modified` tinyint(1) unsigned DEFAULT '0' COMMENT '是否可修改个性域名',
-     `views_count` int(255) unsigned DEFAULT '0' COMMENT '个人主页浏览量',
+     `views_count` int(10) unsigned DEFAULT '0' COMMENT '个人主页浏览量',
      `agree_count` int(10) unsigned DEFAULT '0' COMMENT '赞同数量',
-     `question_count` int(255) unsigned DEFAULT '0' COMMENT '问题数量',
-     `answer_count` int(255) unsigned DEFAULT '0' COMMENT '回答数量',
+     `question_count` int(10) unsigned DEFAULT '0' COMMENT '问题数量',
+     `answer_count` int(10) unsigned DEFAULT '0' COMMENT '回答数量',
      `article_count` int(10) unsigned DEFAULT '0' COMMENT '发布文章数量',
      `draft_count` int(10) DEFAULT NULL COMMENT '草稿数量',
      `topic_focus_count` int(10) NOT NULL DEFAULT '0' COMMENT '关注话题数量',
@@ -702,7 +696,7 @@ CREATE TABLE `dask_links` (
      `logo` varchar(255) NOT NULL DEFAULT '' COMMENT '网站logo',
      `description` varchar(255) NOT NULL DEFAULT '' COMMENT '描述',
      `sort` int(10) unsigned NOT NULL DEFAULT '50' COMMENT '排序',
-     `status` tinyint(10) unsigned NOT NULL DEFAULT '1' COMMENT '状态',
+     `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '状态：1正常，0禁用',
      `create_time` int(11) NOT NULL DEFAULT 0,
      `update_time` int(11) NOT NULL DEFAULT 0,
      PRIMARY KEY (`id`) USING BTREE
@@ -868,7 +862,7 @@ CREATE TABLE `dask_users_favorite` (
       `tag_id` int(11) unsigned NOT NULL DEFAULT '0',
       `create_time` int(10) unsigned DEFAULT '0',
       PRIMARY KEY (`id`) USING BTREE,
-      KEY `uid` (`uid`) USING BTREE,
+      UNIQUE KEY `uk_uf_uid_item` (`uid`,`item_type`,`item_id`),
       KEY `create_time` (`create_time`) USING BTREE,
       KEY `item_id` (`item_id`) USING BTREE,
       KEY `item_type` (`item_type`) USING BTREE
@@ -1410,8 +1404,8 @@ CREATE TABLE `dask_topic` (
     `discuss` int(11) DEFAULT '0' COMMENT '讨论计数',
     `description` longtext CHARACTER SET utf8mb4 COMMENT '话题描述',
     `pic` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '话题图片',
-    `lock` tinyint(2) NOT NULL DEFAULT '0' COMMENT '是否锁定',
-    `top` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否推荐',
+    `lock` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否锁定',
+    `top` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否推荐',
     `focus` int(11) DEFAULT '0' COMMENT '关注计数',
     `related` tinyint(1) DEFAULT '0' COMMENT '是否被用户关联',
     `url_token` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
@@ -1473,6 +1467,7 @@ CREATE TABLE `dask_answer_thanks` (
      `answer_id` int(11) DEFAULT '0' COMMENT '回答ID',
      `create_time` int(11) DEFAULT '0',
      PRIMARY KEY (`id`) USING BTREE,
+     UNIQUE KEY `uk_at_uid_answer` (`uid`,`answer_id`),
      KEY `answer_id` (`answer_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='回答感谢表';
 
@@ -1724,7 +1719,7 @@ DROP TABLE IF EXISTS `dask_search_log`;
 CREATE TABLE `dask_search_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(10) unsigned DEFAULT NULL COMMENT '搜索用户id',
-  `ip` varchar(255) DEFAULT NULL COMMENT '搜索IP地址',
+  `ip` varchar(45) DEFAULT NULL COMMENT '搜索IP地址（支持 IPv6）',
   `keyword` varchar(255) DEFAULT NULL COMMENT '搜索关键词',
   `user_agent` varchar(500) DEFAULT NULL COMMENT '浏览器标识',
   `from` varchar(255) DEFAULT NULL COMMENT '来源页面',
@@ -1787,7 +1782,7 @@ CREATE TABLE `dask_browse_records` (
       `uid` int(10) unsigned DEFAULT '0' COMMENT '用户UID',
       `item_id` int(10) unsigned DEFAULT '0' COMMENT '内容ID',
       `item_type` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '内容类型，question问题，article文章，topic话题,column专栏',
-      `status` tinyint(10) unsigned DEFAULT '1' COMMENT '1正常0删除',
+      `status` tinyint(1) unsigned DEFAULT '1' COMMENT '1正常0删除',
       `create_time` int(10) unsigned DEFAULT '0' COMMENT '添加时间',
       PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='浏览记录表';
@@ -1810,7 +1805,7 @@ CREATE TABLE `dask_column_recommend_article` (
     `uid` int(10) unsigned DEFAULT '0' COMMENT '推荐用户',
     `column_id` int(10) unsigned DEFAULT '0' COMMENT '专栏id',
     `article_id` int(10) unsigned DEFAULT '0' COMMENT '推荐文章id',
-    `status` tinyint(255) unsigned DEFAULT '0' COMMENT '审核状态0待审核1已审核2已拒绝',
+    `status` tinyint(1) unsigned DEFAULT '0' COMMENT '审核状态：0待审核，1已审核，2已拒绝',
     `reason` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '拒绝理由',
     `create_time` int(10) unsigned DEFAULT NULL,
     `update_time` int(10) unsigned DEFAULT '0',

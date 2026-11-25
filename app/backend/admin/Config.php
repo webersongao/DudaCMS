@@ -42,47 +42,101 @@ class Config extends Backend
         $group = $group !== null ? (int) $group : (int) $this->request->param('group', 1);
 
         if ($this->request->isPost()) {
-            if ($data = $this->request->post()) {
-                foreach ($data as $k => $v) {
-                    if (is_array($v) && isset($v['key']) && isset($v['value'])) {
-                        $value = [];
-                        foreach ($v['key'] as $k1 => $v1) {
-                            $value[$v1] = $v['value'][$k1];
-                        }
-                        $data[$k] = $value;
-                    }
-                }
-                // checkbox 全部取消勾选时浏览器不会提交该字段，服务端显式补空值，
-                // 否则 isset 判断跳过该项，出现"提示成功但刷新后未保存"的问题。
-                // 仅补当前分组的 checkbox，避免影响其他分组表单。
-                $checkboxNames = $this->model->where('group', $group)->where('type', 'checkbox')->column('name');
-                foreach ($checkboxNames as $checkboxName) {
-                    if (!isset($data[$checkboxName])) {
-                        $data[$checkboxName] = '';
-                    }
-                }
+            $post = $this->request->post();
+            if ($post) {
+                // 只接受当前分组声明过的字段，防止构造请求越权修改其它分组。
+                $schema = $this->model->where('group', $group)->order(['sort' => 'ASC', 'id' => 'ASC'])->select()->toArray();
+                $errors = [];
                 $configList = [];
-                foreach (db('config')->select()->toArray() as $v) {
-                    if (isset($data[$v['name']])) {
-                        $value = $data[$v['name']];
-                        $option = json_decode($v['option'], true);
-                        if (in_array($v['type'], ['array', 'images', 'files'])) {
-                            $option = $value;
-                            $value = 0;
-                        } else {
-                            $value = is_array($value) ? implode(',', $value) : $value;
+                foreach ($schema as $row) {
+                    $name = (string) $row['name'];
+                    $submitted = array_key_exists($name, $post);
+                    if (!$submitted) {
+                        // checkbox 全部取消勾选时浏览器不提交，按空值处理；其它字段未提交则跳过。
+                        if ($row['type'] !== 'checkbox') {
+                            continue;
                         }
-                        $v['value'] = $value;
-                        $v['option'] = json_encode($option, JSON_UNESCAPED_UNICODE);
-                        $configList[] = $v;
+                        $value = '';
+                    } else {
+                        $value = $post[$name];
                     }
+
+                    $option = json_decode((string) $row['option'], true);
+                    $option = is_array($option) ? $option : [];
+
+                    // 数组型表单：key/value 成对提交。
+                    if (is_array($value) && isset($value['key']) && is_array($value['key'])) {
+                        $pairs = [];
+                        foreach ($value['key'] as $i => $key) {
+                            $key = trim((string) $key);
+                            if ($key === '') {
+                                continue;
+                            }
+                            $pairs[$key] = $value['value'][$i] ?? '';
+                        }
+                        $value = $pairs;
+                    }
+
+                    if (in_array($row['type'], ['array', 'images', 'files'], true)) {
+                        $items = is_array($value) ? array_values(array_filter(array_map('strval', $value), 'strlen')) : [];
+                        $row['option'] = json_encode($items, JSON_UNESCAPED_UNICODE);
+                        $row['value'] = 0;
+                        $configList[] = $row;
+                        continue;
+                    }
+
+                    $value = trim(is_array($value) ? implode(',', $value) : (string) $value);
+
+                    // 枚举白名单：radio / select / select2 / checkbox。
+                    if (in_array($row['type'], ['radio', 'select', 'select2', 'checkbox'], true) && $option) {
+                        foreach ($value === '' ? [] : explode(',', $value) as $part) {
+                            if (!array_key_exists($part, $option)) {
+                                $errors[$name] = $row['title'] . '：存在非法选项';
+                                break;
+                            }
+                        }
+                    }
+
+                    // 数值校验。
+                    if ($row['type'] === 'number' && $value !== '') {
+                        if (!is_numeric($value)) {
+                            $errors[$name] = $row['title'] . '：必须是数字';
+                        } else {
+                            $value = (string) ($value + 0);
+                        }
+                    }
+
+                    if ($value !== '' && str_ends_with($name, '_email') && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $errors[$name] = $row['title'] . '：邮箱格式不正确';
+                    }
+                    if ($value !== '' && in_array($name, ['cdn_url', 'search_engine_host'], true) && !preg_match('/^https?:\/\//i', $value)) {
+                        $errors[$name] = $row['title'] . '：需以 http:// 或 https:// 开头';
+                    }
+                    if ($name === 'sms_ali_endpoint' && $value !== '' && !preg_match('/^[a-z0-9.-]+\.aliyuncs\.com$/i', $value)) {
+                        $value = 'dysmsapi.aliyuncs.com';
+                    }
+
+                    // 密码留空表示保持原值，避免明文回显与误清空。
+                    if ($row['type'] === 'password' && $value === '') {
+                        continue;
+                    }
+
+                    if (in_array($row['type'], ['html', 'editor', 'code', 'textarea'], true)) {
+                        $value = self::sanitizeRichText($value);
+                    }
+
+                    $row['value'] = $value;
+                    $configList[] = $row;
                 }
-                $result = $this->model->saveAll($configList);
-                if ($result) {
-                    $this->success('修改成功');
-                } else {
-                    $this->error('提交失败或数据无变化');
+
+                if ($errors) {
+                    $this->error('配置校验失败：' . implode('；', $errors));
                 }
+                if ($configList) {
+                    $this->model->saveAll($configList);
+                    ConfigModel::flush();
+                }
+                $this->success('修改成功');
             }
         }
 
@@ -91,8 +145,12 @@ class Config extends Backend
         $columns = [];
         $list = $this->model->where('group', $group)->order(['sort' => 'ASC', 'id' => 'ASC'])->column('type,name,title,tips,option,value');
         foreach ($list as $key => $val) {
-            if (in_array($val['type'], ['editor', 'textarea', 'code', 'html'])) {
-                $val['value'] = htmlspecialchars_decode($val['value']);
+            if ($val['type'] === 'password') {
+                // 密钥类配置永不回显明文；留空即保持原值，生产环境推荐用环境变量覆盖。
+                $val['value'] = '';
+                $val['tips'] = trim($val['tips'] . '（留空表示保持原值；可用环境变量 DASK_' . strtoupper($val['name']) . ' 覆盖）');
+            } elseif (in_array($val['type'], ['editor', 'textarea', 'code', 'html'])) {
+                $val['value'] = htmlspecialchars_decode((string) $val['value']);
             }
 
             // 字典管理模块已移除，选项统一从 option(JSON) 读取，不再查 dask_dict。
@@ -146,6 +204,14 @@ class Config extends Backend
         return $this->formBuilder
             ->addLinkGroup($columns, $links)
             ->fetch();
+    }
+
+    /** 移除脚本、内联事件与 javascript: 伪协议，保留有限的富文本标签 */
+    private static function sanitizeRichText(string $value): string
+    {
+        $value = preg_replace('/<\s*(script|style|iframe|object|embed)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $value) ?? $value;
+        $value = preg_replace('/\son[a-z]+\s*=\s*(["\']).*?\1/is', '', $value) ?? $value;
+        return preg_replace('/javascript\s*:/i', '', $value) ?? $value;
     }
 
     /**

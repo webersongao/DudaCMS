@@ -29,14 +29,9 @@ class IpHelper
 
     public static function  ip()
     {
-        $ip = '未知IP';
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            return self::is_ip($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] : $ip;
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            return self::is_ip($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $ip;
-        } else {
-            return self::is_ip($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : $ip;
-        }
+        // 客户端可伪造 X-Forwarded-For / Client-IP，直接以连接来源为准。
+        $remote = (string) (request()->server('REMOTE_ADDR', ''));
+        return filter_var($remote, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) ? $remote : '未知IP';
     }
 
     /**
@@ -46,18 +41,19 @@ class IpHelper
      */
     public static function getRealIp(bool $int = false)
     {
-        if (getenv('HTTP_CLIENT_IP')) {
-            $ip = getenv('HTTP_CLIENT_IP');
-        } elseif (getenv('HTTP_X_REAL_IP')) {
-            $ip = getenv('HTTP_X_REAL_IP');
-        } elseif (getenv('HTTP_X_FORWARDED_FOR')) {
-            $ip = getenv('HTTP_X_FORWARDED_FOR');
-            $ips = explode(',', $ip);
-            $ip = $ips[0];
-        } elseif (getenv('REMOTE_ADDR')) {
-            $ip = getenv('REMOTE_ADDR');
-        } else {
-            $ip = '0.0.0.0';
+        $remote = (string) request()->server('REMOTE_ADDR', '');
+        $ip = $remote;
+        // 仅当直连来源是内网/代理地址时才采信转发头，且只取第一个合法地址。
+        if (self::isPrivateIp($remote)) {
+            $forwarded = (string) request()->server('HTTP_X_FORWARDED_FOR', request()->server('HTTP_X_REAL_IP', ''));
+            if ($forwarded !== '') {
+                foreach (array_map('trim', explode(',', $forwarded)) as $candidate) {
+                    if (filter_var($candidate, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+                        $ip = $candidate;
+                        break;
+                    }
+                }
+            }
         }
 
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) === false) {
@@ -65,6 +61,12 @@ class IpHelper
         }
 
         return $int && $ip ? inet_pton($ip) : $ip;
+    }
+
+    private static function isPrivateIp(string $ip): bool
+    {
+        return !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)
+            || filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 
     /**
@@ -75,14 +77,35 @@ class IpHelper
      */
     public static function queryIpLocalInfo($ip, $type = 'text')
     {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) === false) {
+            return '';
+        }
+        if (!function_exists('curl_init')) {
+            return '';
+        }
         try {
-            $url = 'http://ip-api.com/json/' . $ip . '?lang=zh-CN';
-            $result = json_decode(file_get_contents($url), true);
-            if ($result['status'] != 'success') {
+            $url = 'https://ipwho.is/' . rawurlencode($ip) . '?lang=zh-CN';
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 3,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_USERAGENT => 'DudaCMS/1.0',
+            ]);
+            $body = curl_exec($ch);
+            curl_close($ch);
+            if (!is_string($body)) {
+                return '';
+            }
+            $result = json_decode($body, true);
+            if (!is_array($result) || empty($result['success'])) {
                 return '内部网络';
             }
-            return $type != 'text' ? $result : $result['country'] . $result['regionName'] . $result['city'];
-        } catch (Exception $exception) {
+            if ($type !== 'text') {
+                return $result;
+            }
+            return (string) ($result['country'] ?? '') . (string) ($result['region'] ?? '') . (string) ($result['city'] ?? '');
+        } catch (\Throwable $e) {
             return '';
         }
     }

@@ -5,7 +5,7 @@
             <div class="bh-mobile-navbar-toggler d-lg-none">
             {if $user_id}
                 <div class="dropdown bh-mobile d-inline-block me-4 position-relative">
-                    <a href="javascript:;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-inbox>
+                    <a href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-inbox>
                         <i class="iconfont bh-nav-icon">&#xe628</i>
                         {if $user_id && $user_info['inbox_unread']}
                         <span class="badge text-bg-danger rounded-pill position-absolute" data-inbox-unread style="right:-20px">{$user_info['inbox_unread']? $user_info['inbox_unread'] : '99+'}</span>                            {/if}
@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <div class="dropdown bh-mobile d-inline-block me-4 position-relative">
-                    <a href="javascript:;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-notify>
+                    <a href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-notify>
                         <i class="iconfont bh-nav-icon">&#xe689</i>
                         {if $user_id && $user_info['notify_unread']}
                         <span class="badge text-bg-danger rounded-pill position-absolute" data-notify-unread style="right:-20px">{$user_info['notify_unread']? $user_info['notify_unread'] : '99+'}</span>
@@ -31,7 +31,7 @@
                     <div class="dropdown-menu dropdown-menu-end p-0 border-0 font-size-sm" style="width: 310px !important;">
                         <div class="bg-light clearfix py-2 px-3">
                             <h5 class="text-uppercase float-start fw-bold font-9 mb-0">{:L('通知消息')}</h5>
-                            <a class="text-muted float-end font-8" href="javascript:;" data-action="user-header-notify-read-all">{:L('全部已读')}</a>
+                            <a class="text-muted float-end font-8" href="#" role="button" data-action="user-header-notify-read-all">{:L('全部已读')}</a>
                         </div>
                         <div class="nav-items mb-0 dask-overflow-auto" id="topNotifyBox_Toggler" data-notify-list style="max-height: 400px"></div>
                            <div class="p-2 border-top">
@@ -53,7 +53,7 @@
                         {if $k<5}
                         <li class="nav-item {$v.active ? 'cur' : ''} clearfix">
                             {if $v.child_list}
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$v.title}</a>
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$v.title}</a>
                             <div class="dropdown-menu text-center bh-toggle-position" aria-labelledby="navbarDropdownMenuLink">
                                 {volist name="$v['child_list']" id="v1"}
                                 <a class="dropdown-item" href="{$v1.url}" data-pjax="pageMain" title="{$v1.title}">{$v1.title}</a>
@@ -67,7 +67,7 @@
                         {/foreach}
                         {if count($navMenu)>5}
                         <li class="nav-item clearfix">
-                            <a class="nav-link dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{:L('更多')}</a>
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{:L('更多')}</a>
                             <div class="dropdown-menu text-center bh-toggle-position" aria-labelledby="navbarDropdownMenuLink">
                                 {foreach $navMenu as $k=>$v1}
                                 {if $k>=5}
@@ -88,7 +88,7 @@
                                 <div class="mod-body">
                                     <p class="title text-center p-3 fw-bold">{:L('请输入关键字进行搜索')}</p>
                                     <div class="dask-ui-dropdown-list dask-common-list dask-overflow-auto text-start px-3"></div>
-                                    <p class="search p-3 text-start"><span>{:L('查看更多')} "</span><a data-action="form-submit" data-form="#awGlobalSearch" class="text-danger fw-bold"></a>"
+                                    <p class="search p-3 text-start"><span>{:L('查看更多')} "</span><a href="#" role="button" data-action="form-submit" data-form="#awGlobalSearch" class="text-danger fw-bold"></a>"
                                         {:L('的搜索结果')}</p>
                                 </div>
                                 <div class="mod-footer px-2 py-1">
@@ -99,7 +99,7 @@
                     </form>
                     {if $user_id}
                     <div class="dropdown d-inline-block me-4 position-relative">
-                        <a href="javascript:;" class="btn btn-sm gradientBtn px-3 text-white" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a href="#" role="button" class="btn btn-sm gradientBtn px-3 text-white" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {:L('发起')}
                         </a>
                         <div class="dropdown-menu dropdown-menu-end p-0 border-0 font-size-sm">
@@ -115,7 +115,7 @@
                     </div>
                     <div class="d-none d-lg-block">
                     <div class="dropdown bh-mobile d-inline-block me-4 position-relative">
-                        <a href="javascript:;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-inbox>
+                        <a href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-inbox>
                             <i class="iconfont bh-nav-icon">&#xe628</i>
                             {if $user_id && $user_info['inbox_unread']}
                             <span class="badge text-bg-danger rounded-pill position-absolute" data-inbox-unread style="right:-20px">{$user_info['inbox_unread']? $user_info['inbox_unread'] : '99+'}</span>
@@ -134,7 +134,7 @@
                         </div>
                     </div>
                     <div class="dropdown bh-mobile d-inline-block me-4 position-relative">
-                        <a href="javascript:;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-notify>
+                        <a href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-header-notify>
                             <i class="iconfont bh-nav-icon">&#xe689</i>
                             {if $user_id && $user_info['notify_unread']}
                             <span class="badge text-bg-danger rounded-pill position-absolute" data-notify-unread style="right:-20px">{$user_info['notify_unread']? $user_info['notify_unread'] : '99+'}</span>
@@ -143,7 +143,7 @@
                         <div class="dropdown-menu dropdown-menu-end p-0 border-0 font-size-sm" style="width: 310px !important;">
                             <div class="bg-light clearfix py-2 px-3">
                                 <h5 class="text-uppercase float-start fw-bold font-9 mb-0">{:L('通知消息')}</h5>
-                                <a class="text-muted float-end font-8" href="javascript:;" data-action="user-header-notify-read-all">{:L('全部已读')}</a>
+                                <a class="text-muted float-end font-8" href="#" role="button" data-action="user-header-notify-read-all">{:L('全部已读')}</a>
                             </div>
                             <div class="nav-items mb-0 dask-overflow-auto" id="topNotifyBox" data-notify-list style="max-height: 400px"></div>
                             <div class="p-2 border-top">
@@ -155,7 +155,7 @@
                     </div>
                     </div>
                     <div class="dropdown bh-mobile d-inline-block position-relative">
-                        <a href="javascript:;" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a href="#" role="button" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <img class="rounded" src="{$user_info.avatar}" style="width: 22px;height: 22px">
                             <span class="d-none d-sm-inline-block ms-1">{$user_info.nick_name}</span>
                             <i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
@@ -189,7 +189,7 @@
                         </div>
                     </div>
                     {else/}
-                    <a {if $theme_config['common']['login_type']=='dialog'}href="javascript:;" data-action="user-login" {else/}href="{:url('account/login')}"{/if} class="btn btn-sm gradientBtn px-3 logon-but d-inline-block">{:L('登录')}</a>
+                    <a {if $theme_config['common']['login_type']=='dialog'}href="#" role="button" data-action="user-login" {else/}href="{:url('account/login')}"{/if} class="btn btn-sm gradientBtn px-3 logon-but d-inline-block">{:L('登录')}</a>
                     {/if}
                     {include file="widget/theme_toggle" /}
                 </div>

@@ -58,7 +58,7 @@
             <div class="txtbox">
                 <p>{:L('对不起')}，{:L('网站维护中')}</p>
                 <!--<p>{:L('预计开放时间：2024-07-01 12：00')}</p>-->
-                <p>{:L('如您需要沟通其他事宜，请联系站长：')}ask@btbk.org</p>
+                <p>{:L('如您需要沟通其他事宜，请联系站长：')}{:get_setting('contact_email', 'ask@btbk.org')}</p>
             </div>
         </div>
     </div>

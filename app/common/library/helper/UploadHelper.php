@@ -357,15 +357,13 @@ class UploadHelper
         header("Cache-Control: no-store, no-cache, must-revalidate");
         header("Cache-Control: post-check=0, pre-check=0", false);
         header("Pragma: no-cache");
-        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        if (strtoupper((string) request()->method()) === 'OPTIONS') {
             exit;
         }
-        if (!empty($_REQUEST['debug'])) {
-            $random = rand(0, intval($_REQUEST['debug']));
-            if ($random === 0) {
-                header("HTTP/1.0 500 Internal Server Error");
-                exit;
-            }
+        $debug = (int) request()->param('debug', 0);
+        if ($debug > 0 && random_int(0, $debug) === 0) {
+            header("HTTP/1.0 500 Internal Server Error");
+            exit;
         }
         // 页面执行时间不限制
         @set_time_limit(5 * 60);
@@ -403,8 +401,8 @@ class UploadHelper
         $uploadFullPath = $uploadDir . DS . $fileName;
 
         // Chunking might be enabled
-        $chunk = isset($_REQUEST["chunk"]) ? intval($_REQUEST["chunk"]) : 0;
-        $chunks = isset($_REQUEST["chunks"]) ? intval($_REQUEST["chunks"]) : 1;
+        $chunk = max(0, (int) request()->param('chunk', 0));
+        $chunks = max(1, (int) request()->param('chunks', 1));
 
         // 清空临时目录
         if ($cleanupTargetDir)

@@ -22,6 +22,14 @@ use app\model\Question;
  */
 class PopularHelper
 {
+    // 热度算法为站点内部规则，不暴露为后台配置项，避免低使用场景的配置噪音。
+    private const QUALITY_INIT = 1.0;
+    private const GRAVITY = 1.5;
+    private const AGREE_RATIO = 2;
+    private const AGAINST_RATIO = 1;
+    private const VIEW_RATIO = 2;
+    private const COMMENT_RATIO = 2;
+
     /**
      * 计算问题热度
      * @param $question_id
@@ -33,9 +41,12 @@ class PopularHelper
             return false;
         }
 
-        $qualityInitValue = get_setting('popular_quality_init_value'); //内容初始质量
-        $gravity = get_setting('popular_gravity'); //内容变得不再热门的速度，重力越大，一个内容刷新的就越快
-        $hotParamValue = $question_info['agree_count'] * intval(get_setting('popular_agree_ratio')) + $question_info['against_count'] * intval(get_setting('popular_against_ratio')) + $question_info['view_count'] * intval(get_setting('popular_view_ratio')) + $question_info['answer_count'] * intval(get_setting('popular_comment_ratio')); //内容质量（点赞，反对，浏览，评论）
+        $qualityInitValue = self::QUALITY_INIT;
+        $gravity = self::GRAVITY;
+        $hotParamValue = $question_info['agree_count'] * self::AGREE_RATIO
+            + $question_info['against_count'] * self::AGAINST_RATIO
+            + $question_info['view_count'] * self::VIEW_RATIO
+            + $question_info['answer_count'] * self::COMMENT_RATIO;
         $publishTime = $question_info['create_time']; //内容发布的时间
         $hotValue = (($hotParamValue + $qualityInitValue) / pow((time() - $publishTime) + 1, $gravity)) * 100000; //热度值
 
@@ -56,9 +67,12 @@ class PopularHelper
             return false;
         }
 
-        $qualityInitValue = get_setting('popular_quality_init_value'); //内容初始质量
-        $gravity = get_setting('popular_gravity'); //内容变得不再热门的速度，重力越大，一个内容刷新的就越快
-        $hotParamValue = $article_info['agree_count'] * intval(get_setting('popular_agree_ratio')) + $article_info['against_count'] * intval(get_setting('popular_against_ratio')) + $article_info['view_count'] * intval(get_setting('popular_view_ratio')) + $article_info['comment_count'] * intval(get_setting('popular_comment_ratio')); //内容质量（点赞，反对，浏览，评论）
+        $qualityInitValue = self::QUALITY_INIT;
+        $gravity = self::GRAVITY;
+        $hotParamValue = $article_info['agree_count'] * self::AGREE_RATIO
+            + $article_info['against_count'] * self::AGAINST_RATIO
+            + $article_info['view_count'] * self::VIEW_RATIO
+            + $article_info['comment_count'] * self::COMMENT_RATIO;
         $hotValue = (($hotParamValue + $qualityInitValue) / pow((time() - $article_info['create_time']) + 1, $gravity)) * 100000; //热度值
 
         if (db('article')->where('id', $article_id)->update(['popular_value' => $hotValue, 'popular_value_update' => time()])) {

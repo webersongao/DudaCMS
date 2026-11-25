@@ -303,6 +303,36 @@ if (! function_exists('get_setting')) {
     }
 }
 
+if (! function_exists('set_setting')) {
+    function set_setting(string $name, $value): bool
+    {
+        return Config::setConfig($name, $value);
+    }
+}
+
+if (! function_exists('config_bool')) {
+    /** 统一布尔配置解析，兼容历史 Y/N 与 1/0 存储 */
+    function config_bool(string $name, bool $default = false): bool
+    {
+        $value = get_setting($name, null);
+        if ($value === null) {
+            return $default;
+        }
+        if (is_bool($value)) {
+            return $value;
+        }
+        return in_array(strtolower((string) $value), ['y', '1', 'true', 'on', 'yes'], true);
+    }
+}
+
+if (! function_exists('config_int')) {
+    function config_int(string $name, int $default = 0): int
+    {
+        $value = get_setting($name, null);
+        return is_numeric($value) ? (int) $value : $default;
+    }
+}
+
 if (! function_exists('editor_render')) {
     /**
      * 渲染系统内置 Vditor 编辑器。
@@ -1434,5 +1464,29 @@ if (!function_exists('safe_last_url')) {
             $url = $fallback;
         }
         return mb_substr($url, 0, 255);
+    }
+}
+
+// 回跳地址：只接受站内同源地址，杜绝 HTTP_REFERER 造成的开放重定向。
+if (!function_exists('safe_return_url')) {
+    function safe_return_url(string $fallback = '/'): string
+    {
+        $referer = (string) request()->server('HTTP_REFERER', '');
+        if ($referer === '') {
+            return $fallback;
+        }
+        $parts = parse_url($referer);
+        if (!is_array($parts)) {
+            return $fallback;
+        }
+        $host = strtolower((string) request()->server('HTTP_HOST', ''));
+        if (isset($parts['host']) && strtolower((string) $parts['host']) !== $host) {
+            return $fallback;
+        }
+        $path = (string) ($parts['path'] ?? '');
+        if ($path === '' || str_starts_with($path, '//')) {
+            return $fallback;
+        }
+        return $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
     }
 }

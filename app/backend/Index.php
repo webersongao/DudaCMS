@@ -98,17 +98,19 @@ class Index extends Backend
     //后台统计
     public function statistic()
     {
-        if (!$start_time = strtotime($_GET['start_date'] . ' 00:00:01'))
-        {
+        $startDate = trim((string) $this->request->param('start_date', ''));
+        $endDate = trim((string) $this->request->param('end_date', ''));
+        $start_time = $startDate !== '' ? strtotime($startDate . ' 00:00:01') : false;
+        if (!$start_time) {
             $start_time = strtotime('-12 months');
         }
 
-        if (!$end_time = strtotime($_GET['end_date'] . ' 23:59:59'))
-        {
+        $end_time = $endDate !== '' ? strtotime($endDate . ' 23:59:59') : false;
+        if (!$end_time) {
             $end_time = time();
         }
 
-        $statistic_tag = $_GET['tag'] ? explode(',', $_GET['tag']) : [];
+        $statistic_tag = array_values(array_filter(array_map('trim', explode(',', (string) $this->request->param('tag', ''))), 'strlen'));
         if (empty($statistic_tag)) exit;
         if (!$month_list = get_month_list($start_time, $end_time, 'y')) exit;
         $data = $labels = $statistic = $data_template = [];

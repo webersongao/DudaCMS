@@ -1,0 +1,157 @@
+/* 后台现代化样式：仅收拢自 backend/view 内联 style 的补丁规则与配套设计令牌。
+   另含 window.layer 兼容层所需的最小 <dialog>/toast 外观（与 dask-components.css 对齐）。
+   不使用 !important，避免与 AdminLTE / admin-bundle.css 的既有层叠打架。 */
+
+:root {
+  --dask-icon-hover-bg: #eee;
+  --dask-select2-choice-fs: .7rem;
+  --dask-select2-rendered-pad: 0 5px;
+  --dask-dialog-width: min(560px, calc(100vw - 32px));
+  --dask-dialog-radius: 12px;
+  --dask-dialog-shadow: 0 24px 64px rgba(0, 0, 0, .24);
+  --dask-dialog-backdrop: rgba(0, 0, 0, .48);
+  --dask-dialog-head-h: 48px;
+  --dask-toast-top: 68px;
+  --dask-toast-width: min(360px, calc(100vw - 32px));
+  --dask-toast-success: #0F6E56;
+  --dask-toast-error: #D93026;
+  --dask-toast-warning: #B26A00;
+}
+
+html[data-theme="dark"],
+html[data-bs-theme="dark"] {
+  --dask-icon-hover-bg: #30343C;
+  --dask-dialog-shadow: 0 24px 64px rgba(0, 0, 0, .5);
+}
+
+/* ---------- 自 global/icons.php 抽出 ---------- */
+.dask-icon { cursor: pointer; }
+.dask-icon:hover { background: var(--dask-icon-hover-bg); }
+.block { margin-bottom: 1rem; }
+
+/* ---------- 自 global/table/layout.php 抽出：select2 样式补丁 ---------- */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  font-size: var(--dask-select2-choice-fs);
+}
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+  padding: var(--dask-select2-rendered-pad);
+}
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--single {
+  border-color: transparent;
+  box-shadow: none;
+}
+.select2-container--default .select2-selection--multiple {
+  border-color: transparent;
+}
+
+/* ---------- window.layer 兼容层：原生 dialog 外观 ---------- */
+dialog.dask-dialog {
+  width: var(--dask-dialog-width);
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--adm-line, #E5E6EB);
+  border-radius: var(--dask-dialog-radius);
+  background: var(--adm-surface, #fff);
+  color: var(--adm-text, #1D2129);
+  box-shadow: var(--dask-dialog-shadow);
+}
+dialog.dask-dialog::backdrop { background: var(--dask-dialog-backdrop); }
+dialog.dask-dialog[open] { display: block; }
+
+.dask-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--dask-dialog-head-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--adm-line, #E5E6EB);
+}
+.dask-dialog__title {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  font-weight: 600;
+}
+.dask-dialog__close {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--adm-text-2, #4E5969);
+  font-size: 22px;
+  cursor: pointer;
+}
+.dask-dialog__close:hover { color: var(--adm-primary, #056DE8); }
+.dask-dialog__body {
+  padding: 16px;
+  line-height: 1.7;
+}
+.dask-dialog__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--adm-line, #E5E6EB);
+}
+.dask-dialog__foot button {
+  min-height: 36px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.dask-dialog__foot .dask-btn-secondary {
+  border: 1px solid var(--adm-line-2, #DCDFE6);
+  background: var(--adm-surface, #fff);
+  color: var(--adm-text-2, #4E5969);
+}
+.dask-dialog__foot .dask-btn-primary {
+  border: 1px solid var(--adm-primary, #056DE8);
+  background: var(--adm-primary, #056DE8);
+  color: #fff;
+}
+.dask-dialog--loading .dask-dialog__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+}
+
+/* ---------- dask-toast：layer.msg 复用 dialog.js 的轻通知 ---------- */
+.dask-toast-stack {
+  position: fixed;
+  z-index: 2000;
+  top: var(--dask-toast-top);
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: var(--dask-toast-width);
+  pointer-events: none;
+}
+.dask-toast {
+  padding: 12px 16px;
+  border: 1px solid var(--adm-line, #E5E6EB);
+  border-left: 4px solid var(--adm-primary, #056DE8);
+  border-radius: 8px;
+  background: var(--adm-surface, #fff);
+  color: var(--adm-text, #1D2129);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+}
+.dask-toast--success { border-left-color: var(--dask-toast-success); }
+.dask-toast--error { border-left-color: var(--dask-toast-error); }
+.dask-toast--warning { border-left-color: var(--dask-toast-warning); }
+dask-toast { display: block; }
+
+@media (max-width: 576px) {
+  .dask-toast-stack { top: 12px; left: 16px; right: 16px; width: auto; }
+  .dask-dialog__foot button { min-width: 72px; padding: 0 14px; }
+}

@@ -10,17 +10,6 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/mobile/bo
 echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/tableExport.js?v=' . asset_version('vendor/bootstrap-table/extensions/export/tableExport.js') . '"></script>';
 echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bootstrap-table-export.js?v=' . asset_version('vendor/bootstrap-table/extensions/export/bootstrap-table-export.js') . '"></script>';
 {/php}
-<style>
-    .select2-container--default .select2-selection--multiple .select2-selection__choice {
-        font-size: 0.7rem;
-    }
-    .select2-container--default .select2-selection--multiple .select2-selection__rendered{padding: 0 5px}
-    .select2-container--default.select2-container--focus .select2-selection--multiple, .select2-container--default.select2-container--focus .select2-selection--single, .select2-container--default.select2-container--open .select2-selection--multiple, .select2-container--default.select2-container--open .select2-selection--single {
-        border: none;
-        box-shadow:none
-    }
-    .select2-container--default .select2-selection--multiple{/*background: none;*/border: none;border-color: unset}
-</style>
 <section class="p-3">
     <!--额外CSS代码-->
     {$extra_css|raw|default=''}
@@ -257,7 +246,7 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                                 var val = value?value:item.default;
                                 if(item.param)
                                 {
-                                    return '<span class="badge badge-'+item.param[val].label+'">'+HTMLDecode(item.param[val].text)+'</span>'
+                                    return '<span class="badge badge-'+escapeHtml(item.param[val].label)+'">'+HTMLDecode(item.param[val].text)+'</span>'
                                 }else{
                                     return '<span class="badge text-bg-primary">'+HTMLDecode(val)+'</span>'
                                 }
@@ -282,10 +271,10 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                                 var result ;
                                 var val = value?value:item.default;
                                 while (result = reg.exec(link)) {
-                                    link = link.replace(result[0], row[result[1]]);
+                                    link = link.replace(result[0], escapeAttr(row[result[1]]));
                                 }
-                                // 拼接
-                                link = '<a href="'+link+'" class="'+item.class+'" target="_blank" title="'+item.title+'">' + val + '</a>';
+                                // 拼接（所有服务端字段先转义，避免拼接型 XSS）
+                                link = '<a href="'+escapeAttr(link)+'" class="'+escapeAttr(item.class)+'" target="_blank" title="'+escapeAttr(item.title)+'">' + escapeHtml(val) + '</a>';
                                 return link;
                             }
                             break;
@@ -297,10 +286,10 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                                 var result ;
                                 var val = value?value:item.default;
                                 while (result = reg.exec(link)) {
-                                    link = link.replace(result[0], row[result[1]]);
+                                    link = link.replace(result[0], escapeAttr(row[result[1]]));
                                 }
                                 // 拼接
-                                link = '<a href="javascript:;" data-url="'+link+'" class="dask-ajax-open '+item.class+'" data-title="'+item.title+'" title="'+item.title+'">' + val + '</a>';
+                                link = '<a href="javascript:;" data-url="'+escapeAttr(link)+'" class="dask-ajax-open '+escapeAttr(item.class)+'" data-title="'+escapeAttr(item.title)+'" title="'+escapeAttr(item.title)+'">' + escapeHtml(val) + '</a>';
                                 return link;
                             }
                             break;
@@ -309,7 +298,7 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                             format = function(value, row, index) {
                                 var val = value?value:item.default;
                                 if (DaskAdmin.common.isNotEmpty(val)) {
-                                    return '<a href="' + val + '" data-fancybox="fancybox" data-fancybox-group="dask-thumb"> <img class="image_preview" src="' + val + '"></a>';
+                                    return '<a href="' + escapeAttr(val) + '" data-fancybox="fancybox" data-fancybox-group="dask-thumb"> <img class="image_preview" src="' + escapeAttr(val) + '"></a>';
                                 }
                             }
                             break;
@@ -318,7 +307,7 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                             format = function(value, row, index) {
                                 var val = value?value:item.default;
                                 if (DaskAdmin.common.isNotEmpty(value)) {
-                                    return '<i class="table_colorpicker" style="background: ' + val + '""></i>';
+                                    return '<i class="table_colorpicker" style="background: ' + escapeAttr(val) + '""></i>';
                                 }
                             }
                             break;
@@ -334,51 +323,22 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                                     {
                                         selected ='selected=selected';
                                     }
-                                    str+='<option  value="'+val+'" '+ selected+'>'+name+'</option>'
+                                    str+='<option  value="'+escapeAttr(val)+'" '+ selected+'>'+escapeHtml(name)+'</option>'
                                 });
                                 str +='</select>';
                                 return str;
                             }
-
-                            /*var param = JSON.stringify(item.param);
-
-                            editable = {
-                                type:'select',
-                                source:param,
-                                formatter : function(value,row,index) {
-                                    return value;
-                                }
-                            }*/
                             break;
 
-
+                        // 保持原有 fallthrough：checkbox 复用 select2 的渲染逻辑
                         case 'checkbox':
-                            /*format = function(value, row, index) {
-                                var param = JSON.stringify(item.param);
-                                return  '<a href="javascript:;" class="dask-table-checkbox" data-option=\''+param+'\' data-name="'+item.name+'" data-type="checklist" data-pk="'+row.{$unique_id}+'" data-value="'+value+'" data-url="{$choose_url}" data-title="请选择..."></a>';
-                            }
-                            break;*/
-
                         case 'select2':
                             format = function(value, row, index) {
                                 var param = JSON.stringify(item.param);
                                 var val = value?value:item.default;
-                                var  str = '<select style="min-width:150px" class="select2 table-select2" data-id="'+row.{$unique_id}+'" data-name="'+item.name+'" data-options=\''+param+'\' data-value="'+val+'" multiple ></select>';
+                                var  str = '<select style="min-width:150px" class="select2 table-select2" data-id="'+escapeHtml(row.{$unique_id})+'" data-name="'+escapeHtml(item.name)+'" data-options=\''+escapeAttr(param)+'\' data-value="'+escapeHtml(val)+'" multiple ></select>';
                                 return str;
                             }
-                            /*var param = JSON.stringify(item.param);
-                            editable = {
-                                type:'select2',
-                                source: param,
-                                select2: {
-                                    multiple: true,
-                                    width : '150px',//设置宽
-                                    id: function (item) {
-                                        return item.text;
-                                    }
-
-                                }
-                            }*/
                             break;
 
                         case 'btn':
@@ -390,45 +350,55 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                                     {
                                         confirm = '';
                                     }else{
-                                        confirm = 'data-confirm="'+item2.confirm+'"';
+                                        confirm = 'data-confirm="'+escapeAttr(item2.confirm)+'"';
                                     }
+                                    // 服务端下发的 class/title/icon/target 全部转义后再拼 HTML
+                                    var cls = escapeAttr(item2.class);
+                                    var title = escapeHtml(item2.title);
+                                    var titleAttr = escapeAttr(item2.title);
+                                    var icon = escapeAttr(item2.icon);
+                                    var target = escapeAttr(item2.target);
                                     if(item2.type == 'edit'){
                                         if(item2.href){
                                             var url = item2.href;
                                             var reg = /__(.*?)__/g;
+                                            var result;
                                             while (result = reg.exec(url)) {
-                                                url = url.replace(result[0], row[result[1]]);
+                                                url = url.replace(result[0], escapeAttr(row[result[1]]));
                                             }
-                                            actions.push('<a class="m-1 '+item2.class+'" title="'+item2.title+'" target="'+item2.target+'" href="'+url+'"><i class="'+item2.icon+'"></i> '+item2.title+'</a> ');
+                                            actions.push('<a class="m-1 '+cls+'" title="'+titleAttr+'" target="'+target+'" href="'+escapeAttr(url)+'"><i class="'+icon+'"></i> '+title+'</a> ');
                                         }else{
-                                            actions.push('<a class="m-1 '+item2.class+'" href="javascript:void(0)" title="'+escapeAttr(item2.title)+'" data-action="operate-edit" data-id="'+escapeAttr(row.{$unique_id})+'"><i class="'+item2.icon+'"></i>'+item2.title+'</a> ');
+                                            actions.push('<a class="m-1 '+cls+'" href="javascript:void(0)" title="'+titleAttr+'" data-action="operate-edit" data-id="'+escapeAttr(row.{$unique_id})+'"><i class="'+icon+'"></i>'+title+'</a> ');
                                         }
                                     } else if (item2.type == 'delete'){
                                         if(item2.href){
                                             var url = item2.href;
                                             var reg = /__(.*?)__/g;
+                                            var result;
                                             while (result = reg.exec(url)) {
-                                                url = url.replace(result[0], row[result[1]]);
+                                                url = url.replace(result[0], escapeAttr(row[result[1]]));
                                             }
-                                            actions.push('<a class="m-1 '+item2.class+'" target="'+item2.target+'" title="'+item2.title+'" href="'+url+'"><i class="'+item2.icon+'"></i> '+item2.title+'</a> ');
+                                            actions.push('<a class="m-1 '+cls+'" target="'+target+'" title="'+titleAttr+'" href="'+escapeAttr(url)+'"><i class="'+icon+'"></i> '+title+'</a> ');
                                         }else{
-                                            actions.push('<a class="m-1 '+item2.class+'" href="javascript:void(0)" title="'+escapeAttr(item2.title)+'" data-action="operate-remove" data-id="'+escapeAttr(row.{$unique_id})+'"><i class="'+item2.icon+'"></i> '+item2.title+'</a> ');
+                                            actions.push('<a class="m-1 '+cls+'" href="javascript:void(0)" title="'+titleAttr+'" data-action="operate-remove" data-id="'+escapeAttr(row.{$unique_id})+'"><i class="'+icon+'"></i> '+title+'</a> ');
                                         }
                                     }else {
                                         if(item2.href && !item2.url && item2.href!=='javascript:;'){
                                             var url = item2.href;
                                             var reg = /__(.*?)__/g;
+                                            var result;
                                             while (result = reg.exec(url)) {
-                                                url = url.replace(result[0], row[result[1]]);
+                                                url = url.replace(result[0], escapeAttr(row[result[1]]));
                                             }
-                                            actions.push('<a class="m-1 '+item2.class+'" target="'+item2.target+'" title="'+item2.title+'" href="'+url+'"><i class="'+item2.icon+'"></i> '+item2.title+'</a> ');
+                                            actions.push('<a class="m-1 '+cls+'" target="'+target+'" title="'+titleAttr+'" href="'+escapeAttr(url)+'"><i class="'+icon+'"></i> '+title+'</a> ');
                                         }else{
                                             var url = item2.url;
                                             var reg = /__(.*?)__/g;
+                                            var result;
                                             while (result = reg.exec(url)) {
-                                                url = url.replace(result[0], row[result[1]]);
+                                                url = url.replace(result[0], escapeAttr(row[result[1]]));
                                             }
-                                            actions.push('<a class="m-1 '+item2.class+'" title="'+item2.title+'" data-url="'+url+'"' +confirm +'><i class="'+item2.icon+'"></i> '+item2.title+'</a> ');
+                                            actions.push('<a class="m-1 '+cls+'" title="'+titleAttr+'" data-url="'+escapeAttr(url)+'"' +confirm +'><i class="'+icon+'"></i> '+title+'</a> ');
                                         }
                                     }
                                 })
@@ -441,7 +411,7 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
                             format = function(value, row, index) {
                                 var payload = encodeURIComponent(JSON.stringify(row));
                                 var title = value ? value : item.title;
-                                return '<a class="m-1 btn btn-sm btn-primary '+item.class+'" title="'+escapeAttr(title)+'" data-action="api-post" data-url="'+escapeAttr(submitUrl)+'" data-payload="'+payload+'" href="javascript:;" role="button" tabindex="0">'+title+'</a> ';
+                                return '<a class="m-1 btn btn-sm btn-primary '+escapeAttr(item.class)+'" title="'+escapeAttr(title)+'" data-action="api-post" data-url="'+escapeAttr(submitUrl)+'" data-payload="'+payload+'" href="javascript:;" role="button" tabindex="0">'+escapeHtml(title)+'</a> ';
                             }
                             break;
 
@@ -508,15 +478,21 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
             DaskAdmin.form.reset();
         }
 
-		//HTML反转义
+		//HTML反转义：用 DOMParser 在离屏文档中解析，避免 innerHTML 触发 <img onerror> 之类载荷
 		function HTMLDecode(text) {
+			var raw = String(text == null ? '' : text);
+			if (window.DOMParser) {
+				try {
+					var doc = new DOMParser().parseFromString(raw, 'text/html');
+					return doc.body.textContent || doc.body.innerText || '';
+				} catch (e) {}
+			}
 			var temp = document.createElement("div");
-			temp.innerHTML = text;
-			var output = temp.innerText || temp.textContent;
-			temp = null;
-			return output;
+			temp.textContent = raw;
+			return temp.textContent || '';
 		}
 
+		// 服务端字段拼 HTML 前统一转义；escapeAttr 用于属性，escapeHtml 用于文本节点
 		function escapeAttr(value) {
 			return String(value == null ? '' : value)
 				.replace(/&/g, '&amp;')
@@ -524,6 +500,10 @@ echo '<script src="' . $assetRoot . 'vendor/bootstrap-table/extensions/export/bo
 				.replace(/'/g, '&#39;')
 				.replace(/</g, '&lt;')
 				.replace(/>/g, '&gt;');
+		}
+
+		function escapeHtml(value) {
+			return escapeAttr(value);
 		}
 
 		function getDefaultValue(value,text)

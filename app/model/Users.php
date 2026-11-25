@@ -227,9 +227,9 @@ class Users extends BaseModel
             // MD5 摘要密码在登录成功后自动升级为 bcrypt
             db('users')->where('uid', $user['uid'])->update(['password' => hash_password($password)]);
         }
-        $password_error_limit_time = intval(get_setting('password_error_limit_time'));
+        $password_error_limit_time = intval(get_setting('password_lock_minutes'));
         if (!$passwordOk || ($password_error_limit_time > 0 && cache($user['uid'] . '_error_time'))) {
-            $errors_exceeds_limit_password = intval(get_setting('errors_exceeds_limit_password'));
+            $errors_exceeds_limit_password = intval(get_setting('password_max_retries'));
 
             //限制时长
             if (cache($user['uid'] . '_error_time') && $password_error_limit_time > 0) {

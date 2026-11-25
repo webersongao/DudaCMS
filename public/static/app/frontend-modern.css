@@ -1,0 +1,234 @@
+/* 前台现代化补丁：仅承载从 account/login.php、account/register.php、
+   global/form/items/password.php 内联样式抽出的规则。
+   颜色/间距/圆角一律使用 common/design/tokens.css 变量，不使用 !important 与过时前缀。 */
+
+/* 认证页：block.php 已不再为 login/register/find_password 输出 margin-top 内联样式 */
+body.dask-account-page #wrapMain,
+.appMain.dask-auth-page {
+    margin-top: 0;
+}
+
+.dask-auth-page .signBox {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    background-image: url('/static/frontend/image/body-bg.jpg');
+    background-repeat: no-repeat;
+    background-color: var(--dask-blue-tint);
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+    min-height: 100vh;
+    overflow: auto;
+}
+
+.dask-auth-page .signBoxContent {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0;
+    padding: var(--dask-gap-6) var(--dask-gap-3);
+    border-radius: var(--dask-r-sm);
+    min-height: 0;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.dask-auth-page .content {
+    box-sizing: border-box;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 489px;
+    padding: 0;
+    background-color: var(--dask-surface);
+    border: 1px solid var(--dask-line);
+    border-radius: var(--dask-r-sm);
+    overflow: hidden;
+}
+
+.dask-auth-page .signBoxFooter,
+.dask-auth-page .signBoxFooter a {
+    color: var(--dask-on-primary);
+}
+
+.dask-auth-page .signBox .logo {
+    height: auto;
+    margin-bottom: var(--dask-gap-6);
+    line-height: 1;
+    text-align: center;
+}
+
+.dask-auth-page .signBox .logo a {
+    display: inline-block;
+    line-height: 1;
+    color: var(--dask-on-primary);
+}
+
+.dask-auth-page .signBox .logo img {
+    display: inline-block;
+    width: 210px;
+    max-width: 86%;
+    height: auto;
+    vertical-align: middle;
+}
+
+.dask-auth-page .SignContainer-content {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dask-auth-page .SignContainer-inner {
+    position: relative;
+    overflow: hidden;
+}
+
+.dask-auth-page .bline {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--dask-gap-4);
+}
+
+.dask-auth-page .bline input {
+    width: 100%;
+}
+
+/* 短信验证码行：用 token 边框替代硬编码 #ebebeb */
+.dask-auth-page .dask-auth-code-row {
+    border-bottom: 1px solid var(--dask-line);
+}
+
+.dask-auth-page .dask-auth-code-input {
+    border-bottom: 0;
+}
+
+.dask-auth-page .dask-auth-sms-btn {
+    min-width: 110px;
+    line-height: 38px;
+    border: 0;
+    background: none;
+    color: var(--dask-blue);
+    cursor: pointer;
+}
+
+.dask-auth-page .dask-auth-sms-btn:focus-visible,
+.dask-auth-page .dask-password-toggle:focus-visible {
+    outline: 2px solid var(--dask-blue);
+    outline-offset: 2px;
+}
+
+.dask-auth-page .dask-auth-spacer {
+    margin-top: var(--dask-gap-6);
+}
+
+/* 社交账号图标：统一 44px 触控目标 */
+.dask-auth-page .dask-social a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--dask-touch-target);
+    height: var(--dask-touch-target);
+    margin: 0 var(--dask-gap-1) var(--dask-gap-2);
+    border: 1px solid var(--dask-line);
+    border-radius: var(--dask-r-pill);
+    background: var(--dask-surface);
+    line-height: 1;
+    text-decoration: none;
+}
+
+.dask-auth-page .dask-social a i,
+.dask-auth-page .dask-social a svg {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.dask-auth-page .dask-social-divider {
+    top: 6px;
+}
+
+.dask-auth-page .dask-social-label {
+    width: 120px;
+    margin: 0 auto;
+    z-index: 9;
+    background: var(--dask-surface);
+}
+
+.dask-auth-page .dask-form-control.is-invalid {
+    border-color: var(--dask-danger);
+}
+
+@media (max-width: 767px) {
+    .dask-auth-page .signBoxContent {
+        padding: var(--dask-gap-4) var(--dask-gap-2);
+    }
+
+    .dask-auth-page .signBox .logo {
+        height: auto;
+        padding-top: var(--dask-gap-3);
+        margin-bottom: var(--dask-gap-3);
+        line-height: 1;
+    }
+
+    .dask-auth-page .signBox .logo img {
+        width: 180px;
+    }
+}
+
+@media (max-width: 360px) {
+    .dask-auth-page .signBox .logo img {
+        width: 160px;
+    }
+
+    .dask-auth-page .bline {
+        margin-bottom: var(--dask-gap-3);
+    }
+
+    .dask-auth-page .SignContainer-content.dask-card__body {
+        padding: var(--dask-gap-3);
+    }
+}
+
+/* 密码控件：显隐按钮 + 提示文字（由 password.php 内联样式抽出） */
+.dask-password-field {
+    position: relative;
+}
+
+.dask-password-field > .form-control {
+    padding-right: 3.5rem;
+}
+
+.dask-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: var(--dask-gap-2);
+    transform: translateY(-50%);
+    padding: var(--dask-gap-1) var(--dask-gap-2);
+    border: 0;
+    background: none;
+    color: var(--dask-text-3);
+    font-size: var(--dask-fs-meta);
+    cursor: pointer;
+}
+
+.dask-password-toggle:hover {
+    color: var(--dask-blue);
+}
+
+.dask-form-tips {
+    display: block;
+    font-size: var(--dask-fs-meta);
+    color: var(--dask-danger);
+}
+
+/* 注册协议弹窗内容（由 register.php 内联 padding 抽出） */
+.dask-agreement-content {
+    padding: var(--dask-gap-6);
+}
+
+/* nav.php 的 role="button" 链接保持可点击光标 */
+.navbox a[role="button"],
+.navbox-2 a[role="button"] {
+    cursor: pointer;
+}

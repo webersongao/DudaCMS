@@ -1,23 +1,18 @@
 {extend name="block" /}
 {block name="main"}
-<style>
-    .dask-icon{cursor: pointer}
-    .dask-icon:hover{background: #eee}
-    .block{margin-bottom: 1rem}
-</style>
 <div class="py-1 px-3">
     <ul class="nav nav-tabs nav-tabs-block" id="builder-form-group-tab" role="tablist" data-bs-toggle="tabs">
         <li class="nav-item">
-            <a class="nav-link active" id="nav-tab-1" href="#nav-tab-content-1" role="tab" data-bs-toggle="tab">(151) Font Awesome Regular <small class="text-lowercase"><code>far fa-*</code></small></a>
+            <a class="nav-link active" id="nav-tab-1" href="#nav-tab-content-1" role="tab" aria-controls="nav-tab-content-1" aria-selected="true" data-bs-toggle="tab">(151) Font Awesome Regular <small class="text-lowercase"><code>far fa-*</code></small></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="nav-tab-1" href="#nav-tab-content-2" role="tab" data-bs-toggle="tab">(956) Font Awesome Solid <small class="text-lowercase"><code>fa fa-*</code></small></a>
+            <a class="nav-link" id="nav-tab-2" href="#nav-tab-content-2" role="tab" aria-controls="nav-tab-content-2" aria-selected="false" data-bs-toggle="tab">(956) Font Awesome Solid <small class="text-lowercase"><code>fa fa-*</code></small></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="nav-tab-1" href="#nav-tab-content-3" role="tab" data-bs-toggle="tab">(428) Font Awesome Brands <small class="text-lowercase"><code>fab fa-*</code></small></a>
+            <a class="nav-link" id="nav-tab-3" href="#nav-tab-content-3" role="tab" aria-controls="nav-tab-content-3" aria-selected="false" data-bs-toggle="tab">(428) Font Awesome Brands <small class="text-lowercase"><code>fab fa-*</code></small></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="nav-tab-1" href="#nav-tab-content-4" role="tab" data-bs-toggle="tab">(162) Simple Line Icons <small><code>si si-*</code></small></a>
+            <a class="nav-link" id="nav-tab-4" href="#nav-tab-content-4" role="tab" aria-controls="nav-tab-content-4" aria-selected="false" data-bs-toggle="tab">(162) Simple Line Icons <small><code>si si-*</code></small></a>
         </li>
     </ul>
     <div class="tab-content no-padding">
@@ -6818,15 +6813,5 @@
         </div>
     </div>
 </div>
-<script>
-    $('.dask-icon').click(function () {
-        var icon =$(this).find('i').attr('class');
-        icon = icon.replace("fa-2x", "");
-        $(".dask-form-icon", parent.document).val(icon);
-        $(".dask-form-icon-select", parent.document).attr('class', icon+' dask-form-icon-select');
-        const index = parent.layer.getFrameIndex(window.name);
-        parent.layer.close(index);
-    });
-</script>
 
 {/block}

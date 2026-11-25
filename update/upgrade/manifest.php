@@ -60,4 +60,20 @@ return [
         'risk'    => 'low',
         'verify'  => 'index:users_token.idx_ut_uid_expire, index:attach.idx_attach_item, column:users_online.last_url',
     ],
+    '1.0.5' => [
+        'from'    => '1.0.4',
+        'file'    => 'update1.0.4to1.0.5.sql',
+        'title'   => '配置体系精简与现代化',
+        'summary' => '删除失效配置；补齐缺失键；修正类型、命名与文案；密钥不再明文回显',
+        'risk'    => 'low',
+        'verify'  => 'table:config',
+    ],
+    '1.0.6' => [
+        'from'    => '1.0.5',
+        'file'    => 'update1.0.5to1.0.6.sql',
+        'title'   => '字段类型与注释规范化',
+        'summary' => '修正布尔与计数字段显示宽度；搜索日志 IP 支持 IPv6；安全补充关系表唯一约束',
+        'risk'    => 'low',
+        'verify'  => 'column:search_log.ip, column:links.status, index:users_favorite.uk_uf_uid_item, index:answer_thanks.uk_at_uid_answer',
+    ],
 ];

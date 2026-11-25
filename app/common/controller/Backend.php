@@ -120,7 +120,7 @@ class Backend extends Base
             }
         }
 
-        $return_url = $_SERVER['HTTP_REFERER'] ?? '/';
+        $return_url = safe_return_url('/');
         session('return_url',base64_encode($return_url));
         $this->returnUrl = base64_decode(session('return_url'));
         $this->assign('return_url',base64_decode(session('return_url')));

@@ -1,122 +1,7 @@
 {extend name="$theme_block" /}
 {block name="header"}{/block}
 {block name="main"}
-<style>
-    /* 认证页统一收掉固定导航预留的顶部空白，避免顶部白条 */
-    #wrapMain { margin-top: 0 !important; }
-    {if !$_ajax_open}
-    .signBox{
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        background-image: url('{$static_url}image/body-bg.jpg');
-        background-repeat: no-repeat;
-        background-color: #b8e5f8;
-        background-position: center;
-        background-size: cover;
-        width: 100%;
-        min-height: 100vh;
-        overflow: auto;
-    }
-    .signBoxContent{
-        -webkit-box-flex: 1;
-        -ms-flex: 1 1;
-        flex: 1 1;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        width: 100%;
-        margin-top: 0;
-        padding: 24px 12px;
-        border-radius: 2px;
-        min-height: 0;
-        height: auto;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    .content {
-        box-sizing: border-box;
-        margin: 0 auto;
-        width: 100%;
-        max-width: 489px;
-        padding: 0;
-        background-color: #FFFFFF;
-        box-shadow: 0 1px 3px rgba(18,18,18,0.1);
-        border-radius: 3px;
-        overflow: hidden;
-    }
-    {/if}
-    .signBoxFooter,
-    .signBoxFooter a{color:#fff !important;}
-    .signBoxFooter{padding-left: 12px !important;padding-right: 12px !important;}
-    .signBox .logo {
-        height: auto;
-        margin-bottom: 24px;
-        line-height: 1;
-        text-align: center;
-    }
-    .signBox .logo a{display:inline-block;line-height:1;}
-    .signBox .logo img{display:inline-block;width:210px;max-width:86%;height:auto;vertical-align:middle;}
-    .SignContainer-content {
-        margin: 0 auto;
-        text-align: center;
-    }
-    .SignContainer-inner {
-        position: relative;
-        overflow: hidden;
-    }
-    .logo a{color:#ffffff !important;}
-    .bline{display:flex; align-items:center; margin-bottom:1rem;}
-    .bline input{ width:100%}
-    /* 社交账号图标统一为等大 44px 触控目标 */
-    .dask-social a{
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        margin: 0 4px 8px;
-        border: 1px solid var(--dask-line, #e9ecef);
-        border-radius: 50%;
-        background: var(--dask-surface, #fff);
-        line-height: 1;
-        text-decoration: none;
-    }
-    .dask-social a i,
-    .dask-social a svg{font-size: 1.5rem !important;line-height: 1;}
-    /* 底部不再加深色底衬/阴影；统一用白字配轻文字阴影压在紫色题图上。 */
-    .signBoxFooter{background:transparent !important;box-shadow:none !important;border-radius:0;margin:0 12px 12px;padding-top:6px;padding-bottom:6px;text-shadow:0 1px 3px rgba(0,0,0,.55) !important;}
-    html body .signBoxFooter,
-    html body .signBoxFooter a{color:#fff !important;text-shadow:0 1px 3px rgba(0,0,0,.55) !important;}
-    @media (max-width: 767px){
-        .signBoxContent{padding: 16px 8px;}
-        .signBox .logo{height: auto;padding-top: 12px;margin-bottom: 12px;line-height: 1;}
-        .signBox .logo img{width:180px;}
-    }
-    @media (max-width: 360px){
-        .signBox .logo img{width:160px;}
-        .signBoxFooter{padding-left: 8px !important;padding-right: 8px !important;}
-        .bline{margin-bottom: 12px;}
-        .SignContainer-content.dask-card__body{padding: 12px;}
-    }
-</style>
-<div class="appMain dask-auth-page dask-page" style="margin-top: 0 !important;">
+<div class="appMain dask-auth-page dask-page">
     <div class="signBox">
         <div class="signBoxContent">
             {if !$_ajax_open}
@@ -124,7 +9,7 @@
                 <a href="{$baseUrl}" class="text-primary"><img src="{:asset('brand/logo-bihu-white.svg', false)}" alt="{:get_setting('site_name')}"></a>
             </h1>
             {/if}
-            <div class="content dask-card" style="padding: 0" id="boxMain">
+            <div class="content dask-card" id="boxMain">
                 <div class="SignContainer-content dask-card__body">
                     <div class="SignContainer-inner">
                         <form action="" method="POST">
@@ -144,16 +29,16 @@
                                     <input name="return_url" id="returnUrl" type="hidden" value="{:base64_encode($return_url)}">
                                     {if $login_type=='mobile'}
                                     <div class="mb-3 bline">
-                                        <input type="text" class="dask-form-control" id="mobile" name="mobile" placeholder="{:L('请输入手机号')}">
+                                        <input type="text" class="dask-form-control" id="mobile" name="mobile" placeholder="{:L('请输入手机号')}" data-dask-validate="required">
                                     </div>
-                                    <div class="mb-3 bline d-flex" style="border-bottom: 1px solid #ebebeb">
-                                        <input type="text" style="border-bottom: 0" class="dask-form-control flex-fill" id="code" name="code" placeholder="{:L('请输入短信验证码')}">
-                                        <button type="button" data-sms='#mobile' class="flex-fill text-primary" style="min-width: 110px;line-height: 38px;outline: none;border: none;background: none">{:L('获取短信验证码')}</button>
+                                    <div class="mb-3 bline d-flex dask-auth-code-row">
+                                        <input type="text" class="dask-form-control flex-fill dask-auth-code-input" id="code" name="code" placeholder="{:L('请输入短信验证码')}" data-dask-validate="required">
+                                        <button type="button" data-sms='#mobile' class="flex-fill dask-auth-sms-btn">{:L('获取短信验证码')}</button>
                                     </div>
                                     <div class="mb-3">
                                         <button type="button" class="btn w-100 btn-primary login-button">{:L('登录')}</button>
                                     </div>
-                                    <div class="mb-3 clearfix font-size-sm" style=" margin-top:30px;">
+                                    <div class="mb-3 clearfix font-size-sm dask-auth-spacer">
                                         {if $setting.remember_login_enable=="Y"}
                                         <div class="float-start">
                                             <input type="checkbox" class="remember" name="remember"> {:L('记住我')}
@@ -180,46 +65,53 @@
                                                 return false;
                                             }
                                             else {
-                                                $.ajax({
-                                                    url: "{:url('account/login')}",
-                                                    type: "POST",
-                                                    data: { mobile: name, code: code,token:token,remember:remember,return_url:returnUrl},
-                                                    dataType:"json",
-                                                    success: function (result) {
-                                                        if (result.code > 0) {
-                                                            if (isAjaxOpen){
-                                                                parent.window.location.reload();
-                                                            }
-                                                            layer.msg(result.msg,function (){
-                                                                window.location.href = result.url;
-                                                            })
-                                                        } else {
-                                                            Dask.api.error(result.msg, result.url)
+                                                // 旧接口要求表单编码并依赖响应里的 url，使用 fetch 保持原有语义
+                                                fetch("{:url('account/login')}", {
+                                                    method: 'POST',
+                                                    credentials: 'same-origin',
+                                                    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                                    body: new URLSearchParams({ mobile: name, code: code, token: token, remember: remember, return_url: returnUrl })
+                                                }).then(function (response) {
+                                                    return response.text().then(function (text) {
+                                                        try { return JSON.parse(text); }
+                                                        catch (e) { return { __raw: text }; }
+                                                    });
+                                                }).then(function (result) {
+                                                    if (result && result.__raw !== undefined) {
+                                                        if (daskTrim(result.__raw) !== '') {
+                                                            Dask.api.error('发生错误, 返回的信息:' + ' ' + result.__raw);
                                                         }
-                                                    },
-                                                    error: function (error) {
-                                                        if (daskTrim(error.responseText) !== '') {
-                                                            Dask.api.error('发生错误, 返回的信息:' + ' ' + error.responseText);
-                                                        }
+                                                        return;
                                                     }
-                                                })
+                                                    if (result.code > 0) {
+                                                        if (isAjaxOpen) {
+                                                            parent.window.location.reload();
+                                                        }
+                                                        window.DaskFrontend.toast(result.msg, 'success');
+                                                        window.setTimeout(function () { window.location.href = result.url; }, 1200);
+                                                    } else {
+                                                        Dask.api.error(result.msg, result.url);
+                                                    }
+                                                }).catch(function (error) {
+                                                    Dask.api.error('发生错误, 返回的信息:' + ' ' + error.message);
+                                                });
                                             }
                                         })
                                     </script>
                                     {else/}
                                     <input type="hidden" name="captcha" id="captcha">
                                     <div class="mb-3 bline">
-                                        <input type="text" class="dask-form-control" id="username" name="username" placeholder="{:L('请输入手机号/邮箱/用户名')}">
+                                        <input type="text" class="dask-form-control" id="username" name="username" placeholder="{:L('请输入手机号/邮箱/用户名')}" data-dask-validate="required">
                                     </div>
                                     <div class="mb-3 bline">
-                                        <input type="password" class="dask-form-control" id="password" name="password" placeholder="{:L('请输入密码')}">
+                                        <input type="password" class="dask-form-control" id="password" name="password" placeholder="{:L('请输入密码')}" data-dask-validate="required">
                                     </div>
 
-                                    <div class="mb-3 newbut" style=" margin-top:30px;">
+                                    <div class="mb-3 newbut dask-auth-spacer">
                                         <button type="button" class="btn w-100 btn-primary login-button">{:L('登录')}</button>
                                     </div>
 
-                                    <div class="mb-3 clearfix font-size-sm" style=" margin-top:30px;">
+                                    <div class="mb-3 clearfix font-size-sm dask-auth-spacer">
                                         <div class="float-start">
                                             {if $setting.remember_login_enable=="Y"}
                                             <label class="me-3">
@@ -252,29 +144,36 @@
                                                         return false;
                                                     }
                                                     else {
-                                                        $.ajax({
-                                                            url: "{:url('account/login')}",
-                                                            type: "POST",
-                                                            data: { username: name, password: password,token:token,remember:remember,return_url:returnUrl},
-                                                            dataType:"json",
-                                                            success: function (result) {
-                                                                if (result.code > 0) {
-                                                                    if (isAjaxOpen){
-                                                                        parent.window.location.reload();
-                                                                    }
-                                                                    layer.msg(result.msg,function (){
-                                                                        window.location.href = result.url;
-                                                                    })
-                                                                } else {
-                                                                    Dask.api.error(result.msg, result.url)
+                                                        // 旧接口要求表单编码并依赖响应里的 url，使用 fetch 保持原有语义
+                                                        fetch("{:url('account/login')}", {
+                                                            method: 'POST',
+                                                            credentials: 'same-origin',
+                                                            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                                            body: new URLSearchParams({ username: name, password: password, token: token, remember: remember, return_url: returnUrl })
+                                                        }).then(function (response) {
+                                                            return response.text().then(function (text) {
+                                                                try { return JSON.parse(text); }
+                                                                catch (e) { return { __raw: text }; }
+                                                            });
+                                                        }).then(function (result) {
+                                                            if (result && result.__raw !== undefined) {
+                                                                if (daskTrim(result.__raw) !== '') {
+                                                                    Dask.api.error('发生错误, 返回的信息:' + ' ' + result.__raw);
                                                                 }
-                                                            },
-                                                            error: function (error) {
-                                                                if (daskTrim(error.responseText) !== '') {
-                                                                    Dask.api.error('发生错误, 返回的信息:' + ' ' + error.responseText);
-                                                                }
+                                                                return;
                                                             }
-                                                        })
+                                                            if (result.code > 0) {
+                                                                if (isAjaxOpen) {
+                                                                    parent.window.location.reload();
+                                                                }
+                                                                window.DaskFrontend.toast(result.msg, 'success');
+                                                                window.setTimeout(function () { window.location.href = result.url; }, 1200);
+                                                            } else {
+                                                                Dask.api.error(result.msg, result.url);
+                                                            }
+                                                        }).catch(function (error) {
+                                                            Dask.api.error('发生错误, 返回的信息:' + ' ' + error.message);
+                                                        });
                                                     }
                                                 }
                                             });
@@ -293,29 +192,36 @@
                                                     return false;
                                                 }
                                                 else {
-                                                    $.ajax({
-                                                        url: "{:url('account/login')}",
-                                                        type: "POST",
-                                                        data: { username: name, password: password,token:token,remember:remember,return_url:returnUrl},
-                                                        dataType:"json",
-                                                        success: function (result) {
-                                                            if (result.code) {
-                                                                if (isAjaxOpen){
-                                                                    parent.window.location.reload();
-                                                                }
-                                                                layer.msg(result.msg,function (){
-                                                                    window.location.href = result.url;
-                                                                })
-                                                            } else {
-                                                                Dask.api.error(result.msg, result.url)
+                                                    // 旧接口要求表单编码并依赖响应里的 url，使用 fetch 保持原有语义
+                                                    fetch("{:url('account/login')}", {
+                                                        method: 'POST',
+                                                        credentials: 'same-origin',
+                                                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                                        body: new URLSearchParams({ username: name, password: password, token: token, remember: remember, return_url: returnUrl })
+                                                    }).then(function (response) {
+                                                        return response.text().then(function (text) {
+                                                            try { return JSON.parse(text); }
+                                                            catch (e) { return { __raw: text }; }
+                                                        });
+                                                    }).then(function (result) {
+                                                        if (result && result.__raw !== undefined) {
+                                                            if (daskTrim(result.__raw) !== '') {
+                                                                Dask.api.error('发生错误, 返回的信息:' + ' ' + result.__raw);
                                                             }
-                                                        },
-                                                        error: function (error) {
-                                                            if (daskTrim(error.responseText) !== '') {
-                                                                Dask.api.error('发生错误, 返回的信息:' + ' ' + error.responseText);
-                                                            }
+                                                            return;
                                                         }
-                                                    })
+                                                        if (result.code) {
+                                                            if (isAjaxOpen) {
+                                                                parent.window.location.reload();
+                                                            }
+                                                            window.DaskFrontend.toast(result.msg, 'success');
+                                                            window.setTimeout(function () { window.location.href = result.url; }, 1200);
+                                                        } else {
+                                                            Dask.api.error(result.msg, result.url);
+                                                        }
+                                                    }).catch(function (error) {
+                                                        Dask.api.error('发生错误, 返回的信息:' + ' ' + error.message);
+                                                    });
                                                 }
                                             {/if}
                                         })
@@ -328,8 +234,8 @@
                 </div>
                 {if !empty($thirdConfig['base']['enable'])}
                 <div class="pb-4 position-relative mx-3 dask-social">
-                    <div class="border-bottom pb-1 position-absolute w-100" style="top: 6px"></div>
-                    <span class="d-block bg-white mb-3 position-relative text-center" style="width: 120px;margin: 0 auto;z-index: 9">{:L('社交账号登录')}</span>
+                    <div class="border-bottom pb-1 position-absolute w-100 dask-social-divider"></div>
+                    <span class="d-block bg-white mb-3 position-relative text-center dask-social-label">{:L('社交账号登录')}</span>
                     <span class="d-block text-center">{include file="widget/third_login" /}</span>
                 </div>
                 {/if}

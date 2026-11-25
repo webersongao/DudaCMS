@@ -11,12 +11,7 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     {/if}
     <base href="{$baseUrl}/">
-    <link rel="icon" href="{:asset('brand/favicon.ico', false)}" type="image/x-icon">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
-    <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta name="renderer" content="webkit" />
+    <link rel="icon" href="{:get_setting('site_favicon') ?: asset('brand/favicon.ico', false)}" type="image/x-icon">
     <meta name="referrer" content="never">
     <title>{block name="meta_title"}{$_page_title|default=""}{/block}</title>
     <meta name="title" content="{$_page_title|default=''}" />
@@ -27,7 +22,6 @@
     {if in_array($thisController,['question','article','topic']) && $thisAction=='index'}
     <link rel="stylesheet" href="{$assetBase}vendor/swiper/swiper.min.css?v={:asset_version('vendor/swiper/swiper.min.css')}">
     {/if}
-    <link rel="stylesheet" href="{$assetBase}vendor/layui/css/layui.css?v={:asset_version('vendor/layui/css/layui.css')}">
     <link rel="stylesheet" href="{$assetBase}common/fonts/fonts.min.css?v={:asset_version('common/fonts/fonts.min.css')}">
     <link rel="stylesheet" href="{$assetBase}vendor/bootstrap/dist/css/bootstrap.min.css?v={:asset_version('vendor/bootstrap/dist/css/bootstrap.min.css')}">
     <!-- P1：验证码仅在登录/注册/找回密码与发布页加载 -->
@@ -58,6 +52,8 @@
     <link rel="stylesheet" type="text/css" href="{$static_url}css/zhihu-blue.css?v={:asset_version('frontend/css/zhihu-blue.css')}">
     <link rel="stylesheet" type="text/css" href="{$assetBase}common/css/dask-components.css?v={:asset_version('common/css/dask-components.css')}">
     <link rel="stylesheet" type="text/css" href="{$assetBase}common/css/dask-layout.css?v={:asset_version('common/css/dask-layout.css')}">
+    <!-- 认证页/表单/无障碍补丁：统一收口到一处，避免各模板重复内联样式 -->
+    <link rel="stylesheet" type="text/css" href="{$assetBase}app/frontend-modern.css?v={:asset_version('app/frontend-modern.css')}">
     {block name="meta_style"}{/block}
     <script type="text/javascript" src="{$assetBase}vendor/jquery/dist/jquery.min.js?v={:asset_version('vendor/jquery/dist/jquery.min.js')}"></script>
     <script type="text/javascript" src="{$assetBase}common/js/dask-string.js?v={:asset_version('common/js/dask-string.js')}"></script>
@@ -66,7 +62,8 @@
     {if in_array($thisController,['question','article','topic']) && $thisAction=='index'}
     <script type="text/javascript" src="{$assetBase}vendor/swiper/swiper.min.js?v={:asset_version('vendor/swiper/swiper.min.js')}"></script>
     {/if}
-    <script type="text/javascript" src="{$assetBase}vendor/layui/layui.all.js?v={:asset_version('vendor/layui/layui.all.js')}"></script>
+    <!-- layer.* 兼容层：替代 layui.all.js，保留前台原有 layer.msg / layer.open 调用语义 -->
+    <script type="text/javascript" src="{$assetBase}app/dask-dialog-compat.js?v={:asset_version('app/dask-dialog-compat.js')}"></script>
     <!-- 上传按需：适配器常驻，Dropzone 本体仅在有上传控件时由 dask-dropzone.js 注入 -->
     <script type="text/javascript" src="{$assetBase}common/js/dask-dropzone.js?v={:asset_version('common/js/dask-dropzone.js')}"></script>
     <!-- 灯箱按需：dask-lightbox.js 仅在用户点击图片时动态注入 PhotoSwipe -->
@@ -117,6 +114,7 @@
     <script id="g-dask-modern" data-turbo-permanent src="{$assetBase}common/js/dask-modern.js?v={:asset_version('common/js/dask-modern.js')}"></script>
     <script id="g-dask-theme" data-turbo-permanent src="{$assetBase}common/js/dask-theme.js?v={:asset_version('common/js/dask-theme.js')}"></script>
     <script id="g-app" data-turbo-permanent src="{$static_url}js/app.js?v={:asset_version('frontend/js/app.js')}"></script>
+    <script id="g-frontend-modern" data-turbo-permanent src="{$assetBase}app/frontend-modern.js?v={:asset_version('app/frontend-modern.js')}"></script>
     <script id="g-esm" data-turbo-permanent type="module" src="{$assetBase}app/index.js?v={:asset_version('app/index.js')}"></script>
     {block name="meta_script"} {/block}
     {literal}
@@ -357,7 +355,7 @@
     
     {/if}
 
-    <div style="height: auto;{$theme_config['common']['fixed_navbar']=='Y' && !$_ajax_open && !$_ajax && !($thisController=='column' && $thisAction=='index') && (!($thisController=='index' && $thisAction=='index') || get_theme_setting('home.search_enable')=='N') ? 'margin-top:80px' : ''}" id="wrapMain">
+    <div style="height: auto;{$theme_config['common']['fixed_navbar']=='Y' && !$_ajax_open && !$_ajax && !in_array($thisAction,['login','register','find_password']) && !($thisController=='column' && $thisAction=='index') && (!($thisController=='index' && $thisAction=='index') || get_theme_setting('home.search_enable')=='N') ? 'margin-top:80px' : ''}" id="wrapMain">
         {block name="main"} {/block}
     </div>
 
@@ -449,7 +447,7 @@
 
 </html>
 {else/}
-<div style="{$theme_config['common']['fixed_navbar']=='Y' && !$_ajax_open && !$_ajax && !($thisController=='column' && $thisAction=='index') && (!($thisController=='index' && $thisAction=='index') || get_theme_setting('home.search_enable')=='N') ? 'margin-top:80px' : ''}" id="wrapMain">
+<div style="{$theme_config['common']['fixed_navbar']=='Y' && !$_ajax_open && !$_ajax && !in_array($thisAction,['login','register','find_password']) && !($thisController=='column' && $thisAction=='index') && (!($thisController=='index' && $thisAction=='index') || get_theme_setting('home.search_enable')=='N') ? 'margin-top:80px' : ''}" id="wrapMain">
     {block name="main"} {/block}
 </div>
 {/if}

@@ -58,7 +58,7 @@ class MailHelper
         $emailConfig = get_setting();
         $mail = new PHPMailer(true);
 
-        if (!$emailConfig['email_enable'] || !$emailConfig['email_host'] || !$emailConfig['email_username'] || !$emailConfig['email_password'] || !$emailConfig['email_from']) {
+        if (!config_bool('email_enable') || empty($emailConfig['email_host']) || empty($emailConfig['email_username']) || empty($emailConfig['email_password']) || empty($emailConfig['email_from'])) {
             return ['code' => 0, 'message' => '邮件功能未启用或配置不完整'];
         }
 

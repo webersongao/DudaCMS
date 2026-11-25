@@ -27,7 +27,7 @@ if (in_array('code', $types, true)) {
         </div>
         {/notempty}
 
-        <form method="{$form_method}" action="{$form_url}" id="awFormBuilder">
+        <form method="{$form_method}" action="{$form_url}" id="awFormBuilder" data-dask-modern-form>
             {if $form_items}
             {volist name="form_items" id="form"}
             {switch form.type}

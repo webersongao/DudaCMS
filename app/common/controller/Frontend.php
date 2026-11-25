@@ -165,7 +165,7 @@ class Frontend extends Base
         $this->script();
         $this->style();
         //记录来源页面地址
-        $return_url = $_SERVER['HTTP_REFERER'] ?? '/';
+        $return_url = safe_return_url('/');
         session('return_url',base64_encode($return_url));
         $this->returnUrl = $return_url;
         $this->assign('return_url',$return_url);

@@ -1,42 +1,24 @@
 {if !$_ajax}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta name="csrf-token" content="{:csrf_token()}">
-    <!-- 后台管理界面强制整页导航：后台列表/表单页依赖内联 script 初始化
-         bootstrap-table/layui/select2，Turbo 替换 body 时不会重放这些脚本，
-         会造成点击菜单后表格数据空白。此 meta 让 Turbo 导航回退为完整加载。 -->
-    <meta name="turbo-visit-control" content="reload">
     <script src="{$assetBase}common/js/dask-csrf.js?v={:asset_version('common/js/dask-csrf.js')}"></script>
     <title>{:isset($page_title) && $page_title  ? $page_title : (isset($breadCrumb['left']) ? $breadCrumb['left'][0] : get_setting('site_name'))} - 后台管理</title>
     <meta name="description" content="">
     <meta name="author" content="">
-    <base href="{$baseUrl}/" /><!--[if IE]></base><![endif]-->
+    <base href="{$baseUrl}/" />
     <link href="{:asset('brand/favicon.ico', false)}" rel="shortcut icon" type="image/x-icon"/>
-    <link rel="stylesheet" href="/static/vendor/layui/css/layui.css?v={:asset_version('vendor/layui/css/layui.css')}">
+    <!-- 主题首屏防闪与交互增强收敛到同一脚本；须在样式前同步执行主题引导 -->
+    <script src="{$assetBase}app/backend-modern.js?v={:asset_version('app/backend-modern.js')}" data-turbo-permanent></script>
+    <link rel="stylesheet" href="{$assetBase}app/backend-modern.css?v={:asset_version('app/backend-modern.css')}">
     <link rel="stylesheet" href="{$assetBase}vendor/select2/css/select2.min.css?v={:asset_version('vendor/select2/css/select2.min.css')}">
     <link rel="stylesheet" href="{$assetBase}backend/plugins/fontawesome-free/css/all.min.css?v={:asset_version('backend/plugins/fontawesome-free/css/all.min.css')}">
     <link rel="stylesheet" href="{$assetBase}backend/plugins/icheck-bootstrap/icheck-bootstrap.min.css?v={:asset_version('backend/plugins/icheck-bootstrap/icheck-bootstrap.min.css')}">
     <link rel="stylesheet" href="{$assetBase}common/fonts/fonts.min.css?v={:asset_version('common/fonts/fonts.min.css')}">
     <link rel="stylesheet" href="{$assetBase}vendor/adminlte/dist/css/adminlte.min.css?v={:asset_version('vendor/adminlte/dist/css/adminlte.min.css')}">
-    <script>
-    (function () {
-        try {
-            var pref = localStorage.getItem('dask_theme');
-            if (!pref) {
-                var m = document.cookie.match(/(?:^|; )dask_theme=([^;]*)/);
-                pref = m ? decodeURIComponent(m[1]) : 'auto';
-            }
-            if (['light','dark','auto'].indexOf(pref) === -1) pref = 'auto';
-            document.documentElement.setAttribute('data-theme', pref);
-            var dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.setAttribute('data-dark', dark ? '1' : '0');
-            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-        } catch (e) {}
-    })();
-    </script>
     <!-- P1：admin.css + tokens.css + admin-modern.css 三层按原顺序合并为单文件，减少请求 -->
     <link rel="stylesheet" href="{$assetBase}backend/css/admin-bundle.css?v={:asset_version('backend/css/admin-bundle.css')}">
 
@@ -45,7 +27,9 @@
     <script src="{$assetBase}common/js/dask-util.js?v={:asset_version('common/js/dask-util.js')}"></script>
     <script src="{$assetBase}vendor/bootstrap/dist/js/bootstrap.bundle.min.js?v={:asset_version('vendor/bootstrap/dist/js/bootstrap.bundle.min.js')}"></script>
     <script src="{$assetBase}vendor/adminlte/dist/js/adminlte.min.js?v={:asset_version('vendor/adminlte/dist/js/adminlte.min.js')}"></script>
-    <script src="{$assetBase}vendor/layui/layui.all.js?v={:asset_version('vendor/layui/layui.all.js')}"></script>
+    <!-- layer 兼容层：经典脚本同步定义 window.layer（dialog.js 由兼容层内部动态 import），
+         保证后续 dask-admin.js 与内联脚本执行时 layer.* 已可用 -->
+    <script src="{$assetBase}app/dask-dialog-compat.js?v={:asset_version('app/dask-dialog-compat.js')}" data-turbo-permanent></script>
     <!-- 上传/树形选择/取色器/代码编辑器/bootstrap-table 均按页按需注入，见 global/form/layout.php 与 global/table/layout.php -->
     <script src="{$assetBase}common/js/dask-dropzone.js?v={:asset_version('common/js/dask-dropzone.js')}"></script>
     <script src="{$assetBase}vendor/select2/js/select2.full.min.js?v={:asset_version('vendor/select2/js/select2.full.min.js')}"></script>
@@ -64,13 +48,19 @@
         window.upload_file_size = "{$setting.upload_file_size}";
         window.isAjax = "{$_ajax}";
         window.isAjaxOpen = "{$_ajax_open}";
-        // 后台禁用 Turbo Drive（必须在 dask-turbo.js 加载前定义）：后台页面依赖
-        // 内联脚本初始化，Turbo 的 body 替换不重放内联脚本会导致列表数据空白。
-        window.daskDisableTurboDrive = true;
-        // 将后台 pjax_enable 配置正确接线到 Turbo 开关（原代码从未赋值，开关一直失效）。
+        // 将后台 pjax_enable 配置接线到 Turbo 开关。
         window.pjaxEnable = "{:get_setting('pjax_enable') == 'N' ? 'N' : 'Y'}";
         // 按需加载资源的逐文件版本；不能用 dask-util.js 自身的 hash 代替。
         window.assetVersions = {:asset_versions_json(['common/js/jquery.qrcode.min.js', 'vendor/dropzone/dist/dropzone-min.js', 'vendor/photoswipe/dist/photoswipe.css', 'vendor/photoswipe/dist/umd/photoswipe.umd.min.js'])};
+        // 供 backend-modern.js 使用的模板变量；上面的旧全局变量保留以兼容既有脚本。
+        window.DASK_CONFIG = {
+            baseUrl: window.baseUrl,
+            staticUrl: window.staticUrl,
+            controller: window.thisController,
+            action: window.thisAction,
+            isAjax: window.isAjax,
+            isAjaxOpen: window.isAjaxOpen
+        };
     </script>
     <script src="{$assetBase}backend/js/dask-admin.js?v={:asset_version('backend/js/dask-admin.js')}"></script>
     <script src="{$assetBase}common/js/dask-form.js?v={:asset_version('common/js/dask-form.js')}"></script>
@@ -89,7 +79,7 @@
         <div class="container-fluid">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"><i class="fas fa-bars"></i></a>
+                <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="切换侧栏"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12"/></svg></a>
             </li>
         </ul>
         <div class="dask-admin-topnav navbar-nav">
@@ -105,13 +95,13 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{$baseUrl}" target="_blank">
-                    <i class="fas fa-home"></i>
+                <a class="nav-link" href="{$baseUrl}" target="_blank" aria-label="访问前台">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V7Z"/><path d="M6.5 13.5V9h3v4.5"/></svg>
                 </a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                    <i class="fa fa-sync"></i>
+                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false" aria-label="清理缓存">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 6.4A5.4 5.4 0 0 0 3.4 4.8M2.8 9.6a5.4 5.4 0 0 0 9.8 1.6"/><path d="M13.5 2.7v3.7H9.8M2.5 13.3V9.6h3.7"/></svg>
                 </a>
                 <div class="dropdown-menu font-size-sm text-center" aria-labelledby="dropdownClear">
                     <a class="dropdown-item dask-ajax-get" data-url="{:url('index/clear',['type'=>'cache'])}"
@@ -125,8 +115,8 @@
                 </div>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                    <i class="far fa-bell"></i>
+                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false" aria-label="待处理事项">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6a4 4 0 0 1 8 0c0 3.2.8 4.5 1.4 5H2.6C3.2 10.5 4 9.2 4 6Z"/><path d="M6.4 13a1.7 1.7 0 0 0 3.2 0"/></svg>
                     {if $notify_count}
                     <span class="badge text-bg-danger navbar-badge" style="top: 2px;right: -6px">{$notify_count}</span>
                     {/if}

@@ -2213,4 +2213,11 @@ return[
   '深色' => 'Dark',
   '自动' => 'Auto',
   '返回顶部' => 'Back to top',
+  'QQ 登录' => 'Sign in with QQ',
+  '微信登录' => 'Sign in with WeChat',
+  '微信扫码登录' => 'Sign in with WeChat QR Code',
+  '微博登录' => 'Sign in with Weibo',
+  'GitHub 登录' => 'Sign in with GitHub',
+  'Google 登录' => 'Sign in with Google',
+  'Twitter/X 登录' => 'Sign in with X',
 ];

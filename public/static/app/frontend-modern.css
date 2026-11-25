@@ -123,8 +123,9 @@ body.dask-account-page #wrapMain,
     margin-top: var(--dask-gap-6);
 }
 
-/* 社交账号图标：统一 44px 触控目标 */
-.dask-auth-page .dask-social a {
+/* 社交账号图标：统一 44px 触控目标与品牌色描边 */
+.dask-auth-page .dask-social a,
+.dask-auth-page .dask-social-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -136,11 +137,30 @@ body.dask-account-page #wrapMain,
     background: var(--dask-surface);
     line-height: 1;
     text-decoration: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
+.dask-auth-page .dask-social a:hover,
+.dask-auth-page .dask-social a:focus-visible,
+.dask-auth-page .dask-social-link:hover,
+.dask-auth-page .dask-social-link:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+}
+
+.dask-auth-page .dask-social-link[data-platform="qq"]:hover { border-color: #12b7f5; }
+.dask-auth-page .dask-social-link[data-platform="wechat"]:hover { border-color: #07c160; }
+.dask-auth-page .dask-social-link[data-platform="weibo"]:hover { border-color: #e6162d; }
+.dask-auth-page .dask-social-link[data-platform="github"]:hover { border-color: #181717; }
+.dask-auth-page .dask-social-link[data-platform="google"]:hover { border-color: #4285f4; }
+.dask-auth-page .dask-social-link[data-platform="x"]:hover { border-color: #111827; }
+
 .dask-auth-page .dask-social a i,
-.dask-auth-page .dask-social a svg {
-    font-size: 1.5rem;
+.dask-auth-page .dask-social a svg,
+.dask-auth-page .dask-social-link svg {
+    display: block;
+    width: 22px;
+    height: 22px;
     line-height: 1;
 }
 

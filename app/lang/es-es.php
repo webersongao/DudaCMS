@@ -2182,4 +2182,11 @@ return [
   '深色' => 'Oscuro',
   '自动' => 'Automático',
   '返回顶部' => 'Volver arriba',
+  'QQ 登录' => 'Iniciar sesión con QQ',
+  '微信登录' => 'Iniciar sesión con WeChat',
+  '微信扫码登录' => 'Iniciar sesión con código QR de WeChat',
+  '微博登录' => 'Iniciar sesión con Weibo',
+  'GitHub 登录' => 'Iniciar sesión con GitHub',
+  'Google 登录' => 'Iniciar sesión con Google',
+  'Twitter/X 登录' => 'Iniciar sesión con X',
 ];

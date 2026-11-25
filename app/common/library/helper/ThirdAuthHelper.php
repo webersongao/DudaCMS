@@ -36,13 +36,21 @@ class ThirdAuthHelper
      */
     public static function config(): array
     {
-        $enable = get_setting('third_enable', 'qq,wechat,weibo');
+        // 用 null 作默认值，区分「配置项不存在」与「后台明确全部取消勾选」。
+        // getConfigs 会把空字符串/空数组替换为非 null 的默认值；若这里继续传
+        // 'qq,wechat,weibo'，全部关闭会被误判为默认开启，前台仍能看见三个按钮。
+        $enable = get_setting('third_enable', null);
         $enabled = [];
+        if ($enable === null) {
+            // 配置行不存在（如旧库升级未完成）时才回退默认。
+            $enable = 'qq,wechat,weibo';
+        }
         if (is_array($enable)) {
             $enabled = array_values(array_filter(array_map('strval', $enable), 'strlen'));
         } elseif (is_string($enable)) {
             $enabled = array_values(array_filter(array_map('trim', explode(',', $enable)), 'strlen'));
         }
+        $enabled = array_values(array_intersect($enabled, self::PLATFORMS));
 
         $config = [
             'base' => [

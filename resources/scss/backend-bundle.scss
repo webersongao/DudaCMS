@@ -2830,3 +2830,7 @@ html body .table.dask-soft-lines td {
   border-top-color: var(--adm-line) !important;
   border-bottom-color: var(--adm-line) !important;
 }
+
+/* bootstrap-table 默认按表格宽度 4% 放大加载文字（宽表可达 32px），且列表请求通常
+   几十毫秒即完成，大字一闪更像卡顿。隐藏加载层，数据就绪后直接渲染。 */
+.bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading { display: none !important; }

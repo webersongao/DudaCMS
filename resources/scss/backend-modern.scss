@@ -284,6 +284,9 @@ body.sidebar-expand-lg.sidebar-collapse .app-sidebar .nav .nav-link.active {
 .bootstrap-table .fixed-table-body .table,
 .bootstrap-table .fixed-table-container .table,
 .bootstrap-table table#bootstrap-table { width: 100% !important; min-width: 100%; }
+/* bootstrap-table 默认按表格宽度 4% 放大加载文字（宽表可达 32px），且列表请求通常
+   几十毫秒即完成，大字一闪更像卡顿。隐藏加载层，数据就绪后直接渲染。 */
+.bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading { display: none !important; }
 .fixed-table-toolbar { padding: 12px 16px !important; border-bottom: 1px solid var(--adm-line); }
 /* bootstrap-table 内置刷新/开关/列设置/导出等弱工具按钮：降权为浅灰描边，不再抢主操作焦点。 */
 .bootstrap-table .fixed-table-toolbar .btn.btn-secondary,

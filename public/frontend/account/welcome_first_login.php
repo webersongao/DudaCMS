@@ -29,11 +29,11 @@
         <fieldset class="dask-field">
             <legend class="dask-field__label">{:L('性别')}</legend>
             <div class="dask-segment" role="radiogroup" aria-label="{:L('性别')}">
-                <input class="btn-check" type="radio" id="sex1" name="sex" value="1" autocomplete="off" {if ($user_info.sex|default=0) == 1}checked{/if}>
+                <input class="btn-check" type="radio" id="sex1" name="sex" value="1" autocomplete="off" {if !empty($user_info['sex']) && $user_info['sex'] == 1}checked{/if}>
                 <label class="btn dask-segment__item" for="sex1">{:L('男')}</label>
-                <input class="btn-check" type="radio" id="sex2" name="sex" value="2" autocomplete="off" {if ($user_info.sex|default=0) == 2}checked{/if}>
+                <input class="btn-check" type="radio" id="sex2" name="sex" value="2" autocomplete="off" {if !empty($user_info['sex']) && $user_info['sex'] == 2}checked{/if}>
                 <label class="btn dask-segment__item" for="sex2">{:L('女')}</label>
-                <input class="btn-check" type="radio" id="sex0" name="sex" value="0" autocomplete="off" {if ($user_info.sex|default=0) == 0}checked{/if}>
+                <input class="btn-check" type="radio" id="sex0" name="sex" value="0" autocomplete="off" {if empty($user_info['sex'])}checked{/if}>
                 <label class="btn dask-segment__item" for="sex0">{:L('保密')}</label>
             </div>
         </fieldset>
@@ -41,7 +41,7 @@
         <div class="dask-field">
             <label class="dask-field__label" for="onboarding-birthday">{:L('生日')}</label>
             <input class="form-control dask-field__control" type="date" id="onboarding-birthday" name="birthday"
-                   autocomplete="bday" value="{$user_info['birthday'] && $user_info['birthday'] > 0 ? date('Y-m-d', $user_info['birthday']) : ''}">
+                   autocomplete="bday" value="{if !empty($user_info['birthday'])}{:date('Y-m-d', $user_info['birthday'])}{/if}">
             <p class="dask-field__hint">{:L('可稍后在个人资料中修改')}</p>
         </div>
 

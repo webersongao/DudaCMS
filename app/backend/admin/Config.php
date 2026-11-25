@@ -231,6 +231,18 @@ class Config extends Backend
             return $builder->addGroup($subGroups)->fetch();
         }
 
+        // 成长值规则分组：提供快捷入口直达规则管理页，便于管理员配置各行为的成长值。
+        if ((int) $group === 6) {
+            $ruleUrl = (string) url('member.CreditRule/index');
+            $this->formBuilder->setExtraHtml(
+                '<div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">' .
+                '<span>在此设置前台成长值显示单位；各行为的成长值规则请前往规则管理页配置。</span>' .
+                '<a class="btn btn-sm btn-primary" href="' . htmlspecialchars($ruleUrl, ENT_QUOTES, 'UTF-8') . '">' .
+                '配置成长值规则 <i class="fa fa-arrow-right ms-1"></i></a></div>',
+                'content_top'
+            );
+        }
+
         return $this->formBuilder
             ->addLinkGroup($columns, $links)
             ->fetch();

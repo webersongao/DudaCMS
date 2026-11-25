@@ -74,6 +74,18 @@ class CreditRule extends Backend
     {
         if ($this->request->isPost()) {
             $data = $this->request->except(['file'], 'post');
+            if (empty($data['name']) || !preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', (string) $data['name'])) {
+                $this->error('行为标识需以字母开头，只能包含字母、数字和下划线');
+            }
+            if (empty($data['title'])) {
+                $this->error('请填写行为名称');
+            }
+            if (db('credit_rule')->where('name', $data['name'])->find()) {
+                $this->error('该行为标识已存在');
+            }
+            $data['cycle'] = max(1, (int) ($data['cycle'] ?? 1));
+            $data['max'] = max(0, (int) ($data['max'] ?? 0));
+            $data['credit'] = (int) ($data['credit'] ?? 0);
             $result = $this->model->create($data);
             if ($result) {
                 $this->success('添加成功', 'index');
@@ -97,8 +109,24 @@ class CreditRule extends Backend
     {
         if ($this->request->isPost()) {
             $data = $this->request->except(['file'], 'post');
+            if (empty($data['id'])) {
+                $this->error('缺少记录编号');
+            }
+            if (empty($data['name']) || !preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', (string) $data['name'])) {
+                $this->error('行为标识需以字母开头，只能包含字母、数字和下划线');
+            }
+            if (empty($data['title'])) {
+                $this->error('请填写行为名称');
+            }
+            $duplicate = db('credit_rule')->where('name', $data['name'])->where('id', '<>', (int) $data['id'])->find();
+            if ($duplicate) {
+                $this->error('该行为标识已存在');
+            }
+            $data['cycle'] = max(1, (int) ($data['cycle'] ?? 1));
+            $data['max'] = max(0, (int) ($data['max'] ?? 0));
+            $data['credit'] = (int) ($data['credit'] ?? 0);
             $result = $this->model->update($data);
-            if ($result) {
+            if ($result !== false) {
                 $this->success('修改成功', 'index');
             } else {
                 $this->error('提交失败或数据无变化');
@@ -106,6 +134,9 @@ class CreditRule extends Backend
         }
 
         $info = $this->model->where('id', $id)->find();
+        if (!$info) {
+            $this->error('成长值规则不存在');
+        }
 
         return $this->formBuilder
             ->addHidden('id', $info['id'])
@@ -174,5 +205,31 @@ class CreditRule extends Backend
             ->fetch();
     }
 
-    public function detail(string $id) {}
+    /** 成长记录详情：列表行点击后展示该笔成长值流水。 */
+    public function detail(string $id = '0')
+    {
+        $id = (int) $id;
+        $info = db('credit_log')->where('id', $id)->find();
+        if (!$info) {
+            $this->error('成长记录不存在');
+        }
+        $user = db('users')->where('uid', $info['uid'])->field('user_name,nick_name')->find();
+        $rule = db('credit_rule')->where('name', $info['action_type'])->value('title');
+
+        return $this->formBuilder
+            ->addHtml('detail_info', '', '',
+                '<dl class="row mb-0">' .
+                '<dt class="col-sm-3">记录编号</dt><dd class="col-sm-9">' . (int) $info['id'] . '</dd>' .
+                '<dt class="col-sm-3">执行用户</dt><dd class="col-sm-9">' . htmlspecialchars((string) ($user['nick_name'] ?: $user['user_name'] ?: $info['uid']), ENT_QUOTES, 'UTF-8') . '</dd>' .
+                '<dt class="col-sm-3">行为类型</dt><dd class="col-sm-9">' . htmlspecialchars((string) ($rule ?: $info['action_type']), ENT_QUOTES, 'UTF-8') . '</dd>' .
+                '<dt class="col-sm-3">数据ID</dt><dd class="col-sm-9">' . htmlspecialchars((string) $info['record_id'], ENT_QUOTES, 'UTF-8') . '</dd>' .
+                '<dt class="col-sm-3">成长值变动</dt><dd class="col-sm-9">' . (int) $info['credit'] . '</dd>' .
+                '<dt class="col-sm-3">变动后余额</dt><dd class="col-sm-9">' . (int) $info['balance'] . '</dd>' .
+                '<dt class="col-sm-3">说明</dt><dd class="col-sm-9">' . htmlspecialchars((string) $info['remark'], ENT_QUOTES, 'UTF-8') . '</dd>' .
+                '<dt class="col-sm-3">记录时间</dt><dd class="col-sm-9">' . date('Y-m-d H:i:s', (int) $info['create_time']) . '</dd>' .
+                '</dl>'
+            )
+            ->hideBtn(['submit'])
+            ->fetch();
+    }
 }

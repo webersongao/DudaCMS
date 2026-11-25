@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\common\library\oauth;
 
+use app\common\library\helper\MailHelper;
 use app\model\Users;
 use app\model\Third;
 use think\facade\Db;
@@ -27,6 +28,55 @@ class Service
         );
     }
 
+    /** 归一化第三方邮箱：只保留合法地址并统一小写。 */
+    private static function normalizeEmail($email): string
+    {
+        $email = strtolower(trim((string) $email));
+        return MailHelper::isEmail($email) ? mb_substr($email, 0, 255) : '';
+    }
+
+    /** 邮箱是否已被其它用户占用。 */
+    private static function emailOwner(string $email, int $uid = 0)
+    {
+        if ($email === '') {
+            return null;
+        }
+        $query = db('users')->where('email', $email);
+        if ($uid > 0) {
+            $query->where('uid', '<>', $uid);
+        }
+        return $query->find();
+    }
+
+    /** 第三方平台返回的邮箱是否已验证，只有明确验证通过才视为已验证。 */
+    private static function isEmailVerified($verified): bool
+    {
+        if (is_bool($verified)) {
+            return $verified;
+        }
+        if (is_numeric($verified)) {
+            return (int) $verified === 1;
+        }
+        return in_array(strtolower(trim((string) $verified)), ['1', 'true', 'yes', 'verified'], true);
+    }
+
+    /** 不同平台的性别字段统一为 users.sex：1男 2女 0保密。 */
+    private static function normalizeSex($sex): int
+    {
+        if (is_numeric($sex)) {
+            $sex = (int) $sex;
+            return $sex === 1 || $sex === 2 ? $sex : 0;
+        }
+        $sex = strtolower(trim((string) $sex));
+        if (in_array($sex, ['1', 'male', 'm', '男'], true)) {
+            return 1;
+        }
+        if (in_array($sex, ['2', 'female', 'f', '女'], true)) {
+            return 2;
+        }
+        return 0;
+    }
+
     /**
      * 第三方登录
      * @param string $platform 平台
@@ -41,10 +91,16 @@ class Service
             return false;
         }
 
+        $userInfo = is_array($params['user_info'] ?? null) ? $params['user_info'] : [];
+        $email = self::normalizeEmail($userInfo['email'] ?? '');
+        $emailVerified = $email !== '' && self::isEmailVerified($userInfo['email_verified'] ?? false);
+
         self::debugLog('connect_start', [
-            'platform'     => $platform,
-            'openid_hash'  => substr(md5($openid), 0, 8),
-            'has_nickname' => !empty($params['user_info']['nickname'] ?? ''),
+            'platform'      => $platform,
+            'openid_hash'   => substr(md5($openid), 0, 8),
+            'has_nickname'  => !empty($userInfo['nickname'] ?? ''),
+            'has_email'     => $email !== '',
+            'email_verified'=> $emailVerified,
         ]);
 
         $time = time();
@@ -53,7 +109,7 @@ class Service
             'platform'      => $platform,
             'openid'        => $openid,
             'unionid'       => (string) ($params['unionid'] ?? ''),
-            'open_username' => mb_substr((string) ($params['user_info']['nickname'] ?? ''), 0, 50),
+            'open_username' => mb_substr((string) ($userInfo['nickname'] ?? ''), 0, 50),
             'access_token'  => (string) ($params['access_token'] ?? ''),
             'refresh_token' => (string) ($params['refresh_token'] ?? ''),
             'expires_in'    => $expiresIn,
@@ -76,6 +132,29 @@ class Service
             }
 
             db('oauth')->where(['id' => $third['id']])->update($values);
+
+            // 老绑定用户此前没有邮箱：本次平台若能返回已验证邮箱，直接补全为已验证绑定邮箱。
+            if ($email !== '' && $emailVerified && (string) ($user['email'] ?? '') === '') {
+                if (self::emailOwner($email, (int) ($third['uid'] ?? 0))) {
+                    self::debugLog('existing_email_conflict', [
+                        'platform'    => $platform,
+                        'uid'         => (int) ($third['uid'] ?? 0),
+                    ]);
+                } else {
+                    db('users')->where('uid', (int) $third['uid'])->update([
+                        'email'          => $email,
+                        'is_valid_email' => 1,
+                        'group_id'       => 4,
+                        'update_time'    => $time,
+                    ]);
+                    $user['email'] = $email;
+                    self::debugLog('existing_email_bound', [
+                        'platform'    => $platform,
+                        'uid'         => (int) ($third['uid'] ?? 0),
+                    ]);
+                }
+            }
+
             if (!Users::extracted($user)) {
                 self::debugLog('existing_login_failed', [
                     'platform'    => $platform,
@@ -93,11 +172,47 @@ class Service
             return true;
         }
 
-        $username = self::buildUsername((string) ($params['user_info']['nickname'] ?? ''));
+        // 邮箱已属于其它账号时不能自动绑定，否则会绕过邮箱唯一语义并造成账号混淆。
+        if ($email !== '' && self::emailOwner($email)) {
+            self::debugLog('new_email_conflict', [
+                'platform'    => $platform,
+                'openid_hash' => substr(md5($openid), 0, 8),
+            ]);
+            return false;
+        }
+
+        $nickname = trim((string) ($userInfo['nickname'] ?? ''));
+        $username = self::buildUsername($nickname);
         $password = bin2hex(random_bytes(max(6, (int) get_setting('password_min_length'))));
-        $extend['sex'] = (int) ($params['user_info']['sex'] ?? 0);
-        if (isset($params['user_info']['avatar'])) {
-            $extend['avatar'] = mb_substr((string) $params['user_info']['avatar'], 0, 255);
+
+        // 只使用平台已授权并返回的数据作为新用户默认值，不覆盖管理员显式传入的 extend。
+        if ($nickname !== '' && empty($extend['nick_name'])) {
+            $extend['nick_name'] = mb_substr($nickname, 0, 50);
+        }
+        if (empty($extend['sex'])) {
+            $extend['sex'] = self::normalizeSex($userInfo['sex'] ?? 0);
+        }
+        if (empty($extend['avatar']) && !empty($userInfo['avatar'])) {
+            $extend['avatar'] = mb_substr((string) $userInfo['avatar'], 0, 255);
+        }
+        if (empty($extend['signature']) && !empty($userInfo['signature'])) {
+            $extend['signature'] = mb_substr(trim(strip_tags((string) $userInfo['signature'])), 0, 255);
+        }
+        if (!empty($userInfo['birthday'])) {
+            $birthday = $userInfo['birthday'];
+            if (!is_numeric($birthday)) {
+                $birthday = strtotime((string) $birthday);
+            }
+            if ($birthday && empty($extend['birthday'])) {
+                $extend['birthday'] = (int) $birthday;
+            }
+        }
+        if ($email !== '') {
+            $extend['email'] = $email;
+            $extend['is_valid_email'] = $emailVerified ? 1 : 0;
+            if ($emailVerified) {
+                $extend['group_id'] = 4;
+            }
         }
 
         Db::startTrans();

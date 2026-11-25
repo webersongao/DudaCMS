@@ -22,7 +22,11 @@ use app\common\library\helper\HttpHelper;
  *   'access_token'  => string,
  *   'refresh_token' => string,
  *   'expires_in'    => int,
- *   'user_info'     => ['nickname' => string, 'avatar' => string, 'sex' => int],
+ *   'user_info'     => [
+ *       'nickname' => string, 'avatar' => string, 'sex' => int,
+ *       'email' => string, 'email_verified' => bool,
+ *       'signature' => string, 'birthday' => int|string
+ *   ],
  * ]
  */
 abstract class OAuth2
@@ -182,9 +186,13 @@ abstract class OAuth2
             'refresh_token' => (string) ($token['refresh_token'] ?? ''),
             'expires_in'    => (int) ($token['expires_in'] ?? 0),
             'user_info'     => [
-                'nickname' => (string) ($profile['nickname'] ?? ''),
-                'avatar'   => (string) ($profile['avatar'] ?? ''),
-                'sex'      => (int) ($profile['sex'] ?? 0),
+                'nickname'      => (string) ($profile['nickname'] ?? ''),
+                'avatar'        => (string) ($profile['avatar'] ?? ''),
+                'sex'           => (int) ($profile['sex'] ?? 0),
+                'email'         => (string) ($profile['email'] ?? ''),
+                'email_verified'=> !empty($profile['email_verified']),
+                'signature'     => (string) ($profile['signature'] ?? ''),
+                'birthday'      => $profile['birthday'] ?? '',
             ],
         ];
     }

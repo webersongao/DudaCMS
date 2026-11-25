@@ -38,10 +38,13 @@ class Google extends OAuth2
         $gender = $user['gender'] ?? '';
         $sex = $gender === 'male' ? 1 : ($gender === 'female' ? 2 : 0);
         return [
-            'id'       => (string) $id,
-            'nickname' => (string) ($user['name'] ?? $user['email'] ?? ''),
-            'avatar'   => (string) ($user['picture'] ?? ''),
-            'sex'      => $sex,
+            'id'            => (string) $id,
+            'nickname'      => (string) ($user['name'] ?? $user['email'] ?? ''),
+            'avatar'        => (string) ($user['picture'] ?? ''),
+            'sex'           => $sex,
+            'email'         => (string) ($user['email'] ?? ''),
+            'email_verified'=> !empty($user['email_verified']),
+            'birthday'      => (string) ($user['birthday'] ?? ''),
         ];
     }
 }

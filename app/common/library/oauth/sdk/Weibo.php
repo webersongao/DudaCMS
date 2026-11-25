@@ -48,8 +48,8 @@ class Weibo
      */
     public function getAuthorizeUrl(): string
     {
-        $state = md5(uniqid(rand(), true));
-        session('state', $state);
+        $state = bin2hex(random_bytes(16));
+        session('third_state_weibo', $state);
         $queryArr = array(
             "response_type" => "code",
             "client_id"     => $this->config['weibo']['app_id'],
@@ -93,6 +93,7 @@ class Weibo
         }
         $userInfo['nickname'] = $userInfo['screen_name'] ?? '';
         $userInfo['avatar'] = $userInfo['profile_image_url'] ?? '';
+        $userInfo['signature'] = $userInfo['description'] ?? '';
         return [
             'access_token'  => $access_token,
             'refresh_token' => (string) ($data['refresh_token'] ?? ''),

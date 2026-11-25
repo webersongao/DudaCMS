@@ -49,10 +49,11 @@ class Twitter extends OAuth2
             return [];
         }
         return [
-            'id'       => (string) $user['id'],
-            'nickname' => (string) ($user['name'] ?? $user['username'] ?? ''),
-            'avatar'   => (string) ($user['profile_image_url'] ?? ''),
-            'sex'      => 0,
+            'id'        => (string) $user['id'],
+            'nickname'  => (string) ($user['name'] ?? $user['username'] ?? ''),
+            'avatar'    => (string) ($user['profile_image_url'] ?? ''),
+            'sex'       => 0,
+            'signature' => (string) ($user['description'] ?? ''),
         ];
     }
 }

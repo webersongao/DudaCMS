@@ -296,6 +296,10 @@ class Users extends BaseModel
             self::setError('用户已存在');
             return false;
         }
+        if (!empty($extend['email']) && db('users')->where('email', $extend['email'])->find()) {
+            self::setError('邮箱已被使用');
+            return false;
+        }
 
         $data = array();
         $salt = RandomHelper::alnum();
@@ -334,6 +338,7 @@ class Users extends BaseModel
             $data['status'] = 2;
         }
         //$data['group_id'] = $data['group_id']?:4;
+        $data = db_input_normalize('users', $data);
         try {
             $uid = db('users')->strict(false)->insertGetId($data);
             //用户通知配置

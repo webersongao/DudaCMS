@@ -1997,9 +1997,7 @@ CREATE TABLE `dask_upgrade_log` (
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据库升级记录';
 
--- 新装即为当前程序版本，写入一条成功记录作为版本基准，避免误报待升级
-INSERT INTO `dask_upgrade_log` (`version`, `status`, `sql_file`, `sql_count`, `remark`, `add_time`)
-VALUES ('1.0.4', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
+-- 新装版本基准由安装器读取 config/version.php 后写入，避免在此写死版本号。
 
 SET FOREIGN_KEY_CHECKS = 1;
 

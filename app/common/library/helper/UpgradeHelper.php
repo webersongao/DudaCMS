@@ -18,8 +18,9 @@ use think\facade\Event;
 /**
  * 在线版本升级助手。
  *
- * 升级 SQL 作为代码文件随 git 同步到 install/sql/upgrade/{版本号}.sql，
- * 后台扫描这些文件并与数据库已应用版本比较，提示相邻版本升级。
+ * 升级步骤由 update/upgrade/manifest.php 统一声明，对应幂等 SQL 随 git 同步到
+ * update/upgrade/ 目录；后台与数据库已应用版本比较，提示相邻版本升级。
+ * 老版本包没有清单时仍按 SQL 文件名与文件头元数据扫描。
  * 全程不访问任何外部服务器，不依赖上传 ZIP 升级包。
  */
 class UpgradeHelper
@@ -139,41 +140,104 @@ class UpgradeHelper
         return null;
     }
 
+    /** 读取升级清单；老版本包没有清单时返回空数组，走 SQL 扫描兼容路径 */
+    private function loadManifest(): array
+    {
+        $file = $this->upgradeSqlDir() . 'manifest.php';
+        if (!is_file($file)) {
+            return [];
+        }
+        try {
+            $data = include $file;
+        } catch (\Throwable $e) {
+            return [];
+        }
+        return is_array($data) ? $data : [];
+    }
+
     /**
-     * 扫描所有升级 SQL，以目标版本为键。
+     * 汇总一条升级记录：清单优先，SQL 头部元数据兜底。
+     */
+    private function buildUpgradeInfo(string $version, string $from, string $file, string $path, array $manifestItem, array $meta): array
+    {
+        $title = (string) ($manifestItem['title'] ?? '') ?: (string) ($meta['title'] ?? '');
+        $summary = (string) ($manifestItem['summary'] ?? '') ?: (string) ($meta['summary'] ?? '');
+        $requires = (string) ($manifestItem['requires'] ?? '') ?: (string) ($meta['requires'] ?? '');
+        if ($requires === '') {
+            $requires = $from;
+        }
+        $description = $title !== ''
+            ? $title . ($summary !== '' ? '：' . $summary : '')
+            : (string) ($meta['description'] ?? '');
+        $risk = strtolower((string) ($manifestItem['risk'] ?? '') ?: (string) ($meta['risk'] ?? ''));
+
+        return [
+            'version'     => $version,
+            'from'        => $from,
+            'file'        => $file,
+            'path'        => $path,
+            'size'        => (int) filesize($path),
+            'mtime'       => date('Y-m-d H:i:s', (int) filemtime($path)),
+            'description' => $description,
+            'title'       => $title,
+            'summary'     => $summary,
+            'risk'        => $risk,
+            'requires'    => $requires,
+            'verify'      => (string) ($manifestItem['verify'] ?? '') ?: (string) ($meta['verify'] ?? ''),
+        ];
+    }
+
+    /**
+     * 扫描所有升级步骤，以目标版本为键。
+     * 优先读取 update/upgrade/manifest.php；清单外的 SQL 仍按文件名/头部扫描，兼容旧版本包。
      * @return array<string, array>
      */
     public function listUpgradeFiles(): array
     {
         $dir = $this->upgradeSqlDir();
+        $manifest = $this->loadManifest();
         $files = [];
-        foreach ((array) glob($dir . '*.sql') as $file) {
-            $name = pathinfo(basename((string) $file), PATHINFO_FILENAME);
-            $parsed = $this->parseUpgradeFileName($name);
+        $claimed = [];
+
+        foreach ($manifest as $version => $item) {
+            if (!self::checkVersionText($version) || !is_array($item)) {
+                continue;
+            }
+            $version = (string) $version;
+            $file = (string) ($item['file'] ?? '');
+            if ($file === '' || basename($file) !== $file) {
+                continue;
+            }
+            $path = $dir . $file;
+            if (!is_file($path)) {
+                continue;
+            }
+            $meta = $this->parseUpgradeMeta($path);
+            $parsed = $this->parseUpgradeFileName(pathinfo($file, PATHINFO_FILENAME));
+            $from = (string) ($item['from'] ?? '') ?: ($meta['requires'] !== '' ? $meta['requires'] : (string) ($parsed['from'] ?? ''));
+            $files[$version] = $this->buildUpgradeInfo($version, $from, $file, $path, $item, $meta);
+            $claimed[$file] = true;
+        }
+
+        foreach ((array) glob($dir . '*.sql') as $filePath) {
+            $path = (string) $filePath;
+            $file = basename($path);
+            if (isset($claimed[$file])) {
+                continue;
+            }
+            $meta = $this->parseUpgradeMeta($path);
+            $parsed = $this->parseUpgradeFileName(pathinfo($file, PATHINFO_FILENAME));
             if ($parsed === null) {
                 continue;
             }
-            $meta = $this->parseUpgradeMeta((string) $file);
-            // requires 优先于文件名推断的 from（文件头是更明确的声明）
+            $version = $meta['version'] !== '' ? $meta['version'] : $parsed['to'];
+            if (!self::checkVersionText($version) || isset($files[$version])) {
+                continue;
+            }
             $from = $meta['requires'] !== '' ? $meta['requires'] : $parsed['from'];
-            $description = $meta['title'] !== ''
-                ? $meta['title'] . ($meta['summary'] !== '' ? '：' . $meta['summary'] : '')
-                : $meta['description'];
-            $files[$parsed['to']] = [
-                'version'     => $parsed['to'],
-                'from'        => $from,
-                'file'        => basename((string) $file),
-                'path'        => (string) $file,
-                'size'        => (int) filesize((string) $file),
-                'mtime'       => date('Y-m-d H:i:s', (int) filemtime((string) $file)),
-                'description' => $description,
-                'title'       => $meta['title'],
-                'summary'     => $meta['summary'],
-                'risk'        => $meta['risk'],
-                'requires'    => $meta['requires'],
-                'verify'      => $meta['verify'],
-            ];
+            $files[$version] = $this->buildUpgradeInfo($version, $from, $file, $path, [], $meta);
         }
+
         // 对未声明 from 的文件，按版本号推断其前置版本
         $versions = array_keys($files);
         usort($versions, [self::class, 'compareVersion']);
@@ -409,8 +473,8 @@ class UpgradeHelper
                 return ['code' => 0, 'msg' => $result['msg'] . '（可用升级前备份还原）'];
             }
 
-            // 升级后自检：@verify（失败不回滚数据，但明确告警，便于人工确认）
-            $verify = $this->runVerify($pending['file']);
+            // 升级后自检：清单/SQL 声明的 verify（失败不回滚数据，但明确告警，便于人工确认）
+            $verify = $this->runVerify($pending);
             $remark = '升级成功' . ($result['skipped'] ? '（跳过 ' . $result['skipped'] . ' 条已应用语句）' : '');
             if (!$verify['ok']) {
                 $remark .= '；自检告警：' . $verify['msg'];
@@ -448,17 +512,12 @@ class UpgradeHelper
     }
 
     /**
-     * 升级后自检：解析 SQL 头部的 @verify 声明并逐项验证。
+     * 升级后自检：校验清单（或 SQL 头部）声明的 verify 项。
      * 支持 column:表.列 / table:表 / index:表.索引，用 SHOW 语句规避权限问题。
      */
-    private function runVerify(string $fileName): array
+    private function runVerify(array $pending): array
     {
-        $file = $this->upgradeSqlDir() . $fileName;
-        if (!is_file($file)) {
-            return ['ok' => true, 'msg' => '', 'items' => []];
-        }
-        $meta = $this->parseUpgradeMeta($file);
-        $verifyRaw = $meta['verify'] ?? '';
+        $verifyRaw = (string) ($pending['verify'] ?? '');
         if ($verifyRaw === '') {
             return ['ok' => true, 'msg' => '', 'items' => []];
         }

@@ -427,6 +427,28 @@ function install($username, $password, $config, $adminUrl)
             Db::connect('install')->execute($vo);
         }
 
+        // 新装版本基准：唯一来源为 config/version.php，避免在 install.sql 写死版本号。
+        $versionFile = CONFIG_PATH . 'version.php';
+        $versionConfig = [];
+        if (is_file($versionFile)) {
+            $loaded = include $versionFile;
+            if (is_array($loaded)) {
+                $versionConfig = $loaded;
+            }
+        }
+        $programVersion = (string) ($versionConfig['version'] ?? '');
+        if (preg_match('/^\d{1,3}\.\d{1,2}\.\d{1,2}$/', $programVersion) !== 1) {
+            $programVersion = '1.0.0';
+        }
+        Db::connect('install')->name('upgrade_log')->insert([
+            'version'   => $programVersion,
+            'status'    => 1,
+            'sql_file'  => 'install.sql',
+            'sql_count' => 0,
+            'remark'    => '全新安装基准',
+            'add_time'  => time(),
+        ]);
+
         $pinyin = new Pinyin();
         $url_token = $pinyin->permalink($username, '');
         $pool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

@@ -107,6 +107,13 @@ class Config extends Backend
                             $value = (string) ($value + 0);
                         }
                     }
+                    // 话题最多选择数量：限定 0-5，0 表示不允许选择话题。
+                    if ($name === 'max_topic_select' && $value !== '') {
+                        $topicLimit = (int) $value;
+                        if ($topicLimit < 0 || $topicLimit > 5) {
+                            $errors[$name] = $row['title'] . '：只能是 0 到 5 之间的数字';
+                        }
+                    }
 
                     if ($value !== '' && str_ends_with($name, '_email') && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                         $errors[$name] = $row['title'] . '：邮箱格式不正确';
@@ -167,6 +174,11 @@ class Config extends Backend
                 unset($val['option']);
             } else {
                 $val['option'] = is_array($val['option']) ? $val['option'] : [];
+            }
+            // 话题最多选择数量限制 0-5，前端 number 输入直接给出 min/max 约束。
+            if ($val['name'] === 'max_topic_select') {
+                $val['min'] = 0;
+                $val['max'] = 5;
             }
             $columns[] = array_values($val);
         }

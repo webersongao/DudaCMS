@@ -412,7 +412,7 @@ INSERT INTO `dask_config` VALUES (89,'invitation_expire_time','5','注册邀请�
 INSERT INTO `dask_config` VALUES (91,'show_answer_user_ip','9','显示回答用户IP地址','是否显示回答用户IP地址','radio','Y','{\"Y\":\"显示\",\"N\":\"不显示\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (92,'invite_register_enable','5','开启邀请注册','是否开启邀请注册','radio','N','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (93,'enable_anonymous','7','是否允许匿名','是否允许匿名提问/回答问题','radio','Y','{\"Y\":\"允许\",\"N\":\"不允许\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (98,'max_topic_select','9','话题最多选择数量','话题最多选择数量','number','4','null',51,'',1,0);
+INSERT INTO `dask_config` VALUES (98,'max_topic_select','9','话题最多选择数量','话题最多选择数量，范围 0 - 5；0 表示不允许选择话题','number','4','null',51,'',1,0);
 INSERT INTO `dask_config` VALUES (106,'pjax_enable','1','是否启用pjax','网站是否启用pjax请求','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',50,'',1,0);
 INSERT INTO `dask_config` VALUES (108,'answer_sort_type','9','默认回答排序','选择默认回答排序方式','radio','new','{\"new\":\"最新排序\",\"hot\":\"热门排序\",\"publish\":\"只看楼主\",\"focus\":\"关注的人\"}',50,'',1,0);
 INSERT INTO `dask_config` VALUES (110,'auto_question_lock_day','9','自动锁定问题天数','自动锁定问题天数 0 代表不自动锁定，单位：天','number','60','[]',0,NULL,1,0);

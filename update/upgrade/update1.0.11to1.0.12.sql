@@ -13,3 +13,6 @@ DELETE FROM `dask_config` WHERE `name` IN (
   'enable_multilingual', 'default_language',
   'enable_column', 'remove_xss'
 );
+
+-- 话题最多选择数量：补充 0-5 的范围说明（校验在 Config 控制器服务端执行）。
+UPDATE `dask_config` SET `tips`='话题最多选择数量，范围 0 - 5；0 表示不允许选择话题' WHERE `name`='max_topic_select';

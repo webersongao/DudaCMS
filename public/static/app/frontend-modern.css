@@ -155,8 +155,7 @@ body.dask-account-page #wrapMain,
 .dask-auth-page .dask-social-link[data-platform="google"]:hover { border-color: #4285f4; }
 .dask-auth-page .dask-social-link[data-platform="x"]:hover { border-color: #111827; }
 
-.dask-auth-page .dask-social a i,
-.dask-auth-page .dask-social a svg,
+.dask-auth-page .dask-social-link img,
 .dask-auth-page .dask-social-link svg {
     display: block;
     width: 22px;

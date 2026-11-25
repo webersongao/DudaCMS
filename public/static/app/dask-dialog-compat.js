@@ -135,27 +135,8 @@
     return { element: element, body: body, foot: foot };
   }
 
-  function setContent(body, content, options, index) {
-    if (content == null) return;
-    if (typeof Node !== 'undefined' && content instanceof Node) {
-      body.appendChild(content);
-      return;
-    }
-    var text = String(content);
-    if (options.type === 2 || options.type === 'iframe') {
-      var iframe = document.createElement('iframe');
-      iframe.src = text;
-      iframe.name = 'layui-layer-iframe' + index;
-      iframe.setAttribute('frameborder', '0');
-      iframe.setAttribute('title', String(options.title || '弹出层'));
-      iframe.style.cssText = 'width:100%;height:100%;min-height:320px;border:0;background:transparent;';
-      body.style.padding = '0';
-      body.appendChild(iframe);
-      return;
-    }
-    // layer 的 content 允许 HTML 片段（业务代码大量依赖 <br>/<font> 等内联标记）。
-    body.innerHTML = text;
-    // innerHTML 不会执行内联 script；按 layer 行为重建脚本节点，保证弹窗内初始化逻辑运行。
+  function runInlineScripts(body) {
+    // innerHTML 不会执行内联 script；重建脚本节点，保证弹窗内初始化逻辑运行。
     Array.prototype.forEach.call(body.querySelectorAll('script:not([src])'), function (old) {
       var script = document.createElement('script');
       Array.prototype.forEach.call(old.attributes, function (attr) {
@@ -164,6 +145,49 @@
       script.textContent = old.textContent;
       old.parentNode.replaceChild(script, old);
     });
+  }
+
+  function setContent(body, content, options, index) {
+    if (content == null) return;
+    if (typeof Node !== 'undefined' && content instanceof Node) {
+      body.appendChild(content);
+      return;
+    }
+    var text = String(content);
+
+    // 历史 type:2 / iframe 调用统一改为原生内容弹窗：只取目标页主体片段，不创建 iframe。
+    if (options.type === 2 || options.type === 'iframe') {
+      var url = text;
+      if (url.indexOf('?') > -1) url += '&_ajax_open=1';
+      else url += '?_ajax_open=1';
+      body.textContent = '加载中…';
+      window.fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+          if (!records.has(index)) return;
+          var trimmed = html.replace(/^\s+/, '');
+          if (trimmed.charAt(0) === '{') {
+            try {
+              var result = JSON.parse(trimmed);
+              body.textContent = result.msg || '操作失败';
+              return;
+            } catch (error) { /* 非 JSON，继续按 HTML 处理 */ }
+          }
+          var parsed = new DOMParser().parseFromString(html, 'text/html');
+          var main = parsed.querySelector('#wrapMain') || parsed.body;
+          body.innerHTML = main ? main.innerHTML : '';
+          runInlineScripts(body);
+          document.dispatchEvent(new CustomEvent('dask:ajax-loaded', { detail: { element: body, index: index } }));
+        })
+        .catch(function () {
+          if (records.has(index)) body.textContent = '加载失败，请稍后重试';
+        });
+      return;
+    }
+
+    // layer 的 content 允许 HTML 片段（业务代码大量依赖 <br>/<font> 等内联标记）。
+    body.innerHTML = text;
+    runInlineScripts(body);
   }
 
   function addButtons(foot, labels, primary, secondary, index, onDone) {
@@ -288,6 +312,7 @@
     document.body.appendChild(element);
     records.set(index, record);
     lastIndex = index;
+    window.__daskModalIndex = index;
     if (typeof element.showModal === 'function') element.showModal();
     else element.setAttribute('open', '');
     return index;
@@ -417,7 +442,8 @@
 
     getFrameIndex: function (name) {
       var match = String(name || '').match(/(\d+)\s*$/);
-      return match ? parseInt(match[1], 10) : 0;
+      if (match) return parseInt(match[1], 10);
+      return Number(window.__daskModalIndex || 0);
     },
 
     ready: function (callback) {

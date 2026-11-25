@@ -333,6 +333,8 @@ var Dask = {
                         shade: 0.7,
                         maxmin: max,
                         moveOut: true,
+                        // 弹窗内容页自带操作按钮，不再显示兼容层默认“确定/取消”。
+                        btn: [],
                         area: area,
                         content: parsed.content,
                         success: function (layero, index) {
@@ -372,9 +374,7 @@ var Dask = {
                         content: ret,
                         scrollbar: false,
                         moveOut: true,
-                        success: function (layero, index) {
-                            layer.iframeAuto(index);
-                        },
+                        btn: [],
                     });
                 },
             });
@@ -393,9 +393,7 @@ var Dask = {
                 content: $(element).html(),
                 scrollbar: false,
                 moveOut: true,
-                success: function (layero, index) {
-                    layer.iframeAuto(index);
-                },
+                btn: [],
             });
         },
 
@@ -679,7 +677,7 @@ var Dask = {
             var title = user_name ? '与 ' + user_name + ' 对话' : '新私信';
 
             if (isDialog) {
-                return Dask.api.open(url, title, {})
+                return Dask.api.open(url, title, { btn: [], width: '620px', shadeClose: true })
             } else {
                 Dask.common.openNewWindow(url);
             }

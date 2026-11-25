@@ -185,64 +185,84 @@ const DaskAdmin = {
             })
         },
 
+        /** 解析后端 _ajax_open 页面，只取主体片段，杜绝整页 iframe 嵌套。 */
+        parseModalHtml: function (html) {
+            var parsed = new DOMParser().parseFromString(String(html || ''), 'text/html');
+            var main = parsed.querySelector('#wrapMain') || parsed.body;
+            return main ? main.innerHTML : '';
+        },
+
         /**
-         * 打开一个弹出窗口
-         * @param url
-         * @param title
-         * @param options
-         * @returns {*}
+         * 统一的原生内容弹窗入口：AJAX 取页面主体并注入，不使用 iframe。
+         */
+        openContent: function (url, title, options) {
+            options = options || {};
+            title = options.title || title || '';
+            url = url + (url.indexOf('?') > -1 ? '&' : '?') + '_ajax_open=1';
+            return $.ajax({
+                url: url,
+                type: options.method || 'GET',
+                data: options.data || null,
+                dataType: 'html',
+                success: function (html) {
+                    var trimmed = $.trim(String(html || ''));
+                    if (trimmed.charAt(0) === '{') {
+                        try {
+                            var result = JSON.parse(trimmed);
+                            return layer.msg(result.msg || '操作失败', { time: 1200 });
+                        } catch (error) { /* 非 JSON 继续按 HTML 处理 */ }
+                    }
+                    var width = options.width || (($(window).width() > 800) ? '800px' : '95%');
+                    var height = options.height || (($(window).height() > 600) ? '600px' : '95%');
+                    var defaults = {
+                        type: 1,
+                        title: title,
+                        shadeClose: true,
+                        scrollbar: false,
+                        shade: 0.7,
+                        maxmin: !!options.max,
+                        moveOut: true,
+                        area: [width, height],
+                        btn: [],
+                        content: DaskAdmin.api.parseModalHtml(html)
+                    };
+                    var layerOptions = $.extend({}, defaults, options);
+                    layerOptions.type = 1;
+                    layerOptions.content = defaults.content;
+                    delete layerOptions.width;
+                    delete layerOptions.height;
+                    delete layerOptions.max;
+                    delete layerOptions.data;
+                    delete layerOptions.method;
+                    var userSuccess = options.success;
+                    layerOptions.success = function (layero, index) {
+                        layer.setTop(layero);
+                        $(layero).data('callback', options.callback);
+                        window.__daskModalIndex = index;
+                        if (typeof userSuccess === 'function') userSuccess(layero, index);
+                    };
+                    return layer.open(layerOptions);
+                },
+                error: function (xhr) {
+                    var msg = $.trim(xhr.responseText || '');
+                    DaskAdmin.api.error(msg ? ('加载失败：' + msg.slice(0, 200)) : '加载失败，请稍后重试');
+                }
+            });
+        },
+
+        /**
+         * 打开一个弹出窗口（原生内容弹窗）
          */
         open: function (url, title, options) {
-            title = options && options.title ? options.title : (title ? title : "");
-            url = url + (url.indexOf("?") > -1 ? "&" : "?") + "_ajax_open=1";
-            let width = options.width ? options.width : $(window).width() > 800 ? '800px' : '95%';
-            let height = options.height ? options.height : $(window).height() > 600 ? '600px' : '95%';
-            let area = [width, height];
-            let max = options.max ? true : false;
-            options = $.extend({
-                type: 2,
-                title: title,
-                shadeClose: true,
-                scrollbar: false,
-                shade: 0.7,
-                maxmin: max,
-                moveOut: true,
-                area: area,
-                content: url,
-                success: function (layero, index) {
-                    const that = this;
-                    $(layero).data("callback", that.callback);
-                    layer.setTop(layero);
-                    if ($(layero).height() > $(window).height()) {
-                        //当弹出窗口大于浏览器可视高度时,重定位
-                        layer.style(index, {
-                            top: 0,
-                            height: $(window).height()
-                        });
-                    }
-                    var iframe = $(layero).find('iframe');
-                    //设定iframe的高度为当前iframe内body的高度
-                    iframe.css('height', iframe[0].contentDocument.body.offsetHeight);
-                    //重新调整弹出层的位置，保证弹出层在当前屏幕的中间位置
-                    $(layero).css('top', (window.innerHeight - iframe[0].offsetHeight) / 2);
-                    layer.iframeAuto(index);
-                }
-            }, options ? options : {});
-
-            return layer.open(options);
+            return DaskAdmin.api.openContent(url, title, options);
         },
 
         //post方式打开
         postOpen: function (url, title, data, options) {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                dataType: 'html',
-                success: function () {
-                    return DaskAdmin.api.open(url, title, options);
-                }
-            });
+            options = options || {};
+            options.method = 'POST';
+            options.data = data;
+            return DaskAdmin.api.openContent(url, title, options);
         }
     },
 
@@ -768,67 +788,40 @@ const DaskAdmin = {
                     DaskAdmin.modal.reload();
                 });
         },
-        // 弹出层指定宽度
+        // 弹出层指定宽度（原生内容弹窗）
         open: function (title, url, width, height, callback) {
-            // 如果是移动端，就使用自适应大小弹窗
             if (navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)) {
-                width = 'auto';
-                height = 'auto';
+                width = '95%';
+                height = '90%';
             }
-            if (DaskAdmin.common.isEmpty(title)) {
-                title = false;
-            }
-            if (DaskAdmin.common.isEmpty(width)) {
-                width = 600;
-            }
-            if (DaskAdmin.common.isEmpty(height)) {
-                height = ($(window).height() - 50);
-            }
+            if (DaskAdmin.common.isEmpty(title)) title = '';
+            if (DaskAdmin.common.isEmpty(width)) width = 600;
+            if (DaskAdmin.common.isEmpty(height)) height = ($(window).height() - 50);
             if (DaskAdmin.common.isEmpty(callback)) {
-                // 当前层索引参数（index）、当前层的DOM对象（layero）
-                callback = function (index, layero) {
-                    var iframeWin = layero.find('iframe')[0];
-                    iframeWin.contentWindow.submitHandler(index, layero);
-                }
+                callback = function (index) {
+                    if (typeof window.submitHandler === 'function') window.submitHandler(index);
+                    else layer.close(index);
+                };
             }
-            layer.open({
-                // iframe层
-                type: 2,
-                // 宽高
-                area: [width + 'px', height + 'px'],
-                // 固定
-                fix: false,
-                // 最大最小化
-                maxmin: true,
-                // 遮罩
-                shade: 0.3,
-                // 标题
+            return DaskAdmin.api.openContent(url, title, {
+                width: typeof width === 'number' ? width + 'px' : width,
+                height: typeof height === 'number' ? height + 'px' : height,
                 title: title,
-                // 内容
-                content: url,
-                // 按钮
+                shade: 0.3,
+                maxmin: true,
                 btn: ['确定', '关闭'],
-                // 是否点击遮罩关闭
-                shadeClose: true,
-                // 确定按钮回调方法
                 yes: callback,
-                // 右上角关闭按钮触发的回调
-                cancel: function (index) {
-                    return true;
-                }
+                cancel: function () { return true; }
             });
         },
 
         postOpen: function (url, title, data, options) {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                dataType: 'json',
-                success: function () {
-                    return DaskAdmin.modal.open(title, url, options.width, options.height);
-                }
-            });
+            options = options || {};
+            options.method = 'POST';
+            options.data = data;
+            options.title = title;
+            options.btn = options.btn || ['确定', '关闭'];
+            return DaskAdmin.api.openContent(url, title, options);
         },
 
         // 弹出层指定参数选项
@@ -843,14 +836,11 @@ const DaskAdmin = {
                     options.callBack(index, layero);
                 }
             }
-            layer.open({
-                type: 2,
+            return DaskAdmin.api.openContent(_url, _title, {
+                width: _width + 'px',
+                height: _height + 'px',
                 maxmin: true,
                 shade: 0.3,
-                title: _title,
-                fix: false,
-                area: [_width + 'px', _height + 'px'],
-                content: _url,
                 shadeClose: DaskAdmin.common.isEmpty(options.shadeClose) ? true : options.shadeClose,
                 skin: options.skin,
                 btn: DaskAdmin.common.isEmpty(options.btn) ? _btn : options.btn,
@@ -879,27 +869,25 @@ const DaskAdmin = {
             if (DaskAdmin.common.isEmpty(height)) {
                 height = ($(window).height() - 50);
             }
-            var index = layer.open({
-                type: 2,
-                area: [width + 'px', height + 'px'],
-                fix: false,
-                //不固定
+            DaskAdmin.api.openContent(url, title, {
+                width: typeof width === 'number' ? width + 'px' : width,
+                height: typeof height === 'number' ? height + 'px' : height,
                 maxmin: true,
                 shade: 0.3,
                 title: title,
-                content: url,
                 btn: ['确定', '关闭'],
-                // 弹层外区域关闭
                 shadeClose: true,
-                yes: function (index, layero) {
-                    var iframeWin = layero.find('iframe')[0];
-                    iframeWin.contentWindow.submitHandler(index, layero);
+                yes: function (index) {
+                    if (typeof window.submitHandler === 'function') window.submitHandler(index);
+                    else layer.close(index);
                 },
-                cancel: function (index) {
+                cancel: function () {
                     return true;
+                },
+                success: function () {
+                    layer.full(window.__daskModalIndex || 0);
                 }
             });
-            layer.full(index);
         },
         // 重新加载
         reload: function () {
@@ -1345,44 +1333,7 @@ const DaskAdmin = {
         },
 
         open: function (url, title, options) {
-            title = options && options.title ? options.title : (title ? title : "");
-            url = url + (url.indexOf("?") > -1 ? "&" : "?") + "_ajax_open=1";
-            let width = options.width ? options.width : $(window).width() > 800 ? '800px' : '95%';
-            let height = options.height ? options.height : $(window).height() > 600 ? '600px' : '95%';
-            let area = [width, height];
-            options = $.extend({
-                type: 2,
-                title: title,
-                shadeClose: true,
-                scrollbar: false,
-                shade: 0.7,
-                maxmin: true,
-                moveOut: true,
-                area: area,
-                content: url,
-                success: function (layero, index) {
-                    const that = this;
-                    //检测弹窗是否是提示信息
-                    var text = window["layui-layer-iframe" + index].document.body.innerText;
-                    if (text.indexOf('"code":0') != -1 || text.indexOf('"code":1') != -1) {
-                        var result = JSON.parse(text);
-                        parent.layer.close(index);
-                        layer.msg(result.msg, { time: 500 });
-                    }
-
-                    //存储callback事件
-                    $(layero).data("callback", that.callback);
-                    layer.setTop(layero);
-                    if ($(layero).height() > $(window).height()) {
-                        //当弹出窗口大于浏览器可视高度时,重定位
-                        layer.style(index, {
-                            top: 0,
-                            height: $(window).height()
-                        });
-                    }
-                }
-            }, options ? options : {});
-            return layer.open(options);
+            return DaskAdmin.api.openContent(url, title, options);
         },
     },
 
@@ -1640,6 +1591,8 @@ const DaskAdmin = {
             var options = $(that).data();
             var url = $(that).data("url") ? $(that).data("url") : $(that).attr('href');
             var title = $(that).attr("title") || $(that).data("title") || $(that).data('original-title');
+            // 图标等选择型弹窗需要回写触发字段；内容弹窗在同一文档内，显式记录触发元素。
+            window.__daskModalTrigger = that;
             if (typeof options.confirm !== 'undefined') {
                 layer.confirm(options.confirm, {
                     btn: ['确认', '取消']

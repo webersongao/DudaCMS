@@ -285,18 +285,6 @@
   Dask.modal = {
     open: function (options) {
       var opts = options || {};
-      if (global.layer && !opts.forceNative) {
-        return global.layer.open({
-          type: opts.type || 2,
-          title: opts.title || '',
-          area: opts.area || ['560px', '80%'],
-          content: opts.content || '',
-          btn: opts.buttons || null,
-          yes: opts.onYes || null,
-          end: opts.onClose || null
-        });
-      }
-
       var dialog = document.createElement('dialog');
       dialog.className = 'dask-dialog';
       dialog.setAttribute('role', 'dialog');
@@ -319,11 +307,19 @@
       var body = document.createElement('div');
       body.className = 'dask-dialog__body';
       if (opts.url) {
-        var iframe = document.createElement('iframe');
-        iframe.src = opts.url;
-        iframe.title = opts.title || '';
-        iframe.style.cssText = 'width:100%;min-height:360px;border:0;background:transparent';
-        body.appendChild(iframe);
+        var url = opts.url + (opts.url.indexOf('?') > -1 ? '&' : '?') + '_ajax_open=1';
+        body.textContent = '加载中…';
+        global.fetch(url, {
+          credentials: 'same-origin',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        }).then(function (response) { return response.text(); }).then(function (html) {
+          if (!dialog.isConnected) return;
+          var parsed = new DOMParser().parseFromString(html, 'text/html');
+          var main = parsed.querySelector('#wrapMain') || parsed.body;
+          body.innerHTML = (main && main.innerHTML) || '';
+        }).catch(function () {
+          if (dialog.isConnected) body.textContent = '加载失败，请稍后重试';
+        });
       } else {
         body.appendChild(toNode(opts.content || ''));
       }

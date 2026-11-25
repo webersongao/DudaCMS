@@ -293,18 +293,22 @@
         ? event.target.closest('.js-icon-list .dask-icon') : null;
       if (!icon) return;
       var node = icon.querySelector('i');
-      if (!node || !window.parent || window.parent === window) return;
+      if (!node) return;
       var name = String(node.className || '').replace('fa-2x', '').trim();
       var $ = window.jQuery;
+      var trigger = window.__daskModalTrigger;
       if ($) {
-        $('.dask-form-icon', window.parent.document).val(name);
-        $('.dask-form-icon-select', window.parent.document)
-          .attr('class', name + ' dask-form-icon-select');
+        var scope = trigger && trigger.ownerDocument ? $(trigger.ownerDocument) : $(document);
+        var form = trigger ? $(trigger).closest('form') : $();
+        var field = form.length ? form.find('.dask-form-icon') : $();
+        if (!field.length) field = scope.find('.dask-form-icon').first();
+        field.val(name);
+        var preview = form.length ? form.find('.dask-form-icon-select') : $();
+        if (!preview.length) preview = scope.find('.dask-form-icon-select').first();
+        preview.attr('class', name + ' dask-form-icon-select');
       }
-      if (window.parent.layer) {
-        var index = typeof window.parent.layer.getFrameIndex === 'function'
-          ? window.parent.layer.getFrameIndex(window.name) : 0;
-        if (typeof window.parent.layer.close === 'function') window.parent.layer.close(index);
+      if (window.layer && typeof window.layer.close === 'function') {
+        window.layer.close(window.__daskModalIndex || 0);
       }
     });
 

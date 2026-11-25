@@ -388,7 +388,6 @@ INSERT INTO `dask_config` VALUES (27,'password_lock_minutes','5','账号锁定�
 INSERT INTO `dask_config` VALUES (28,'register_agreement','5','注册协议','','textarea','当您申请用户时，表示您已经同意遵守本规章。\r\n欢迎您加入本站点参与交流和讨论，本站点为社区，为维护网上公共秩序和社会稳定，请您自觉遵守以下条款：\r\n\r\n一、不得利用本站危害国家安全、泄露国家秘密，不得侵犯国家社会集体的和公民的合法权益，不得利用本站制作、复制和传播下列信息：\r\n　（一）煽动抗拒、破坏宪法和法律、行政法规实施的；\r\n　（二）煽动颠覆国家政权，推翻社会主义制度的；\r\n　（三）煽动分裂国家、破坏国家统一的；\r\n　（四）煽动民族仇恨、民族歧视，破坏民族团结的；\r\n　（五）捏造或者歪曲事实，散布谣言，扰乱社会秩序的；\r\n　（六）宣扬封建迷信、淫秽、色情、赌博、暴力、凶杀、恐怖、教唆犯罪的；\r\n　（七）公然侮辱他人或者捏造事实诽谤他人的，或者进行其他恶意攻击的；\r\n　（八）损害国家机关信誉的；\r\n　（九）其他违反宪法和法律行政法规的；\r\n　（十）进行商业广告行为的。\r\n\r\n二、互相尊重，对自己的言论和行为负责。\r\n三、禁止在申请用户时使用相关本站的词汇，或是带有侮辱、毁谤、造谣类的或是有其含义的各种语言进行注册用户，否则我们会将其删除。\r\n四、禁止以任何方式对本站进行各种破坏行为。\r\n五、如果您有违反国家相关法律法规的行为，本站概不负责，您的登录信息均被记录无疑，必要时，我们会向相关的国家管理部门提供此类信息。','[]',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (29,'enable_column','7','启用专栏','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (30,'enable_category','7','启用分类','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (46,'cdn_url','4','资源URL','默认为空，代表当前服务器，其他服务器填写域名或IP,不带/','text','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (47,'upload_type','4','上传方式','默认为TP上传','radio','tp','{\"tp\":\"默认方式\",\"big\":\"分片上传\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (48,'footer_html','1','公共底部代码','','textarea','','null',53,NULL,1,0);
 INSERT INTO `dask_config` VALUES (49,'header_html','1','公共头部代码','','textarea','','null',52,NULL,1,0);
@@ -529,7 +528,6 @@ INSERT INTO `dask_config` VALUES (521,'watermark_position','4','水印位置','�
 INSERT INTO `dask_config` VALUES (522,'watermark_font_size','4','水印字号','0 表示按图片尺寸自动计算','number','0','[]',22,NULL,1,0);
 INSERT INTO `dask_config` VALUES (523,'watermark_opacity','4','水印不透明度','0-100，数值越大越不透明','number','100','[]',23,NULL,1,0);
 INSERT INTO `dask_config` VALUES (524,'watermark_color','4','水印颜色','十六进制颜色值，例如 #ffffff','text','#ffffff','null',24,NULL,1,0);
-INSERT INTO `dask_config` VALUES (525,'watermark_max_lines','4','水印最大行数','超出自动省略','number','3','[]',25,NULL,1,0);
 INSERT INTO `dask_config` VALUES (526,'watermark_quality','4','水印输出质量','1-100，JPEG/WebP 使用；PNG 自动换算压缩级别','number','90','[]',26,NULL,1,0);
 INSERT INTO `dask_config` VALUES (527,'video_compress_enable','4','启用视频压缩','开启后上传视频使用 ffmpeg 转码，未安装 ffmpeg 时自动跳过','radio','N','{\"Y\":\"启用\",\"N\":\"不启用\"}',30,NULL,1,0);
 INSERT INTO `dask_config` VALUES (528,'ffmpeg_path','4','ffmpeg 路径','留空使用系统 PATH 中的 ffmpeg','text','ffmpeg','null',31,NULL,1,0);

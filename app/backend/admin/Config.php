@@ -211,9 +211,89 @@ class Config extends Backend
             }
         }
 
+        // 配置项较多的分组按功能拆成页内二级 tab，避免几十项堆在同一页。
+        $subGroups = $this->groupColumnsForConfig($columns, (int) $group);
+        if ($subGroups !== []) {
+            // 顶部仍保留一级分组链接；configs 留空由模板跳过空 pane。
+            $builder = $links ? $this->formBuilder->addLinkGroup([], $links) : $this->formBuilder;
+            return $builder->addGroup($subGroups)->fetch();
+        }
+
         return $this->formBuilder
             ->addLinkGroup($columns, $links)
             ->fetch();
+    }
+
+    /**
+     * 按功能把同组配置项拆成页内 tab；未显式归类的字段进「其他设置」，避免升级后新增配置丢失。
+     * @return array 分类标题 => 字段数组；无需分类时返回空数组
+     */
+    private function groupColumnsForConfig(array $columns, int $group): array
+    {
+        $maps = [
+            1 => [
+                '站点信息' => ['site_name', 'site_logo', 'site_favicon', 'site_close', 'icp', 'site_description', 'pjax_enable'],
+                'SEO 设置' => ['seo_title', 'seo_keywords', 'seo_description', 'site_keywords'],
+                '联系方式' => ['contact_email', 'report_bug_email'],
+                '页头页脚' => ['header_html', 'footer_html'],
+            ],
+            3 => [
+                'SMTP 设置' => ['email_enable', 'email_host', 'email_port', 'email_secure', 'email_username', 'email_password'],
+                '发件人设置' => ['email_from', 'email_show_name'],
+            ],
+            4 => [
+                '上传限制' => ['upload_file_size', 'upload_file_ext', 'upload_image_size', 'upload_image_ext', 'upload_type', 'upload_max_size'],
+                '图片处理' => ['download_local_enable', 'upload_image_thumb_enable', 'upload_image_thumb_percent'],
+                '水印设置' => ['watermark_enable', 'watermark_text', 'watermark_font', 'watermark_position', 'watermark_font_size', 'watermark_opacity', 'watermark_color', 'watermark_quality'],
+                '视频压缩' => ['video_compress_enable', 'ffmpeg_path', 'video_compress_crf', 'video_compress_preset', 'video_compress_max_width'],
+            ],
+            5 => [
+                '注册设置' => ['register_valid_type', 'register_type', 'register_agreement', 'invite_register_enable', 'invitation_expire_time'],
+                '账号规则' => ['password_min_length', 'password_max_length', 'password_type', 'password_max_retries', 'password_lock_minutes', 'username_min_length', 'username_max_length'],
+                '登录与访问' => ['online_check', 'online_check_time', 'unique_login', 'remember_login_enable', 'remember_login_time', 'visitor_view_answer_count'],
+            ],
+            7 => [
+                '内容功能' => ['enable_column', 'enable_category', 'enable_anonymous', 'enable_multilingual', 'default_language'],
+                '安全与审核' => ['sensitive_words', 'remove_xss', 'enable_frontend_captcha', 'enable_backend_captcha'],
+                '系统设置' => ['date_friendly_enable', 'record_admin_log', 'auto_save_draft', 'auto_save_draft_time', 'api_doc_public'],
+            ],
+            9 => [
+                '功能开关' => ['attach_enable', 'topic_enable', 'open_content_enable'],
+                '发布与审核' => ['publish_content_verify_time', 'publish_content_verify_num', 'answer_unique', 'auto_question_lock_day', 'auto_set_best_answer_day', 'best_answer_min_count', 'best_agree_min_count'],
+                '展示设置' => ['contents_per_page', 'show_answer_user_ip', 'uninterested_fold', 'answer_sort_type', 'max_topic_select', 'content_popular_value_show'],
+            ],
+            13 => [
+                '基础设置' => ['editor_mode_default', 'editor_content_theme', 'editor_toolbar_preset', 'editor_code_highlight'],
+                '上传设置' => ['editor_upload_enable', 'editor_upload_max_image', 'editor_upload_max_video', 'editor_upload_timeout'],
+                '功能开关' => ['editor_video_enable', 'editor_image_enable', 'editor_float_toolbar_enable', 'editor_cache_enable', 'editor_counter_enable'],
+            ],
+        ];
+        $map = $maps[$group] ?? [];
+        if (count($map) < 2) {
+            return [];
+        }
+
+        $grouped = [];
+        foreach ($map as $title => $names) {
+            $grouped[$title] = [];
+        }
+        foreach ($columns as $column) {
+            $name = (string) ($column[1] ?? '');
+            $target = '';
+            foreach ($map as $title => $names) {
+                if (in_array($name, $names, true)) {
+                    $target = $title;
+                    break;
+                }
+            }
+            $grouped[$target ?: '其他设置'][] = $column;
+        }
+        foreach ($grouped as $title => $items) {
+            if (!$items) {
+                unset($grouped[$title]);
+            }
+        }
+        return $grouped;
     }
 
     /**

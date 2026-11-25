@@ -100,4 +100,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'column:action_log.anonymous, column:users.status, column:article.sort',
     ],
+    '1.0.10' => [
+        'from'    => '1.0.9',
+        'file'    => 'update1.0.9to1.0.10.sql',
+        'title'   => '配置项精简与分组分类展示',
+        'summary' => '移除资源URL与水印最大行数；配置页按功能分类显示，避免大量选项堆在一页',
+        'risk'    => 'low',
+        'verify'  => 'config:cdn_url=absent, config:watermark_max_lines=absent',
+    ],
 ];

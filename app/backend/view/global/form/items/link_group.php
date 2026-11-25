@@ -7,6 +7,7 @@
     {/volist}
 </ul>
 {/if}
+{if !empty($form.configs)}
 <div class="tab-content p-3">
     <div class="tab-pane active">
     {volist name="form.configs" id="form_group"}
@@ -123,3 +124,4 @@
     {/volist}
 </div>
 </div>
+{/if}

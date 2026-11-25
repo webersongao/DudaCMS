@@ -176,11 +176,62 @@ class CreditGroup extends Backend
             $columns[$key] = array_values($val);
         }
 
+        // 权限项按功能分类展示，避免大量开关堆在同一页。
+        $groups = $this->groupPermissionColumns($columns);
+
         // 构建页面
         return $this->formBuilder
-            ->addFormItems($columns)
+            ->addGroup($groups)
             ->setFormUrl((string)url('permission',['id'=>$id]))
             ->fetch();
+    }
+
+    /**
+     * 权限项按功能拆分为顶部切换式 tab（与用户组权限页保持一致）。
+     * @param array $columns add{Type} 入参格式：[type, name, title, tips, option, value, ...]
+     * @return array 关联数组：tab 标题 => 字段数组
+     */
+    private function groupPermissionColumns(array $columns): array
+    {
+        $maps = [
+            '网站访问' => ['visit_website', 'available_invite_count', 'publish_url'],
+            '内容发布' => [
+                'publish_question_enable', 'publish_article_enable', 'publish_answer_enable',
+                'create_topic_enable', 'publish_question_num', 'publish_article_num',
+            ],
+            '审核设置' => [
+                'publish_question_approval', 'publish_article_approval', 'publish_answer_approval',
+                'modify_answer_approval', 'modify_article_approval', 'modify_question_approval',
+                'publish_approval_time_start', 'publish_approval_time_end',
+            ],
+            '内容管理' => [
+                'topic_manager', 'edit_content_topic', 'modify_article', 'remove_article',
+                'modify_question', 'remove_question', 'set_best_answer', 'recommend_post',
+                'set_top_post', 'modify_answer', 'remove_answer', 'lock_topic', 'remove_topic',
+                'redirect_question', 'lock_question', 'merge_topic',
+            ],
+        ];
+        $grouped = [];
+        foreach ($maps as $title => $names) {
+            $grouped[$title] = [];
+        }
+        foreach ($columns as $column) {
+            $name = (string) ($column[1] ?? '');
+            $target = '';
+            foreach ($maps as $title => $names) {
+                if (in_array($name, $names, true)) {
+                    $target = $title;
+                    break;
+                }
+            }
+            $grouped[$target ?: '其他权限'][] = $column;
+        }
+        foreach ($grouped as $title => $items) {
+            if (!$items) {
+                unset($grouped[$title]);
+            }
+        }
+        return $grouped;
     }
 
     public function delete()

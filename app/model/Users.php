@@ -1102,7 +1102,7 @@ class Users extends BaseModel
             //$map[] = ['last_login_ip', '=', $ip];
             $map[] = ['uid', '=', $user['uid']];
             $online_id = db('users_online')->where($map)->value('id');
-            $last_url = request()->url();
+            $last_url = safe_last_url();
             $user_agent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'CLI');
 
             $data = array();

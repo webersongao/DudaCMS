@@ -1418,3 +1418,21 @@ if (!function_exists('sms_enabled')) {
         return \app\common\service\SmsService::isEnabled();
     }
 }
+
+// 在线用户停留页面：去掉 query/fragment 并限制长度，避免写入 users_online.last_url 时截断。
+if (!function_exists('safe_last_url')) {
+    function safe_last_url(string $fallback = '/'): string
+    {
+        try {
+            $url = (string) request()->url();
+        } catch (\Throwable $e) {
+            $url = $fallback;
+        }
+        $url = explode('?', $url, 2)[0];
+        $url = explode('#', $url, 2)[0];
+        if ($url === '') {
+            $url = $fallback;
+        }
+        return mb_substr($url, 0, 255);
+    }
+}

@@ -33,7 +33,7 @@ class CheckHelper
                     $ip = IpHelper::getRealIp();
                     $updateData = array(
                         'last_login_time' => time(),
-                        'last_url' => Request::url(),
+                        'last_url' => safe_last_url(),
                         'user_agent' => Request::server('HTTP_USER_AGENT'),
                         'last_login_ip' => $ip,
                         'uid' => $user_info['uid']

@@ -57,7 +57,7 @@
                         <div class="mb-3 row">
                             <label class="col-md-1 col-form-label"> {:L('生日')} </label>
                             <div class="col-md-4">
-                                <input type="text" class="form-control" id="birthday" name="birthday" value="{$user_info['birthday'] ? date('Y-m-d',$user_info['birthday']) : date('Y-m-d',time())}">
+                                <input type="date" class="form-control" id="birthday" name="birthday" value="{$user_info['birthday'] ? date('Y-m-d',$user_info['birthday']) : ''}">
                             </div>
                         </div>
 
@@ -98,11 +98,6 @@
                     </form>
                 </div>
                 <script>
-                    layui.laydate.render({
-                        elem: '#birthday',
-                        type:'date',
-                        trigger: 'click'
-                    });
                     $(function (){
                         //上传头像封面
                         Dask.upload.webUpload('filePicker_cover','cover_preview','avatar','avatar');

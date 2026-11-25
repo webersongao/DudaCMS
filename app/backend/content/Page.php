@@ -74,7 +74,7 @@ class Page extends Backend
     {
         if ($this->request->isPost())
         {
-            $data =$this->request->except(['file'],'post');
+            $data = db_input_normalize('page', $this->request->except(['file'], 'post'));
             $result = $this->model->update($data);
             if ($result) {
                 $this->success('修改成功', 'index');

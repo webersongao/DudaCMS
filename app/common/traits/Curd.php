@@ -79,7 +79,7 @@ trait Curd
     {
         if($this->request->isPost())
         {
-            $data = $this->request->except(['file'],'post');
+            $data = db_input_normalize($this->table, $this->request->except(['file'], 'post'));
 
             $validate = $this->makeBuilder->getValidateRule($this->table);
             if($validate)
@@ -107,7 +107,7 @@ trait Curd
     {
         if ($this->request->isPost())
         {
-            $data =$this->request->except(['file'],'post');
+            $data = db_input_normalize($this->table, $this->request->except(['file'], 'post'));
             $validate = $this->makeBuilder->getValidateRule($this->table);
             if($validate)
             {
@@ -200,11 +200,21 @@ trait Curd
     {
         if (request()->isPost())
         {
-            $data = request()->post();
-            $info = db($this->table)->find($data['id']);
-            if ($info[$data['field']] != $data['sort'])
+            $input = request()->post();
+            $id = db_input_int($input['id'] ?? 0, 0);
+            $field = (string) ($input['field'] ?? '');
+            $columns = db_table_columns($this->table);
+            if ($id <= 0 || $field === '' || ($columns && !isset($columns[$field]))) {
+                return json(['error' => 1, 'msg' => '排序参数不正确']);
+            }
+            $value = $columns ? db_input_field_value($this->table, $field, $input['sort'] ?? 0) : db_input_int($input['sort'] ?? 0);
+            $info = db($this->table)->find($id);
+            if (!$info) {
+                return json(['error' => 1, 'msg' => '记录不存在']);
+            }
+            if ($info[$field] != $value)
             {
-                db($this->table)->where($this->getPk(),$data['id'])->update([$data['field']=>$data['sort']]);
+                db($this->table)->where($this->getPk(), $id)->update([$field => $value]);
                 return json(['error' => 0, 'msg' => '修改成功!']);
             }
             return json(['error' => 0, 'msg' => '提交失败或数据无变化!']);
@@ -216,11 +226,17 @@ trait Curd
     {
         if(request()->isPost())
         {
-            $data = request()->post();
-            $id = $data['id']??($data['pk']??'id');
-            $field = $data['field']??($data['name']??'');
-            $value = is_array($data['value'])?implode(',',$data['value']) : $data['value'];
-            db($this->table)->where($this->getPk(),$id)->update([$field=>$value]);
+            $input = request()->post();
+            $id = db_input_int($input['id'] ?? ($input['pk'] ?? 0), 0);
+            $field = (string) ($input['field'] ?? ($input['name'] ?? ''));
+            $columns = db_table_columns($this->table);
+            if ($id <= 0 || $field === '' || ($columns && !isset($columns[$field]))) {
+                return json(['error' => 1, 'msg' => '参数不正确']);
+            }
+            $rawValue = $input['value'] ?? '';
+            $rawValue = is_array($rawValue) ? implode(',', $rawValue) : $rawValue;
+            $value = $columns ? db_input_field_value($this->table, $field, $rawValue) : $rawValue;
+            db($this->table)->where($this->getPk(), $id)->update([$field => $value]);
             return json(['error'=>0, 'msg'=>'修改成功!']);
         }
     }
@@ -230,11 +246,18 @@ trait Curd
     {
         if (request()->isPost())
         {
-            $id = request()->post('id');
-            $field = request()->post('field');
-            $info =db($this->table)->find($id);
-            $status = $info[$field] == 1 ? 0 : 1;
-            db($this->table)->where($this->getPk(),$id)->update([$field=>$status]);
+            $id = db_input_int(request()->post('id'), 0);
+            $field = (string) request()->post('field');
+            $columns = db_table_columns($this->table);
+            if ($id <= 0 || $field === '' || ($columns && !isset($columns[$field]))) {
+                return json(['error' => 1, 'msg' => '参数不正确']);
+            }
+            $info = db($this->table)->find($id);
+            if (!$info) {
+                return json(['error' => 1, 'msg' => '记录不存在']);
+            }
+            $status = ((int) ($info[$field] ?? 0)) === 1 ? 0 : 1;
+            db($this->table)->where($this->getPk(), $id)->update([$field => $status]);
             return json(['error'=>0, 'msg'=>'修改成功!']);
         }
     }

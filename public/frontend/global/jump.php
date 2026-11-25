@@ -30,8 +30,6 @@
     </script>
     {/literal}
     <link rel="stylesheet" href="{$assetBase}common/design/tokens.css?v={:asset_version('common/design/tokens.css')}">
-    <link rel="stylesheet" href="{$assetBase}vendor/layui/css/layui.css?v={:asset_version('vendor/layui/css/layui.css')}">
-    <script type="text/javascript" src="{$assetBase}vendor/layui/layui.all.js?v={:asset_version('vendor/layui/layui.all.js')}"></script>
     <style type="text/css">
         *{box-sizing:border-box;margin:0;padding:0;font-family:Lantinghei SC,Open Sans,Arial,Hiragino Sans GB,Microsoft YaHei,"微软雅黑",STHeiti,WenQuanYi Micro Hei,SimSun,sans-serif;-webkit-font-smoothing:antialiased}
         body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;color:var(--dask-text,#333);background-color:rgba(0,0,0,.7);}
@@ -65,7 +63,7 @@
             页面将在 <span id="wait"><?php echo($wait);?></span> 秒后自动跳转
         </p>
         <p class="clearfix dask-actions">
-            <a href="javascript:;" data-action="history-back" class="btn btn-grey dask-btn-secondary">返回上一页</a>
+            <a href="#" role="button" data-action="history-back" class="btn btn-grey dask-btn-secondary">返回上一页</a>
             <a id="href" href="{$url}" class="btn btn-primary dask-btn-primary">立即跳转</a>
         </p>
     </div>

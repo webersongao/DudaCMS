@@ -232,3 +232,177 @@ body.dask-account-page #wrapMain,
 .navbox-2 a[role="button"] {
     cursor: pointer;
 }
+
+/* 首次登录资料完善：现代卡片式引导，不依赖旧 tab / laydate UI */
+.dask-onboarding {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: var(--dask-gap-5) var(--dask-gap-5) var(--dask-gap-4);
+    box-sizing: border-box;
+}
+
+.dask-onboarding__hero {
+    text-align: center;
+    margin-bottom: var(--dask-gap-5);
+}
+
+.dask-onboarding__avatar {
+    position: relative;
+    display: inline-flex;
+    width: 88px;
+    height: 88px;
+    margin-bottom: var(--dask-gap-3);
+    border-radius: var(--dask-r-pill);
+    background: var(--dask-bg);
+}
+
+.dask-onboarding__avatar-picker {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--dask-line);
+}
+
+.dask-onboarding__avatar-picker img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dask-onboarding__avatar-edit {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--dask-r-pill);
+    background: var(--dask-blue);
+    color: var(--dask-on-primary);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.dask-onboarding__title {
+    margin: 0 0 var(--dask-gap-1);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dask-text);
+    line-height: 1.5;
+}
+
+.dask-onboarding__subtitle {
+    margin: 0;
+    color: var(--dask-text-3);
+    font-size: var(--dask-fs-meta);
+}
+
+.dask-onboarding__form {
+    display: grid;
+    gap: var(--dask-gap-3);
+}
+
+.dask-field {
+    display: block;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.dask-field__label {
+    display: block;
+    margin-bottom: var(--dask-gap-1);
+    padding: 0;
+    color: var(--dask-text);
+    font-size: var(--dask-fs-meta);
+    font-weight: 600;
+}
+
+.dask-field__control {
+    width: 100%;
+    border-radius: var(--dask-r-sm);
+    border: 1px solid var(--dask-line);
+    background: var(--dask-surface);
+    color: var(--dask-text);
+}
+
+.dask-field__control:focus-visible {
+    outline: 2px solid var(--dask-blue);
+    outline-offset: 1px;
+}
+
+.dask-field__hint {
+    margin: var(--dask-gap-1) 0 0;
+    color: var(--dask-text-3);
+    font-size: var(--dask-fs-meta);
+    text-align: right;
+}
+
+.dask-segment {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--dask-gap-1);
+    padding: var(--dask-gap-1);
+    border: 1px solid var(--dask-line);
+    border-radius: var(--dask-r-sm);
+    background: var(--dask-bg);
+}
+
+.dask-segment__item {
+    margin: 0;
+    border: 0;
+    border-radius: var(--dask-r-xs, var(--dask-r-sm));
+    background: transparent;
+    color: var(--dask-text-3);
+    text-align: center;
+}
+
+.btn-check:checked + .dask-segment__item {
+    background: var(--dask-surface);
+    color: var(--dask-blue);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+}
+
+.dask-onboarding__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dask-gap-3);
+    margin-top: var(--dask-gap-3);
+    padding-top: var(--dask-gap-3);
+    border-top: 1px solid var(--dask-line);
+}
+
+.dask-onboarding__skip {
+    color: var(--dask-text-3);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dask-onboarding__skip:hover {
+    color: var(--dask-text);
+}
+
+.dask-onboarding__submit {
+    min-width: 120px;
+    border-radius: var(--dask-r-pill);
+}
+
+@media (max-width: 575px) {
+    .dask-onboarding {
+        padding: var(--dask-gap-4) var(--dask-gap-3);
+    }
+
+    .dask-onboarding__avatar {
+        width: 72px;
+        height: 72px;
+    }
+}

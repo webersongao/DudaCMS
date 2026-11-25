@@ -126,7 +126,7 @@ class Topic extends Backend
     public function add()
     {
         if ($this->request->isPost()) {
-            $data = $this->request->except(['file'], 'post');
+            $data = db_input_normalize('topic', $this->request->except(['file'], 'post'));
 
             // 字段规则验证
             try {
@@ -182,7 +182,7 @@ class Topic extends Backend
     public function edit($id = 0)
     {
         if ($this->request->isPost()) {
-            $data = $this->request->except(['file'], 'post');
+            $data = db_input_normalize('topic', $this->request->except(['file'], 'post'));
 
             // 字段规则验证
             try {

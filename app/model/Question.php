@@ -101,7 +101,7 @@ class Question extends BaseModel
             'question_type' => $postData['question_type'] ?? 'normal',
             'create_time' => time(),
             'update_time' => time(),
-            'status' => $postData['status'] ?? 1
+            'status' => db_input_int($postData['status'] ?? 1, 1)
         );
         $pinyin = new Pinyin();
         $token = $pinyin->permalink($postData['title'], '');

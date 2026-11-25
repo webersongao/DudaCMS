@@ -13,6 +13,8 @@
     <link href="{:asset('brand/favicon.ico', false)}" rel="shortcut icon" type="image/x-icon"/>
     <!-- 主题首屏防闪与交互增强收敛到同一脚本；须在样式前同步执行主题引导 -->
     <script src="{$assetBase}app/backend-modern.js?v={:asset_version('app/backend-modern.js')}" data-turbo-permanent></script>
+    <!-- layui 仍为上传/日期/数据表等遗留模块提供底层能力；UI 由 backend-modern 统一接管 -->
+    <link rel="stylesheet" href="{$assetBase}vendor/layui/css/layui.css?v={:asset_version('vendor/layui/css/layui.css')}">
     <link rel="stylesheet" href="{$assetBase}app/backend-modern.css?v={:asset_version('app/backend-modern.css')}">
     <link rel="stylesheet" href="{$assetBase}vendor/select2/css/select2.min.css?v={:asset_version('vendor/select2/css/select2.min.css')}">
     <link rel="stylesheet" href="{$assetBase}backend/plugins/fontawesome-free/css/all.min.css?v={:asset_version('backend/plugins/fontawesome-free/css/all.min.css')}">
@@ -27,6 +29,7 @@
     <script src="{$assetBase}common/js/dask-util.js?v={:asset_version('common/js/dask-util.js')}"></script>
     <script src="{$assetBase}vendor/bootstrap/dist/js/bootstrap.bundle.min.js?v={:asset_version('vendor/bootstrap/dist/js/bootstrap.bundle.min.js')}"></script>
     <script src="{$assetBase}vendor/adminlte/dist/js/adminlte.min.js?v={:asset_version('vendor/adminlte/dist/js/adminlte.min.js')}"></script>
+    <script src="{$assetBase}vendor/layui/layui.all.js?v={:asset_version('vendor/layui/layui.all.js')}"></script>
     <!-- layer 兼容层：经典脚本同步定义 window.layer（dialog.js 由兼容层内部动态 import），
          保证后续 dask-admin.js 与内联脚本执行时 layer.* 已可用 -->
     <script src="{$assetBase}app/dask-dialog-compat.js?v={:asset_version('app/dask-dialog-compat.js')}" data-turbo-permanent></script>

@@ -486,6 +486,7 @@ class Users extends Backend
                 $data['verified'] = $data['verified']=='normal' ? '' : $data['verified'];
             }
 
+            $data = db_input_normalize('users', $data);
             $result = $this->model->where(['uid'=>$data['uid']])->update($data);
             if ($result) {
                 StorageCleanupService::cleanupUpdatedRecord(
@@ -572,8 +573,8 @@ class Users extends Backend
                     if ($val == 1) {continue;}
                     if (!db('users_forbidden')->where(['uid'=>$val])->find()) {
                         db('users_forbidden')->insert([
-                            'uid'=>$val,
-                            'forbidden_time'=>strtotime($data['forbidden_time']),
+                            'uid'=>db_input_int($val),
+                            'forbidden_time'=>db_input_timestamp($data['forbidden_time'], time() + 86400),
                             'forbidden_reason'=>trim($data['forbidden_reason']),
                             'create_time'=>time(),
                             'status'=>1

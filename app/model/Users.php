@@ -597,6 +597,11 @@ class Users extends BaseModel
             if (array_intersect_key($data, array_flip(self::IMMUTABLE_FIELDS))) {
                 return false;
             }
+            // 所有用户资料写库统一按表结构归一化，空字符串不再写入数值/日期列。
+            $data = db_input_normalize('users', $data);
+            if (!$data) {
+                return false;
+            }
             $oldAvatar = isset($data['avatar'])
                 ? (string) db('users')->where(['uid' => $uid])->value('avatar')
                 : '';

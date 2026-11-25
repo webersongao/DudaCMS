@@ -96,7 +96,7 @@ class Answer extends Backend
     {
         if($this->request->isPost())
         {
-            $data = $this->request->except(['file'],'post');
+            $data = db_input_normalize($this->table, $this->request->except(['file'], 'post'));
             unset($data['question_id']);
             $result = db($this->table)->where('id',intval($id))->update($data);
             if (!$result) {

@@ -48,6 +48,11 @@ class Backend extends Base
     {
         parent::__construct($app);
 
+        // 请求级兜底：后台批量写库接口的空值不再流入整数列。
+        if ($this->request->isPost()) {
+            $this->request->withPost(normalize_numeric_post($this->request->post()));
+        }
+
         //判断是否入口文件是否一致
         $baseFile = $this->request->baseFile();
         if($baseFile != '/'.config('app.admin'))

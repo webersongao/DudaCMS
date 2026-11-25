@@ -367,8 +367,8 @@ class Approval extends Backend
                 foreach ($data['id'] as $val) {
                     if (!db('users_forbidden')->where(['uid' => $val])->find()) {
                         db('users_forbidden')->insert([
-                            'uid' => $val,
-                            'forbidden_time' => strtotime($data['forbidden_time']),
+                            'uid' => db_input_int($val),
+                            'forbidden_time' => db_input_timestamp($data['forbidden_time'], time() + 86400),
                             'forbidden_reason' => trim($data['forbidden_reason']),
                             'create_time' => time(),
                             'status' => 1

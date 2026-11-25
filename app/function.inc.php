@@ -1490,3 +1490,186 @@ if (!function_exists('safe_return_url')) {
         return $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
     }
 }
+
+/**
+ * 读取表结构用于写库前的类型归一化（按请求缓存，失败时返回空数组以保持原行为）。
+ */
+if (!function_exists('db_table_columns')) {
+    function db_table_columns(string $table): array
+    {
+        static $cache = [];
+        if (array_key_exists($table, $cache)) {
+            return $cache[$table];
+        }
+        try {
+            $prefix = (string) config('database.connections.mysql.prefix');
+            $fullName = ($prefix !== '' && !str_starts_with($table, $prefix)) ? $prefix . $table : $table;
+            $rows = \think\facade\Db::query('SHOW COLUMNS FROM `' . str_replace('`', '', $fullName) . '`');
+            $columns = [];
+            foreach ($rows as $row) {
+                $field = (string) ($row['Field'] ?? '');
+                if ($field !== '') {
+                    $columns[$field] = $row;
+                }
+            }
+        } catch (\Throwable $e) {
+            $columns = [];
+        }
+        return $cache[$table] = $columns;
+    }
+}
+
+/** 表单数值安全转换：非数字/空值统一回退默认值，避免 MySQL 1366。 */
+if (!function_exists('db_input_int')) {
+    function db_input_int($value, int $default = 0): int
+    {
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+        if (is_string($value) && preg_match('/^-?\d+/', trim($value), $match) === 1) {
+            return (int) $match[0];
+        }
+        return $default;
+    }
+}
+
+/** 表单日期安全转换：支持 Y-m-d / Y-m-d H:i:s / 时间戳，空值与非法值回退默认值。 */
+if (!function_exists('db_input_timestamp')) {
+    function db_input_timestamp($value, int $default = 0): int
+    {
+        if ($value === null || $value === '' || is_bool($value) || is_array($value)) {
+            return $default;
+        }
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+        $time = strtotime((string) $value);
+        return $time === false ? $default : $time;
+    }
+}
+
+/**
+ * 按表结构把单个字段值归一化为数据库可接受的类型。
+ * 空字符串写入整数/日期列时：可空列写 NULL，否则写列默认值或类型零值。
+ */
+if (!function_exists('db_input_field_value')) {
+    function db_input_field_value(string $table, string $field, $value)
+    {
+        $columns = db_table_columns($table);
+        if (!isset($columns[$field])) {
+            return $value;
+        }
+        $meta = $columns[$field];
+        $type = strtolower(trim((string) ($meta['Type'] ?? '')));
+        $base = strtolower(trim(explode('(', $type)[0]));
+        $nullable = strtoupper((string) ($meta['Null'] ?? '')) === 'YES';
+        $default = $meta['Default'] ?? null;
+        if (is_string($default) && strtolower($default) === 'null') {
+            $default = null;
+        }
+        $isDateName = str_contains($field, 'time') || str_contains($field, 'birthday') || str_contains($field, 'date');
+
+        if (in_array($base, ['tinyint', 'smallint', 'mediumint', 'int', 'bigint'], true)) {
+            $intDefault = $default !== null && is_numeric($default) ? (int) $default : 0;
+            if ($value === '' || $value === null || is_array($value) || is_bool($value)) {
+                if (is_bool($value)) {
+                    return (int) $value;
+                }
+                return ($nullable && $isDateName) ? null : $intDefault;
+            }
+            if (is_numeric($value)) {
+                return (int) $value;
+            }
+            if ($isDateName) {
+                $time = strtotime((string) $value);
+                if ($time !== false) {
+                    return $time;
+                }
+            }
+            return ($nullable && $isDateName) ? null : $intDefault;
+        }
+
+        if (in_array($base, ['decimal', 'float', 'double'], true)) {
+            if ($value === '' || $value === null || is_array($value) || !is_numeric($value)) {
+                return $nullable ? null : ($default !== null && is_numeric($default) ? $default + 0 : 0);
+            }
+            return $value + 0;
+        }
+
+        if (in_array($base, ['date', 'datetime', 'timestamp'], true)) {
+            if ($value === '' || $value === null || is_array($value)) {
+                return $nullable ? null : ($default ?: date('Y-m-d H:i:s', 0));
+            }
+            $time = is_numeric($value) ? (int) $value : strtotime((string) $value);
+            if ($time === false) {
+                return $nullable ? null : ($default ?: date('Y-m-d H:i:s', 0));
+            }
+            return $base === 'date' ? date('Y-m-d', $time) : date('Y-m-d H:i:s', $time);
+        }
+
+        return $value;
+    }
+}
+
+/**
+ * 批量归一化写库数据：丢弃表中不存在的字段，并按列类型修正空值/字符串。
+ * 仅用于写路径；表结构探测失败时保持原数据，避免影响无权限环境。
+ */
+if (!function_exists('db_input_normalize')) {
+    function db_input_normalize(string $table, array $data): array
+    {
+        $columns = db_table_columns($table);
+        if (!$columns) {
+            return $data;
+        }
+        foreach ($data as $field => $value) {
+            if (!array_key_exists($field, $columns)) {
+                unset($data[$field]);
+                continue;
+            }
+            $data[$field] = db_input_field_value($table, $field, $value);
+        }
+        return $data;
+    }
+}
+
+/**
+ * 请求级兜底：把常见数字/时间字段的空字符串转为安全默认值。
+ * 写库前仍应按表结构归一化；这里用于拦截尚未显式处理的遗留入口。
+ */
+if (!function_exists('normalize_numeric_post')) {
+    function normalize_numeric_post(array $post): array
+    {
+        $intNames = [
+            'uid', 'id', 'pid', 'sort', 'status', 'sex', 'verify', 'recommend',
+            'group_id', 'credit_group_id', 'category_id', 'column_id', 'topic_id',
+            'question_id', 'answer_id', 'article_id', 'item_id', 'tag_id', 'attach_id',
+        ];
+        $timeNames = ['birthday', 'forbidden_time', 'create_time', 'update_time', 'expire_time', 'wait_time'];
+        foreach ($post as $key => $value) {
+            if (is_array($value)) {
+                continue;
+            }
+            if ($key === 'id' && is_string($value) && str_contains($value, ',')) {
+                $post[$key] = implode(',', array_map('db_input_int', explode(',', $value)));
+                continue;
+            }
+            $isInt = in_array($key, $intNames, true)
+                || str_starts_with((string) $key, 'is_')
+                || str_ends_with((string) $key, '_id')
+                || str_ends_with((string) $key, '_count')
+                || str_ends_with((string) $key, '_num');
+            if ($isInt) {
+                $post[$key] = db_input_int($value);
+                continue;
+            }
+            if (in_array($key, $timeNames, true) || str_ends_with((string) $key, '_time')) {
+                $post[$key] = db_input_timestamp($value);
+            }
+        }
+        return $post;
+    }
+}

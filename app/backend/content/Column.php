@@ -117,7 +117,7 @@ class Column extends Backend
     public function add()
     {
         if ($this->request->isPost()) {
-            $data = $this->request->except(['file'], 'post');
+            $data = db_input_normalize('column', $this->request->except(['file'], 'post'));
             $result = $this->model->create($data);
             if (!$result) {
                 $this->error('添加失败');
@@ -139,7 +139,7 @@ class Column extends Backend
     public function edit($id = 0)
     {
         if ($this->request->isPost()) {
-            $data = $this->request->except(['file'], 'post');
+            $data = db_input_normalize('column', $this->request->except(['file'], 'post'));
             $oldRow = db('column')->where('id', $data['id'] ?? 0)->find();
             $result = $this->model->update($data);
             if ($result) {

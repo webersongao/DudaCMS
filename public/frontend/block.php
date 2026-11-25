@@ -53,6 +53,8 @@
     <link rel="stylesheet" type="text/css" href="{$assetBase}common/css/dask-components.css?v={:asset_version('common/css/dask-components.css')}">
     <link rel="stylesheet" type="text/css" href="{$assetBase}common/css/dask-layout.css?v={:asset_version('common/css/dask-layout.css')}">
     <!-- 认证页/表单/无障碍补丁：统一收口到一处，避免各模板重复内联样式 -->
+    <!-- layui 仍为上传/日期等遗留模块提供底层能力；UI 由 frontend-modern 统一接管 -->
+    <link rel="stylesheet" type="text/css" href="{$assetBase}vendor/layui/css/layui.css?v={:asset_version('vendor/layui/css/layui.css')}">
     <link rel="stylesheet" type="text/css" href="{$assetBase}app/frontend-modern.css?v={:asset_version('app/frontend-modern.css')}">
     {block name="meta_style"}{/block}
     <script type="text/javascript" src="{$assetBase}vendor/jquery/dist/jquery.min.js?v={:asset_version('vendor/jquery/dist/jquery.min.js')}"></script>
@@ -62,7 +64,8 @@
     {if in_array($thisController,['question','article','topic']) && $thisAction=='index'}
     <script type="text/javascript" src="{$assetBase}vendor/swiper/swiper.min.js?v={:asset_version('vendor/swiper/swiper.min.js')}"></script>
     {/if}
-    <!-- layer.* 兼容层：替代 layui.all.js，保留前台原有 layer.msg / layer.open 调用语义 -->
+    <script type="text/javascript" src="{$assetBase}vendor/layui/layui.all.js?v={:asset_version('vendor/layui/layui.all.js')}"></script>
+    <!-- layer.* 兼容层：替代 layui 的 layer 实现，保留前台原有 layer.msg / layer.open 调用语义 -->
     <script type="text/javascript" src="{$assetBase}app/dask-dialog-compat.js?v={:asset_version('app/dask-dialog-compat.js')}"></script>
     <!-- 上传按需：适配器常驻，Dropzone 本体仅在有上传控件时由 dask-dropzone.js 注入 -->
     <script type="text/javascript" src="{$assetBase}common/js/dask-dropzone.js?v={:asset_version('common/js/dask-dropzone.js')}"></script>
@@ -397,6 +400,7 @@
 
     {if $user_id && $user_info['is_first_login']}
     <script>
+        window.daskFirstLoginTitle = "{:L('完善个人资料')}";
         Dask.User.firstLogin();
     </script>
     {/if}

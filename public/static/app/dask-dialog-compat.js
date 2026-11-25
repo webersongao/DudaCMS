@@ -155,6 +155,15 @@
     }
     // layer 的 content 允许 HTML 片段（业务代码大量依赖 <br>/<font> 等内联标记）。
     body.innerHTML = text;
+    // innerHTML 不会执行内联 script；按 layer 行为重建脚本节点，保证弹窗内初始化逻辑运行。
+    Array.prototype.forEach.call(body.querySelectorAll('script:not([src])'), function (old) {
+      var script = document.createElement('script');
+      Array.prototype.forEach.call(old.attributes, function (attr) {
+        script.setAttribute(attr.name, attr.value);
+      });
+      script.textContent = old.textContent;
+      old.parentNode.replaceChild(script, old);
+    });
   }
 
   function addButtons(foot, labels, primary, secondary, index, onDone) {
@@ -228,7 +237,7 @@
     var element = shell.element;
     var yes = isFunction(options.yes) ? options.yes : callbacks[0];
     var cancel = isFunction(options.cancel) ? options.cancel : callbacks[1];
-    var labels = Array.isArray(options.btn) && options.btn.length
+    var labels = Array.isArray(options.btn)
       ? options.btn
       : (kind === 'alert' ? ['确定'] : ['确定', '取消']);
 

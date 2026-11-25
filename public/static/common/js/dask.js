@@ -483,7 +483,12 @@ var Dask = {
 
         /*首次登录*/
         firstLogin: function () {
-            return Dask.api.open(baseUrl + '/account/welcome_first_login', '', {});
+            return Dask.api.open(baseUrl + '/account/welcome_first_login', '', {
+                title: window.daskFirstLoginTitle || '',
+                width: '560px',
+                btn: [],
+                shadeClose: false
+            });
         },
 
         // @人功能

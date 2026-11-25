@@ -36,6 +36,11 @@ class Frontend extends Base
     {
         parent::__construct($app);
 
+        // 请求级兜底：空字符串不再流入数值/日期列，避免 strict mode 下的 1366。
+        if ($this->request->isPost()) {
+            $this->request->withPost(normalize_numeric_post($this->request->post()));
+        }
+
         //检查IP封禁
         $this->checkIpAllowed();
 

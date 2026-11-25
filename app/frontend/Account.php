@@ -378,12 +378,12 @@ class Account extends Frontend
         if($this->request->isPost())
         {
             $postData = $this->request->post();
-            if(!$postData['uid'] || $postData['uid']!=$this->user_id)
+            if(!($postData['uid'] ?? 0) || $postData['uid']!=$this->user_id)
             {
                 $this->error('当前用户信息不正确');
             }
             unset($postData['uid']);
-            $postData['birthday'] = strtotime($postData['birthday']);
+            $postData['birthday'] = db_input_timestamp($postData['birthday'] ?? '', 0);
 
             if(isset($postData['url_token']) && $postData['url_token'] && $postData['url_token']!=$this->user_info['url_token'] && db('users')->where('url_token',trim($postData['url_token']))->value('uid'))
             {
@@ -631,12 +631,12 @@ class Account extends Frontend
         if($this->request->isPost())
         {
             $postData = $this->request->post();
-            if(!$postData['uid'] || $postData['uid']!=$this->user_id)
+            if(!($postData['uid'] ?? 0) || $postData['uid']!=$this->user_id)
             {
                 $this->error('当前用户信息不正确');
             }
             unset($postData['uid']);
-            $postData['birthday'] = strtotime($postData['birthday']);
+            $postData['birthday'] = db_input_timestamp($postData['birthday'] ?? '', 0);
             $postData['is_first_login'] = 0;
             Users::updateProfileFields($this->user_id,$postData);
             $this->success('资料更新成功');

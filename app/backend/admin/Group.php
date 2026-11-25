@@ -82,6 +82,7 @@ class Group extends Backend
                 $permission_arr[$val['name']] = $val['value'];
             }
             $data['permission'] = json_encode($permission_arr, JSON_UNESCAPED_UNICODE);
+            $data = db_input_normalize('admin_group', $data);
 
             $result = db('admin_group')->insertGetId($data);
             if ($result) {
@@ -103,9 +104,10 @@ class Group extends Backend
     {
         if ($this->request->isPost()) {
             $data = $this->request->post();
-            if ($data['id'] == 1) {
+            if (db_input_int($data['id'] ?? 0) === 1) {
                 $data['rules'] = '*';
             }
+            $data = db_input_normalize('admin_group', $data);
             $result = db('admin_group')->update($data);
             if ($result) {
                 $this->success('修改成功', 'index');

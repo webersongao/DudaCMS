@@ -96,9 +96,11 @@ class Topic extends Frontend
                 $topics = (clone $query)->page($page,$rows)->column('id,title');
                 $total = (clone $query)->count();
             }else{
-                $query = db('topic');
-                $topics = (clone $query)->page($page,$rows)->column('id,title');
-                $total = (clone $query)->count();
+                // 推荐话题只展示最新的一批（发布页下拉最多两行），避免一次加载过多导致列表抖动。
+                $rows = min(max((int) $rows, 1), 12);
+                $query = db('topic')->order('id', 'desc');
+                $topics = (clone $query)->page(1, $rows)->column('id,title');
+                $total = 1;
             }
 
             $result = [];

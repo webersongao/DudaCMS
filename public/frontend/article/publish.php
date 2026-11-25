@@ -205,7 +205,7 @@
     $(function () {
         // 启用ajax分页查询
         var  option = {
-            placeholder: "为你的作品贴“关键词”标签，最多不超过{:get_setting('max_topic_select')}个，单个标签不超过6个字符（{$setting.topic_enable=='Y'?'必填':'选填'}）",
+            placeholder: "添加话题（最多{:get_setting('max_topic_select')}个，{$setting.topic_enable=='Y'?'必填':'选填'}）",
             language: "zh-CN",
             allowClear: false,
             tags: createEnable === 1,

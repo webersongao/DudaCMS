@@ -79,9 +79,16 @@
         min-width: 0;
         white-space: nowrap;
     }
-    .select2-container .select2-search--inline .select2-search__field{margin-top: 0 !important;}
+    .select2-container .select2-search--inline .select2-search__field{
+        margin-top: 0 !important;
+        /* 占位文案较长，搜索框需占满剩余宽度，否则右下角文字被截断。 */
+        width: 100% !important;
+        min-width: 220px;
+        flex: 1 1 auto;
+    }
     .select2-container--default .select2-search--inline .select2-search__field::-webkit-input-placeholder{
-        color:#A8ABAD
+        color:#A8ABAD;
+        text-overflow: ellipsis;
     }
 
     .select2-results__option {
@@ -110,11 +117,18 @@
         padding: 10px;
         display: flex;
         flex-wrap: wrap;
+        /* 推荐话题最多显示两行（每行约 44px），超出滚动；固定高度避免 ajax 分批渲染时抖动。 */
+        max-height: 96px;
+        overflow-y: auto;
+        align-content: flex-start;
         background: var(--dask-elevated, #F2F2F5);
     }
     .select2-dropdown{
         border: none !important;
         border-radius: var(--dask-r-md, 8px) !important;
+        /* 固定下拉整体高度，消除 ajax 占位→结果切换及选项数变化导致的高度跳变。 */
+        min-height: 108px;
+        .select2-results__options { height: 108px !important; max-height: 108px !important; overflow-y: auto !important; }
     }
 
 /* 窄屏发布页：标题与分类/专栏不再并排挤压，各自占满一行 */

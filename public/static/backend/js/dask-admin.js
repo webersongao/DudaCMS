@@ -187,9 +187,56 @@ const DaskAdmin = {
 
         /** 解析后端 _ajax_open 页面，只取主体片段，杜绝整页 iframe 嵌套。 */
         parseModalHtml: function (html) {
+            var parts = DaskAdmin.api.parseModalParts(html);
+            return parts.content;
+        },
+
+        /**
+         * 解析弹窗 HTML：主体片段 + 内容区脚本。
+         * innerHTML 注入的 script 不会执行，必须单独按文档顺序加载/执行，
+         * 否则弹窗内的 Vditor 等依赖脚本会缺失。
+         */
+        parseModalParts: function (html) {
             var parsed = new DOMParser().parseFromString(String(html || ''), 'text/html');
             var main = parsed.querySelector('#wrapMain') || parsed.body;
-            return main ? main.innerHTML : '';
+            var scripts = [];
+            if (main) {
+                Array.prototype.forEach.call(main.querySelectorAll('script'), function (s) {
+                    var src = s.getAttribute('src');
+                    if (src) {
+                        scripts.push({ src: src });
+                    } else if (s.textContent.trim() !== '') {
+                        scripts.push({ code: s.textContent });
+                    }
+                    if (s.parentNode) s.parentNode.removeChild(s);
+                });
+            }
+            return { content: main ? main.innerHTML : '', scripts: scripts };
+        },
+
+        /** 按文档顺序串行执行弹窗内容区脚本，保证依赖脚本先加载完成。 */
+        runModalScripts: function (items, index) {
+            items = items || [];
+            index = index || 0;
+            if (index >= items.length) return;
+            var item = items[index];
+            if (item.code) {
+                try {
+                    new Function(item.code)();
+                } catch (error) {
+                    console.error('[dask-admin][modal-script]', error);
+                }
+                DaskAdmin.api.runModalScripts(items, index + 1);
+                return;
+            }
+            var tag = document.createElement('script');
+            tag.onload = function () { DaskAdmin.api.runModalScripts(items, index + 1); };
+            tag.onerror = function () {
+                console.error('[dask-admin][modal-script] failed to load ' + item.src);
+                DaskAdmin.api.runModalScripts(items, index + 1);
+            };
+            tag.src = item.src;
+            (document.body || document.head).appendChild(tag);
         },
 
         /**
@@ -214,6 +261,7 @@ const DaskAdmin = {
                     }
                     var width = options.width || (($(window).width() > 800) ? '800px' : '95%');
                     var height = options.height || (($(window).height() > 600) ? '600px' : '95%');
+                    var modalParts = DaskAdmin.api.parseModalParts(html);
                     var defaults = {
                         type: 1,
                         title: title,
@@ -224,7 +272,7 @@ const DaskAdmin = {
                         moveOut: true,
                         area: [width, height],
                         btn: [],
-                        content: DaskAdmin.api.parseModalHtml(html)
+                        content: modalParts.content
                     };
                     var layerOptions = $.extend({}, defaults, options);
                     layerOptions.type = 1;
@@ -240,6 +288,7 @@ const DaskAdmin = {
                         $(layero).data('callback', options.callback);
                         window.__daskModalIndex = index;
                         if (typeof userSuccess === 'function') userSuccess(layero, index);
+                        DaskAdmin.api.runModalScripts(modalParts.scripts, 0);
                     };
                     return layer.open(layerOptions);
                 },

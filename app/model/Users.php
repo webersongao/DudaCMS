@@ -1256,22 +1256,26 @@ class Users extends BaseModel
             return false;
         }
 
-        if (self::whereIn('uid', $uid)->save(['forbidden_ip' => 1])) {
-            $ip = self::whereIn('uid', $uid)->column('last_login_ip', 'uid');
-            $arr = [];
-            $time = time();
-            foreach ($ip as $key => $val) {
-                $arr[] = [
-                    'uid' => $key,
-                    'ip' => $val,
-                    'time' => $time
-                ];
+        self::whereIn('uid', $uid)->save(['forbidden_ip' => 1]);
+        // 重复封禁时 save() 返回 0，但仍是“已封禁”状态，按成功处理。
+        $ip = self::whereIn('uid', $uid)->column('last_login_ip', 'uid');
+        $arr = [];
+        $time = time();
+        foreach ($ip as $key => $val) {
+            if ($val === '' || $val === null) {
+                continue;
             }
-
-            return db('forbidden_ip')->insertAll($arr);
+            if (db('forbidden_ip')->where('uid', $key)->count()) {
+                continue;
+            }
+            $arr[] = [
+                'uid' => $key,
+                'ip' => $val,
+                'time' => $time
+            ];
         }
 
-        return false;
+        return $arr ? (bool) db('forbidden_ip')->insertAll($arr) : true;
     }
 
     // 批量解除封禁Ip
@@ -1288,17 +1292,31 @@ class Users extends BaseModel
     // 封禁用户IP
     public static function forbiddenIp($data)
     {
-        $uids = is_array($data['uid']) ? $data['uid'] : explode(',', $data['uid']);
-        if (empty($uids = array_diff($uids, [1, getLoginUid()]))) {
+        $uid = intval($data['uid'] ?? 0);
+        if (!$uid || in_array($uid, [1, intval(getLoginUid())], true)) {
             self::setError('不可封创世管理员或自己的IP');
             return false;
         }
-
-        if (self::where('uid', $data['uid'])->save(['forbidden_ip' => 1])) {
-            return db('forbidden_ip')->strict(false)->insert($data);
+        $user = self::find($uid);
+        if (!$user) {
+            self::setError('用户不存在');
+            return false;
         }
-
-        return false;
+        $ip = (string) ($data['ip'] ?? $user->last_login_ip ?? '');
+        if ($ip === '') {
+            self::setError('该用户暂无登录IP，无法封禁');
+            return false;
+        }
+        self::where('uid', $uid)->save(['forbidden_ip' => 1]);
+        // 幂等：已有封禁记录直接视为成功，避免重复点击报“操作失败”。
+        if (db('forbidden_ip')->where('uid', $uid)->count()) {
+            return true;
+        }
+        return (bool) db('forbidden_ip')->strict(false)->insert([
+            'uid'  => $uid,
+            'ip'   => $ip,
+            'time' => $data['time'] ?? time(),
+        ]);
     }
 
     // 解封用户IP

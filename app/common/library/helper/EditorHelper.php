@@ -19,7 +19,13 @@ class EditorHelper
      */
     public static function render(array $params = []): string
     {
+        // $assetsLoaded 改为请求级：CLI server / 常驻进程下 static 会跨请求保留，
+        // 导致后续 AJAX 弹窗只输出内联 init 而不输出 adapter.js，编辑器渲染为空白。
         static $assetsLoaded = false;
+        $isAjax = \think\facade\Request::param('_ajax_open') || \think\facade\Request::isAjax();
+        if ($isAjax) {
+            $assetsLoaded = false;
+        }
 
         $name       = isset($params['name']) ? (string) $params['name'] : 'content';
         $safeName   = preg_replace('/[^A-Za-z0-9_-]/', '_', $name) ?: 'content';

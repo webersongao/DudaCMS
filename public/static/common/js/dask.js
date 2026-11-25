@@ -284,6 +284,42 @@ var Dask = {
         },
 
         /**
+         * 按文档顺序执行内容区脚本：外部脚本加载完成后再执行后续内联初始化，
+         * 避免依赖脚本（如 Vditor adapter）尚未就绪就调用其 API。
+         */
+        _runModalScopedScripts: function (items, layero) {
+            var index = 0;
+            function next() {
+                if (index >= items.length) return;
+                var item = items[index++];
+                if (item.code) {
+                    try {
+                        new Function('layero', item.code)(layero);
+                    } catch (error) {
+                        console.error('[dask][modal-script]', error);
+                    }
+                    next();
+                    return;
+                }
+                var src = item.src;
+                if (Dask.api._modalLoadedScripts[src]) {
+                    next();
+                    return;
+                }
+                Dask.api._modalLoadedScripts[src] = true;
+                var tag = document.createElement('script');
+                tag.onload = next;
+                tag.onerror = function () {
+                    console.error('[dask][modal-script] failed to load ' + src);
+                    next();
+                };
+                tag.src = src;
+                (document.body || document.head).appendChild(tag);
+            }
+            next();
+        },
+
+        /**
          * 从服务端返回的完整 HTML 文档里提取弹窗内容片段与模块级脚本。
          * 原生弹窗不再用 iframe 加载整套框架，只取 #wrapMain 内容 + 该控制器的模块 js。
          */
@@ -311,9 +347,24 @@ var Dask = {
                     inlineScripts.push(s.textContent);
                 }
             });
+            // #wrapMain 内的脚本（如编辑器资源与初始化）按 DOM 顺序收集，注入后串行执行，
+            // 保证 adapter.js 先于调用方的 DaskEditor.init() 加载完成。
+            var scopedScripts = [];
+            Array.prototype.forEach.call(main.querySelectorAll('script'), function (s) {
+                var src = s.getAttribute('src');
+                if (src) {
+                    if (framework.some(function (f) { return src.indexOf(f) > -1; })) {
+                        return;
+                    }
+                    scopedScripts.push({ src: src });
+                } else if (s.textContent.trim() !== '') {
+                    scopedScripts.push({ code: s.textContent });
+                }
+                s.parentNode.removeChild(s);
+            });
             // body 内容（去掉会污染主页面的 html/body 高度样式由调用方局部化）
             var content = main.innerHTML;
-            return { content: content, scripts: moduleScripts, inlineScripts: inlineScripts };
+            return { content: content, scripts: moduleScripts, inlineScripts: inlineScripts, scopedScripts: scopedScripts };
         },
 
         /**
@@ -360,6 +411,7 @@ var Dask = {
                             $(layero).data("callback", options.callback);
                             Dask.api._runModalInlineScripts(parsed.inlineScripts || [], layero);
                             Dask.api._runModalScripts(parsed.scripts, layero);
+                            Dask.api._runModalScopedScripts(parsed.scopedScripts || [], layero);
                         }
                     }, options);
                     // 防止调用方传入的 type/content 覆盖原生实现

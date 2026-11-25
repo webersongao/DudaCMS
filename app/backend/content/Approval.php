@@ -154,7 +154,7 @@ class Approval extends Backend
             ->addColumns($columns)
             ->setSearch($search)
             ->addColumn('right_button', '操作', 'btn')
-            ->setDataUrl(Request::baseUrl() . '?_list=1&status=' . $status . '$type=' . $type)
+            ->setDataUrl(Request::baseUrl() . '?_list=1&status=' . $status . '&type=' . $type)
             ->setPagination('false')
             ->addRightButtons($right_button)
             ->addTopButtons($top_button)
@@ -223,7 +223,11 @@ class Approval extends Backend
     public function edit($id = 0)
     {
         $info = db('approval')->where('id', $id)->find();
-        $data = json_decode($info['data'], true);
+        if (!$info) {
+            $this->error('审核记录不存在');
+        }
+        $data = json_decode((string) $info['data'], true);
+        $data = is_array($data) ? $data : [];
         $category_list = db('category')->where(['status' => 1])->column('id,title,icon,url_token');
         $category_list = $category_list ? array_column($category_list, 'title', 'id') : [];
 
@@ -231,11 +235,11 @@ class Approval extends Backend
         if ($info['type'] == 'question') {
             return $this->formBuilder
                 ->addHidden('approval_id', $info['id'])
-                ->addText('title', '问题标题', '', $data['title'], 'disabled readonly')
-                ->addEditor('detail', '问题详情', '', htmlspecialchars_decode($data['detail']), '', 'disabled readonly')
-                ->addSelect('category_id', '问题分类', '', $category_list, $data['category_id'], 'disabled readonly')
-                ->addRadio('question_type', '问题类型', '', ['normal' => '普通问题', 'reward' => '悬赏问题'], $data['question_type'], 'disabled readonly')
-                ->addRadio('is_anonymous', '是否匿名', '', [0 => '公开', 1 => '匿名'], $data['is_anonymous'], 'disabled readonly')
+                ->addText('title', '问题标题', '', $data['title'] ?? '', 'disabled readonly')
+                ->addEditor('detail', '问题详情', '', htmlspecialchars_decode((string) ($data['detail'] ?? '')), '', 'disabled readonly')
+                ->addSelect('category_id', '问题分类', '', $category_list, $data['category_id'] ?? '', 'disabled readonly')
+                ->addRadio('question_type', '问题类型', '', ['normal' => '普通问题', 'reward' => '悬赏问题'], $data['question_type'] ?? 'normal', 'disabled readonly')
+                ->addRadio('is_anonymous', '是否匿名', '', [0 => '公开', 1 => '匿名'], $data['is_anonymous'] ?? 0, 'disabled readonly')
                 ->hideBtn(['submit'])
                 ->fetch();
         }
@@ -244,11 +248,11 @@ class Approval extends Backend
         if ($info['type'] == 'modify_question') {
             return $this->formBuilder
                 ->addHidden('approval_id', $info['id'])
-                ->addText('title', '问题标题', '', $data['title'], 'disabled readonly')
-                ->addEditor('detail', '问题详情', '', htmlspecialchars_decode($data['detail']), '', 'disabled readonly')
-                ->addSelect('category_id', '问题分类', '', $category_list, $data['category_id'], 'disabled readonly')
-                ->addRadio('question_type', '问题类型', '', ['normal' => '普通问题', 'reward' => '悬赏问题'], $data['question_type'], 'disabled readonly')
-                ->addRadio('is_anonymous', '是否匿名', '', [0 => '公开', 1 => '匿名'], $data['is_anonymous'], 'disabled readonly')
+                ->addText('title', '问题标题', '', $data['title'] ?? '', 'disabled readonly')
+                ->addEditor('detail', '问题详情', '', htmlspecialchars_decode((string) ($data['detail'] ?? '')), '', 'disabled readonly')
+                ->addSelect('category_id', '问题分类', '', $category_list, $data['category_id'] ?? '', 'disabled readonly')
+                ->addRadio('question_type', '问题类型', '', ['normal' => '普通问题', 'reward' => '悬赏问题'], $data['question_type'] ?? 'normal', 'disabled readonly')
+                ->addRadio('is_anonymous', '是否匿名', '', [0 => '公开', 1 => '匿名'], $data['is_anonymous'] ?? 0, 'disabled readonly')
                 ->hideBtn(['submit'])
                 ->fetch();
         }
@@ -260,9 +264,9 @@ class Approval extends Backend
             return $this->formBuilder
                 ->addHidden('approval_id', $info['id'])
                 ->addImage('cover', '文章封面', '', $data['cover'] ?? '', 'disabled readonly')
-                ->addText('title', '文章标题', '', $data['title'], 'disabled readonly')
-                ->addEditor('message', '文章详情', '', htmlspecialchars_decode($data['message']), '', 'disabled readonly')
-                ->addSelect('category_id', '文章分类', '', $category_list, $data['category_id'], 'disabled readonly')
+                ->addText('title', '文章标题', '', $data['title'] ?? '', 'disabled readonly')
+                ->addEditor('message', '文章详情', '', htmlspecialchars_decode((string) ($data['message'] ?? '')), '', 'disabled readonly')
+                ->addSelect('category_id', '文章分类', '', $category_list, $data['category_id'] ?? '', 'disabled readonly')
                 ->addSelect('column_id', '文章专栏', '', $column_list, $data['column_id'] ?? '', 'disabled readonly')
                 ->hideBtn(['submit'])
                 ->fetch();
@@ -275,31 +279,33 @@ class Approval extends Backend
             return $this->formBuilder
                 ->addHidden('approval_id', $info['id'])
                 ->addImage('cover', '文章封面', '', $data['cover'] ?? '', 'disabled readonly')
-                ->addText('title', '文章标题', '', $data['title'], 'disabled readonly')
-                ->addEditor('message', '文章详情', '', htmlspecialchars_decode($data['message']), '', 'disabled readonly')
-                ->addSelect('category_id', '文章分类', '', $category_list, $data['category_id'], 'disabled readonly')
+                ->addText('title', '文章标题', '', $data['title'] ?? '', 'disabled readonly')
+                ->addEditor('message', '文章详情', '', htmlspecialchars_decode((string) ($data['message'] ?? '')), '', 'disabled readonly')
+                ->addSelect('category_id', '文章分类', '', $category_list, $data['category_id'] ?? '', 'disabled readonly')
                 ->addSelect('column_id', '文章专栏', '', $column_list, $data['column_id'] ?? '', 'disabled readonly')
                 ->hideBtn(['submit'])
                 ->fetch();
         }
 
-        if ($info['type'] == 'answer') {
+        if ($info['type'] == 'answer' || $info['type'] == 'modify_answer') {
+            $questionTitle = isset($data['question_id'])
+                ? db('question')->where('id', $data['question_id'])->value('title')
+                : '';
             return $this->formBuilder
                 ->addHidden('approval_id', $info['id'])
-                ->addText('question_id', '问题标题', '', db('question')->where('id', $data['question_id'])->value('title'), 'disabled readonly')
-                ->addEditor('content', '回答详情', '', htmlspecialchars_decode($data['content']), '', 'disabled readonly')
+                ->addText('question_id', '问题标题', '', $questionTitle ?: '', 'disabled readonly')
+                ->addEditor('content', '回答详情', '', htmlspecialchars_decode((string) ($data['content'] ?? '')), '', 'disabled readonly')
                 ->hideBtn(['submit'])
                 ->fetch();
         }
 
-        if ($info['type'] == 'modify_answer') {
-            return $this->formBuilder
-                ->addHidden('approval_id', $info['id'])
-                ->addText('question_id', '问题标题', '', db('question')->where('id', $data['question_id'])->value('title'), 'disabled readonly')
-                ->addEditor('content', '回答详情', '', htmlspecialchars_decode($data['content']), '', 'disabled readonly')
-                ->hideBtn(['submit'])
-                ->fetch();
-        }
+        // 文章评论等未知类型：展示原始 JSON，避免控制器无返回值导致 500。
+        return $this->formBuilder
+            ->addHidden('approval_id', $info['id'])
+            ->addText('type', '审核类型', '', (string) $info['type'], 'disabled readonly')
+            ->addTextarea('raw_data', '提交内容', '', json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), 'disabled readonly')
+            ->hideBtn(['submit'])
+            ->fetch();
     }
 
     //审核状态
@@ -404,24 +410,40 @@ class Approval extends Backend
         $id = $this->request->param('id', 0);
         $type = $this->request->param('type', '');
 
+        // 本接口由列表页 AJAX GET 调用：直接返回 JSON，空 url 避免成功后跳转回后台首页。
+        $respond = function ($code, $msg) {
+            throw new \think\exception\HttpResponseException(json([
+                'code' => $code,
+                'msg'  => $msg,
+                'data' => '',
+                'url'  => '',
+                'wait' => 3,
+            ]));
+        };
+
         // 批量操作
         if ($type == 'list') {
-            if (!$id) $this->error('请选择要操作的数据');
-            $uid = ApprovalModel::whereIn('id', explode(',', $id))->column('uid');
+            if (!$id) {
+                $respond(0, '请选择要操作的数据');
+            }
+            $uid = ApprovalModel::whereIn('id', array_filter(array_map('intval', explode(',', (string) $id))))->column('uid');
 
             if (UserModel::batchForbiddenIp($uid)) {
-                $this->success('操作成功');
+                $respond(1, '操作成功');
             } else {
-                $this->error('操作失败');
+                $respond(0, UserModel::getError() ?: '操作失败');
             }
         }
 
         // 单条操作
         $user = UserModel::find($id);
+        if (!$user) {
+            $respond(0, '用户不存在');
+        }
         if (UserModel::forbiddenIp(['uid' => $id, 'ip' => $user->last_login_ip, 'time' => time()])) {
-            $this->success('操作成功');
+            $respond(1, '操作成功');
         } else {
-            $this->error('操作失败');
+            $respond(0, UserModel::getError() ?: '操作失败');
         }
     }
 }

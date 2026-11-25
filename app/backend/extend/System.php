@@ -35,20 +35,8 @@ class System extends Backend
         $info   = $helper->getLocalInfo();
         $pending = $helper->getPendingUpgrade();
 
-        $files = $helper->listUpgradeFiles();
-        foreach ($files as $version => &$file) {
-            if ($pending && $pending['version'] === (string) $version) {
-                $file['status_label'] = '待升级';
-                $file['status_class'] = 'text-bg-warning';
-            } elseif (UpgradeHelper::compareVersion((string) $version, $info['db_version']) <= 0) {
-                $file['status_label'] = '已应用';
-                $file['status_class'] = 'text-bg-success';
-            } else {
-                $file['status_label'] = '等待前置版本';
-                $file['status_class'] = 'text-bg-secondary';
-            }
-        }
-        unset($file);
+        // 已应用版本最多展示最近 5 个，未升级版本全量展示。
+        $files = $helper->prepareDisplayFiles($helper->listUpgradeFiles(), $pending, $info);
 
         $this->assign([
             'info'          => $info,

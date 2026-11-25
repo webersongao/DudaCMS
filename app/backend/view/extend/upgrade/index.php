@@ -76,6 +76,7 @@
                     {/if}
 
                     {if $files}
+                    <div class="small text-muted mt-3 mb-1"><i class="fas fa-info-circle me-1"></i>已应用版本仅显示最近 5 个；未升级版本全部展示。</div>
                     <div class="table-responsive mt-3">
                         <table class="table table-hover mb-0" style="min-width: 560px">
                             <thead>

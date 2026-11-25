@@ -35,21 +35,12 @@ class Upgrade extends Backend
         $info = $this->upgradeHelper->getLocalInfo();
         $pending = $this->upgradeHelper->getPendingUpgrade();
 
-        // 为每个升级文件预处理状态标签，避免模板内调用函数
-        $files = $this->upgradeHelper->listUpgradeFiles();
-        foreach ($files as $version => &$file) {
-            if ($pending && $pending['version'] === (string) $version) {
-                $file['status_label'] = '待升级';
-                $file['status_class'] = 'text-bg-warning';
-            } elseif (UpgradeHelper::compareVersion((string) $version, $info['db_version']) <= 0) {
-                $file['status_label'] = '已应用';
-                $file['status_class'] = 'text-bg-success';
-            } else {
-                $file['status_label'] = '等待前置版本';
-                $file['status_class'] = 'text-bg-secondary';
-            }
-        }
-        unset($file);
+        // 为每个升级文件预处理状态标签；已应用最多展示 5 个，未升级全量展示。
+        $files = $this->upgradeHelper->prepareDisplayFiles(
+            $this->upgradeHelper->listUpgradeFiles(),
+            $pending,
+            $info
+        );
 
         $this->assign([
             'info'          => $info,

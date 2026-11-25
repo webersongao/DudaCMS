@@ -251,6 +251,54 @@ class UpgradeHelper
     }
 
     /**
+     * 为升级列表页准备展示数据：
+     * - 标记每个版本的状态；
+     * - 「已应用」仅保留最近的 5 个，未升级版本全量展示。
+     */
+    public function prepareDisplayFiles(array $files, ?array $pending, array $info, int $appliedLimit = 5): array
+    {
+        $marked = [];
+        foreach ($files as $version => $file) {
+            $versionText = (string) $version;
+            if ($pending && $pending['version'] === $versionText) {
+                $file['status_label'] = '待升级';
+                $file['status_class'] = 'text-bg-warning';
+                $file['_applied'] = false;
+            } elseif (self::compareVersion($versionText, (string) $info['db_version']) <= 0) {
+                $file['status_label'] = '已应用';
+                $file['status_class'] = 'text-bg-success';
+                $file['_applied'] = true;
+            } else {
+                $file['status_label'] = '等待前置版本';
+                $file['status_class'] = 'text-bg-secondary';
+                $file['_applied'] = false;
+            }
+            $marked[$versionText] = $file;
+        }
+
+        $applied = [];
+        foreach ($marked as $version => $file) {
+            if (!empty($file['_applied'])) {
+                $applied[] = $version;
+            }
+        }
+        // 按版本号从大到小，只保留最近 N 个已应用版本。
+        usort($applied, [self::class, 'compareVersion']);
+        $applied = array_reverse($applied);
+        $hide = array_slice($applied, max(0, $appliedLimit));
+
+        $result = [];
+        foreach ($marked as $version => $file) {
+            if (in_array((string) $version, $hide, true)) {
+                continue;
+            }
+            unset($file['_applied']);
+            $result[$version] = $file;
+        }
+        return $result;
+    }
+
+    /**
      * 解析 SQL 文件头元数据（借鉴成熟升级组件的文件即清单设计）。
      * 支持 @version/@requires/@title/@summary/@risk；无元数据时回退到普通注释说明。
      */

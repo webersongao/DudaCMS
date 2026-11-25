@@ -109,7 +109,11 @@ class Frontend extends Base
             'showHero'=>$showHero,
             'heroTitle'=>$heroTitle,
             'heroSubtitle'=>$heroSubtitle,
-            'thirdConfig'=>\app\common\library\helper\ThirdAuthHelper::config()
+            'thirdConfig'=>[
+                'base' => [
+                    'enable' => \app\common\library\helper\ThirdAuthHelper::config()['base']['enable'] ?? [],
+                ],
+            ]
         ]);
 
         //站点关闭检查

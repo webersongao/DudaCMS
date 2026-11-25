@@ -9,7 +9,7 @@ use think\facade\Route;
 //      发布/预览/话题编辑这类「同一 URL 兼具 GET 展示 + POST 提交」的保留 Route::rule；
 //   3. 多段路径用 pattern 约束每段取值，从根上消除「-」分隔变量的边界歧义；
 //   4. 通配段（people/:name）用 pattern 排除固定入口保留字，不单纯依赖注册顺序；
-//   5. 第三方登录回调走 TP8 默认路由 ThirdAuth/callback.html?platform=xxx，
+//   5. 第三方登录回调走 TP8 默认路由 ThirdAuth/callback?platform=xxx，
 //      token 经 query 传递（SDK 的 url() 反向解析自动生成），不进路径。
 
 Route::group('', function () {

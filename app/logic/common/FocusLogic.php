@@ -226,7 +226,7 @@ class FocusLogic
                 $dbName = 'users_favorite_focus';
                 $countWhere = ['tag_id' => (int)$item_id];
                 $count = db($dbName)->where($countWhere)->count();
-                db('favorite_tag')->where(['id' => $item_id])->update(['focus_count' => $count]);
+                db('users_favorite_tag')->where(['id' => $item_id])->update(['focus_count' => $count]);
                 break;
         }
 

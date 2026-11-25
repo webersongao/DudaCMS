@@ -11,7 +11,6 @@
 
 namespace app\common\library\oauth;
 
-use app\common\library\helper\RandomHelper;
 use app\common\library\helper\ThirdAuthHelper;
 use app\model\Users;
 use Endroid\QrCode\QrCode;
@@ -113,9 +112,19 @@ trait ThirdAuthTrait
             );
             $this->error('第三方授权失败，请重试', $returnUrl);
         }
-        $userInfo['token'] = (string) $this->request->get('token', '');
+        $state = (string) $this->request->param('state', '');
+        $userInfo['token'] = '';
 
         if (Service::connect($platform, $userInfo)) {
+            if ($platform === 'wechat' && $state !== '' && session('wechat_login_token') === $state) {
+                $uid = (int) db('oauth')->where([
+                    'platform' => 'wechat',
+                    'openid'   => (string) $userInfo['openid'],
+                ])->value('uid');
+                if ($uid > 0) {
+                    cache('wechat_login_' . $state, $uid, 300);
+                }
+            }
             \think\facade\Log::write(
                 '[oauth_callback] connect_ok platform=' . $platform . ' openid_hash=' . substr(md5((string) $userInfo['openid']), 0, 8),
                 'error'
@@ -139,8 +148,11 @@ trait ThirdAuthTrait
             $this->error('微信登录尚未配置完成');
         }
         try {
-            $token = RandomHelper::alnum();
-            $url = $wechat->getAuthorizeUrl($token);
+            $token = bin2hex(random_bytes(16));
+            session('third_state_wechat', $token);
+            session('wechat_login_token', $token);
+            cache('wechat_login_' . $token, 0, 300);
+            $url = $wechat->getAuthorizeUrl();
             $qrCode = new QrCode($url);
             $result = (new PngWriter())->write($qrCode);
             $this->assign(['img' => $result->getDataUri(), 'token' => $token]);
@@ -156,15 +168,18 @@ trait ThirdAuthTrait
     public function wechat_login()
     {
         $token = (string) $this->request->get('token', '');
-        if ($token === '') {
+        if ($token === '' || session('wechat_login_token') !== $token) {
             $this->ajaxResult(['code' => 0]);
         }
-        $third = db('oauth')->where(['token' => $token])->find();
-        if (!$third) {
+        $uid = (int) cache('wechat_login_' . $token, 0);
+        if ($uid <= 0) {
             $this->ajaxResult(['code' => 0]);
         }
         $returnUrl = $this->safeReturnUrl(session('third_redirect_url') ?: $this->returnUrl);
-        if ($third['uid'] && Users::directLogin($third['uid'])) {
+        $ok = Users::directLogin($uid);
+        cache('wechat_login_' . $token, null);
+        session('wechat_login_token', null);
+        if ($ok) {
             $this->ajaxResult(['code' => 1, 'returnUrl' => $returnUrl]);
         }
         $this->ajaxResult(['code' => 0]);

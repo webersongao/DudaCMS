@@ -210,9 +210,13 @@ class NotifyHelper
 
                 //存在自定义附属信息时 不做处理
                 if ($item_type && $item_id && !$extends) {
-                    if ($item_type == 'question' || $item_type == 'article' || $item_type == 'reward') {
+                    if ($item_type == 'question' || $item_type == 'article') {
                         $title = db($item_type)->where(['id' => $item_id])->value('title');
                         $link = (string)get_url($item_type . '/detail', ['id' => $item_id]);
+                    }
+                    if ($item_type == 'reward') {
+                        $title = db('question')->where(['id' => $item_id])->value('title');
+                        $link = (string)get_url('question/detail', ['id' => $item_id]);
                     }
                     if ($item_type == 'column') {
                         $title = db('column')->where(['id' => $item_id])->value('name');

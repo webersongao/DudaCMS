@@ -117,7 +117,7 @@ class Report extends BaseModel
                 //给举报人发送通知
                 send_notify(0, $info['uid'], 'REPORT_ARTICLE_COMMENT_HANDLE_SUCCESS', 'article', $info['item_id']);
                 //给发起人发送通知
-                send_notify(0, $item_info['uid'], 'ARTICLE_REPORT_COMMENT_HANDLE_SUCCESS', 'article', $info['item_id']);
+                send_notify(0, $item_info['uid'], 'ARTICLE_COMMENT_REPORT_HANDLE_SUCCESS', 'article', $info['item_id']);
             } else {
             }
         } elseif ($handle_type == 2) //要求整改内容

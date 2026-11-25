@@ -719,7 +719,7 @@ class Article extends BaseModel
         }
 
         if ($sort == 'unresponsive') {
-            $where[] = ['answer_count', '=', 0];
+            $where[] = ['comment_count', '=', 0];
         }
 
         if ($sort == 'hot') {

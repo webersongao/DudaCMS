@@ -47,19 +47,21 @@ class Wechat
     /**
      * 获取authorize_url
      */
-    public function getAuthorizeUrl($token = ''): string
+    public function getAuthorizeUrl(): string
     {
-        $state = md5(uniqid(rand(), true));
-        session('state', $state);
+        $state = (string) session('third_state_wechat');
+        if ($state === '') {
+            $state = bin2hex(random_bytes(16));
+            session('third_state_wechat', $state);
+        }
         $queryArr = array(
             "appid"         => $this->config['wechat']['app_id'],
-            "redirect_uri"  => $this->config['wechat']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'wechat', 'token' => $token], true, true),
+            "redirect_uri"  => $this->config['wechat']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'wechat'], false, true),
             "response_type" => "code",
             "scope"         => $this->config['wechat']['scope'],
             "state"         => $state,
         );
         Request::isMobile() && $queryArr['display'] = 'mobile';
-        $token && $queryArr['token'] = $token;
         return self::GET_AUTH_CODE_URL . '?' . http_build_query($queryArr) . '#wechat_redirect';
     }
 
@@ -69,43 +71,44 @@ class Wechat
      */
     public function getUserInfo($params = [])
     {
-        $params = $params ?: request()->get();
-        if (isset($params['access_token']) || (isset($params['state']) && isset($params['code']))) {
-            //获取access_token
-            $data = isset($params['code']) ? $this->getAccessToken($params['code']) : $params;
-            $access_token = $data['access_token'] ?? '';
-            $refresh_token = $data['refresh_token'] ?? '';
-            $expires_in = $data['expires_in'] ?? 0;
-            if ($access_token) {
-                $openid = $data['openid'] ?? '';
-                $unionid = $data['unionid'] ?? '';
-                if (stripos($this->config['wechat']['scope'], 'snsapi_userinfo') !== false) {
-                    //获取用户信息
-                    $queryArr = [
-                        "access_token" => $access_token,
-                        "openid"       => $openid,
-                        "lang"         => 'zh_CN'
-                    ];
-                    $ret = Http::get(self::GET_USERINFO_URL, $queryArr)['data'];
-                    $userInfo = is_array($ret) ?: json_decode($ret, true);
-                    if (!$userInfo || isset($userInfo['errcode'])) {
-                        return [];
-                    }
-                    $userInfo['avatar'] = $userInfo['headimgurl'] ?? '';
-                } else {
-                    $userInfo = [];
-                }
-                return [
-                    'access_token'  => $access_token,
-                    'refresh_token' => $refresh_token,
-                    'expires_in'    => $expires_in,
-                    'openid'        => $openid,
-                    'unionid'       => $unionid,
-                    'user_info'      => $userInfo
-                ];
-            }
+        $params = $params ?: request()->param();
+        $state = (string) ($params['state'] ?? '');
+        $expected = (string) session('third_state_wechat');
+        if ($state === '' || $expected === '' || !hash_equals($expected, $state) || empty($params['code'])) {
+            return [];
         }
-        return [];
+        session('third_state_wechat', null);
+
+        $data = $this->getAccessToken((string) $params['code']);
+        $access_token = (string) ($data['access_token'] ?? '');
+        if ($access_token === '') {
+            return [];
+        }
+
+        $userInfo = [];
+        if (stripos((string) $this->config['wechat']['scope'], 'snsapi_userinfo') !== false) {
+            $queryArr = [
+                "access_token" => $access_token,
+                "openid"       => (string) ($data['openid'] ?? ''),
+                "lang"         => 'zh_CN'
+            ];
+            $ret = Http::get(self::GET_USERINFO_URL, $queryArr)['data'];
+            $profile = is_array($ret) ? $ret : json_decode((string) $ret, true);
+            if (!$profile || isset($profile['errcode'])) {
+                return [];
+            }
+            $profile['avatar'] = $profile['headimgurl'] ?? '';
+            $userInfo = $profile;
+        }
+
+        return [
+            'access_token'  => $access_token,
+            'refresh_token' => (string) ($data['refresh_token'] ?? ''),
+            'expires_in'    => (int) ($data['expires_in'] ?? 0),
+            'openid'        => (string) ($data['openid'] ?? ''),
+            'unionid'       => (string) ($data['unionid'] ?? ''),
+            'user_info'     => $userInfo
+        ];
     }
 
     /**

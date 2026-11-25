@@ -196,9 +196,13 @@ class Notify extends BaseModel
             $from_name = $val['anonymous'] ? '匿名用户' : ($val['sender_uid'] ? $sender_user_list[$val['sender_uid']]['nick_name'] : '系统');
 
             if ($val['item_type'] && $val['item_id']) {
-                if ($val['item_type'] == 'question' || $val['item_type'] == 'article' || $val['item_type'] == 'reward') {
+                if ($val['item_type'] == 'question' || $val['item_type'] == 'article') {
                     $title = db($val['item_type'])->where(['id' => $val['item_id']])->value('title');
                     $link = (string)get_url($val['item_type'] . '/detail', ['id' => $val['item_id']]);
+                }
+                if ($val['item_type'] == 'reward') {
+                    $title = db('question')->where(['id' => $val['item_id']])->value('title');
+                    $link = (string)get_url('question/detail', ['id' => $val['item_id']]);
                 }
 
                 if ($val['item_type'] == 'column') {

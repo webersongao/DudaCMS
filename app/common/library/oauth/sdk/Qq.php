@@ -46,12 +46,12 @@ class Qq
      */
     public function getAuthorizeUrl(): string
     {
-        $state = md5(uniqid(rand(), true));
-        session('state', $state);
+        $state = bin2hex(random_bytes(16));
+        session('third_state_qq', $state);
         $queryArr = array(
             "response_type" => "code",
             "client_id"     => $this->config['qq']['app_id'],
-            "redirect_uri"  => $this->config['qq']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'qq'], true, true),
+            "redirect_uri"  => $this->config['qq']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'qq'], false, true),
             "scope"         => $this->config['qq']['scope'] ?: 'get_user_info',
             "state"         => $state,
         );
@@ -66,38 +66,40 @@ class Qq
      */
     public function getUserInfo($params = []): array
     {
-        $params = $params ?: $_GET;
-        if (isset($params['access_token']) || (isset($params['state']) && $params['state'] == session('state') && isset($params['code']))) {
-            //获取access_token
-            $data = isset($params['code']) ? $this->getAccessToken($params['code']) : $params;
-            $access_token = $data['access_token'] ?? '';
-            $refresh_token = $data['refresh_token'] ?? '';
-            $expires_in = $data['expires_in'] ?? 0;
-            if ($access_token) {
-                $openid = $this->getOpenId($access_token);
-                //获取用户信息
-                $queryArr = [
-                    "access_token"       => $access_token,
-                    "oauth_consumer_key" => $this->config['qq']['app_id'],
-                    "openid"             => $openid,
-                ];
-                $userInfo = HttpHelper::get(self::GET_USERINFO_URL, $queryArr)['data'];
-                $userInfo = json_decode($userInfo, true);
-                if (!$userInfo || !isset($userInfo['ret']) || $userInfo['ret'] !== 0) {
-                    return [];
-                }
-                $userInfo['avatar'] = $userInfo['figureurl_qq_2'] ?? '';
-                $userInfo['sex'] = $userInfo['gender'] == '男' ? 1 : ($userInfo['gender'] == '女' ? 2 : 0);
-                return [
-                    'access_token'  => $access_token,
-                    'refresh_token' => $refresh_token,
-                    'expires_in'    => $expires_in,
-                    'openid'        => $openid,
-                    'user_info'      => $userInfo
-                ];
-            }
+        $params = $params ?: request()->param();
+        $state = (string) ($params['state'] ?? '');
+        $expected = (string) session('third_state_qq');
+        if ($state === '' || $expected === '' || !hash_equals($expected, $state) || empty($params['code'])) {
+            return [];
         }
-        return [];
+        session('third_state_qq', null);
+
+        //获取access_token
+        $data = $this->getAccessToken((string) $params['code']);
+        $access_token = $data['access_token'] ?? '';
+        if ($access_token === '') {
+            return [];
+        }
+        $openid = $this->getOpenId($access_token);
+        $queryArr = [
+            "access_token"       => $access_token,
+            "oauth_consumer_key" => $this->config['qq']['app_id'],
+            "openid"             => $openid,
+        ];
+        $userInfo = HttpHelper::get(self::GET_USERINFO_URL, $queryArr)['data'];
+        $userInfo = json_decode($userInfo, true);
+        if (!$userInfo || !isset($userInfo['ret']) || $userInfo['ret'] !== 0) {
+            return [];
+        }
+        $userInfo['avatar'] = $userInfo['figureurl_qq_2'] ?? '';
+        $userInfo['sex'] = $userInfo['gender'] == '男' ? 1 : ($userInfo['gender'] == '女' ? 2 : 0);
+        return [
+            'access_token'  => $access_token,
+            'refresh_token' => $data['refresh_token'] ?? '',
+            'expires_in'    => (int) ($data['expires_in'] ?? 0),
+            'openid'        => $openid,
+            'user_info'     => $userInfo
+        ];
     }
 
     /**
@@ -113,7 +115,7 @@ class Qq
             "grant_type"    => "authorization_code",
             "client_id"     => $this->config['qq']['app_id'],
             "client_secret" => $this->config['qq']['app_secret'],
-            "redirect_uri"  => $this->config['qq']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'qq'], true, true),
+            "redirect_uri"  => $this->config['qq']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'qq'], false, true),
             "code"          => $code,
         );
 

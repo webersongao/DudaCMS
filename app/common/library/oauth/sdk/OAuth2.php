@@ -80,7 +80,7 @@ abstract class OAuth2
     }
 
     /**
-     * 回调地址：优先使用框架生成值，避免后台配置里硬编码域名。
+     * 回调地址：统一使用不带 .html 后缀的绝对地址。
      */
     protected function callbackUrl(): string
     {

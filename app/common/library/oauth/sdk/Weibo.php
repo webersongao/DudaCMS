@@ -53,7 +53,7 @@ class Weibo
         $queryArr = array(
             "response_type" => "code",
             "client_id"     => $this->config['weibo']['app_id'],
-            "redirect_uri"  => $this->config['weibo']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'weibo'], true, true),
+            "redirect_uri"  => $this->config['weibo']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'weibo'], false, true),
             "state"         => $state,
         );
         request()->isMobile() && $queryArr['display'] = 'mobile';
@@ -67,37 +67,39 @@ class Weibo
      */
     public function getUserInfo($params = []): array
     {
-        $params = $params ?: $_GET;
-        if (isset($params['access_token']) || (isset($params['state']) && $params['state'] == session('state') && isset($params['code']))) {
-            //获取access_token
-            $data = isset($params['code']) ? $this->getAccessToken($params['code']) : $params;
-            $access_token = $data['access_token'] ?? '';
-            $refresh_token = $data['refresh_token'] ?? '';
-            $expires_in = $data['expires_in'] ?? 0;
-            if ($access_token) {
-                $uid = $data['uid'] ?? '';
-                //获取用户信息
-                $queryArr = [
-                    "access_token" => $access_token,
-                    "uid"          => $uid,
-                ];
-                $ret = Http::get(self::GET_USERINFO_URL, $queryArr);
-                $userInfo = (array)json_decode($ret['data'], true);
-                if (!$userInfo || isset($userInfo['error_code'])) {
-                    return [];
-                }
-                $userInfo['nickname'] = $userInfo['screen_name'] ?? '';
-                $userInfo['avatar'] = $userInfo['profile_image_url'] ?? '';
-                return [
-                    'access_token'  => $access_token,
-                    'refresh_token' => $refresh_token,
-                    'expires_in'    => $expires_in,
-                    'openid'        => $uid,
-                    'user_info'      => $userInfo
-                ];
-            }
+        $params = $params ?: request()->param();
+        $state = (string) ($params['state'] ?? '');
+        $expected = (string) session('third_state_weibo');
+        if ($state === '' || $expected === '' || !hash_equals($expected, $state) || empty($params['code'])) {
+            return [];
         }
-        return [];
+        session('third_state_weibo', null);
+
+        //获取access_token
+        $data = $this->getAccessToken((string) $params['code']);
+        $access_token = is_array($data) ? ($data['access_token'] ?? '') : '';
+        if ($access_token === '') {
+            return [];
+        }
+        $uid = (string) ($data['uid'] ?? '');
+        $queryArr = [
+            "access_token" => $access_token,
+            "uid"          => $uid,
+        ];
+        $ret = Http::get(self::GET_USERINFO_URL, $queryArr);
+        $userInfo = (array) json_decode((string) ($ret['data'] ?? ''), true);
+        if (!$userInfo || isset($userInfo['error_code'])) {
+            return [];
+        }
+        $userInfo['nickname'] = $userInfo['screen_name'] ?? '';
+        $userInfo['avatar'] = $userInfo['profile_image_url'] ?? '';
+        return [
+            'access_token'  => $access_token,
+            'refresh_token' => (string) ($data['refresh_token'] ?? ''),
+            'expires_in'    => (int) ($data['expires_in'] ?? 0),
+            'openid'        => $uid,
+            'user_info'     => $userInfo
+        ];
     }
 
     /**
@@ -113,7 +115,7 @@ class Weibo
             "grant_type"    => "authorization_code",
             "client_id"     => $this->config['weibo']['app_id'],
             "client_secret" => $this->config['weibo']['app_secret'],
-            "redirect_uri"  => $this->config['weibo']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'weibo'], true, true),
+            "redirect_uri"  => $this->config['weibo']['callback'] ?? (string)get_url('ThirdAuth/callback', ['platform' => 'weibo'], false, true),
             "code"          => $code,
         );
         $response = Http::post(self::GET_ACCESS_TOKEN_URL, $queryArr);

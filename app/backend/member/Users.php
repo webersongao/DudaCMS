@@ -420,6 +420,17 @@ class Users extends Backend
     {
         if ($this->request->isPost()) {
             $data = $this->request->except(['file'],'post');
+            $hasEmail = !empty($data['email']) && \app\common\library\helper\MailHelper::isEmail($data['email']);
+            $hasMobile = !empty($data['mobile']) && preg_match('/^1[3-9]\d{9}$/', (string) $data['mobile']);
+            if (!$hasEmail && !$hasMobile) {
+                $this->error('用户必须填写邮箱或手机号（至少一项）');
+            }
+            // 后台创建的用户由管理员录入联系方式，视为已验证。
+            if ($hasEmail) {
+                $data['is_valid_email'] = 1;
+            } elseif ($hasMobile) {
+                $data['is_valid_mobile'] = 1;
+            }
             $result = UserModel::registerUser($data['user_name'],$data['password'],$data,false,true);
             if (!$result) {
                 $this->error(UserModel::getError());
@@ -432,8 +443,8 @@ class Users extends Backend
             ->addText('user_name','用户名','填写用户名')
             ->addText('nick_name','用户昵称','填写用户昵称')
             ->addPassword('password','用户密码','填写用户密码')
-            ->addText('email','用户邮箱','填写用户邮箱')
-            ->addText('mobile','用户手机','填写用户手机')
+            ->addText('email','用户邮箱','邮箱或手机号至少填写一项；后台创建视为已验证')
+            ->addText('mobile','用户手机','邮箱或手机号至少填写一项')
             ->addImage('avatar','用户头像')
             ->addTextarea('signature','个人签名','填写个人签名')
             ->addSelect('group_id','系统组','',array_column(db('admin_group')->column('title,id'),'title','id'),4)

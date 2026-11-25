@@ -130,17 +130,29 @@ class Account extends Frontend
                 }
             }
 
-            if($this->settings['register_type'] == 'email' || $this->settings['register_type']=='all')
-            {
-                if(!$data['email'] || !MailHelper::isEmail($data['email']))
-                {
-                    $this->error('请填写正确的邮箱地址');
-                }
+            $smsEnabled = SmsService::isEnabled();
+            $hasEmail = !empty($data['email']) && MailHelper::isEmail($data['email']);
+            $hasMobile = !empty($data['mobile']) && preg_match('/^1[3-9]\d{9}$/', (string) $data['mobile']);
 
-                if(Users::checkUserExist($data['email']))
-                {
-                    $this->error('该邮箱已被使用请更换邮箱');
-                }
+            // 未启用短信插件时，所有注册用户必须有邮箱；启用后邮箱/手机号二选一。
+            if (!$smsEnabled && !$hasEmail) {
+                $this->error('请填写正确的邮箱地址');
+            }
+            if ($this->settings['register_type'] == 'email' && !$hasEmail) {
+                $this->error('请填写正确的邮箱地址');
+            }
+            if ($smsEnabled && $this->settings['register_type'] == 'mobile' && !$hasMobile) {
+                $this->error('请填写正确的手机号');
+            }
+            if ($this->settings['register_type'] == 'all' && !$hasEmail && !$hasMobile) {
+                $this->error('请填写邮箱或手机号（至少一项）');
+            }
+
+            if ($hasEmail && Users::checkUserExist($data['email'])) {
+                $this->error('该邮箱已被使用请更换邮箱');
+            }
+            if ($hasMobile && Users::checkUserExist($data['mobile'])) {
+                $this->error('该手机号已被使用');
             }
 
             // 字段规则验证
@@ -157,24 +169,21 @@ class Account extends Frontend
                 $this->error('该IP注册频繁，请3分钟后重试~');
             }
 
-            if (isset($data['code']) || isset($data['mobile'])) {
-                if($data['mobile'] && Users::checkUserExist($data['mobile']))
-                {
-                    $this->error('该手机号已被使用');
-                }
-
-                if ($this->settings['register_valid_type']=='mobile' && SmsService::isEnabled() && !$data['code'])
-                {
+            if ($smsEnabled && $hasMobile) {
+                if ($this->settings['register_valid_type']=='mobile' && !$data['code']) {
                     $this->error('请输入手机验证码');
                 }
-
-                if(isset($data['code']) && !SmsService::verify($data['mobile'], $data['code']))
-                {
+                if (!empty($data['code']) && !SmsService::verify($data['mobile'], $data['code'])) {
                     $this->error('手机验证码不正确');
                 }
-                $uid = Users::loginByMobile($data['mobile'], $data['code'], ['username'=>$user_name,'password'=>$password]);
+                $uid = Users::loginByMobile($data['mobile'], $data['code'] ?? '', ['username'=>$user_name,'password'=>$password]);
             } else {
-                $uid = Users::registerUser($user_name, $password, ['email' => $data['email']]);
+                // 邮箱注册（含手机号仅作辅助但短信未启用的场景）。
+                $extend = ['email' => $data['email']];
+                if ($hasMobile) {
+                    $extend['mobile'] = $data['mobile'];
+                }
+                $uid = Users::registerUser($user_name, $password, $extend);
             }
 
             if(!$uid)

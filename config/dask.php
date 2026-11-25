@@ -49,6 +49,29 @@ return array (
     'font' => 'vendor/captcha/font/SourceHanSansCN-Normal.ttf',
   ],
 
+  // 身份验证门槛：二选一（邮箱或手机号）验证通过后才允许修改活动。
+  // 未启用短信时仅邮箱路径可用；白名单内的 action 不拦截，避免用户无法去验证/退出。
+  'verification' => [
+    'enabled' => true,
+    // 允许未验证用户访问的操作（小写 控制器/方法）。
+    'allow_unverified' => [
+      'account/login',
+      'account/register',
+      'account/send_valid_mail',
+      'account/valid_email_verify',
+      'account/modify_email',
+      'account/modify_mobile',
+      'account/modify_password',
+      'account/modify_urltoken',
+      'account/save_profile',
+      'account/logout',
+      'account/welcome_first_login',
+      'ajax/sms',
+      'ajax/check_mobile',
+      'ajax/check_email',
+    ],
+  ],
+
   // 功能配置：草稿自动保存与多语言为固定基线，后台不再自定义。
   'feature' => [
     // 默认开启草稿自动保存，间隔 30 秒（毫秒值供前端定时器直接使用）。

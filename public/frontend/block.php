@@ -365,9 +365,20 @@
         </div>
     </div>
     <a class="dask-back-top hidden-xs" href="javascript:;" data-action="scroll-top" aria-label="{:L('返回顶部')}">{:dask_icon('circle-arrow-up','',23)}</a>
-    {if $user_id && !$user_info['is_valid_email'] && $user_info['email'] && $setting['register_valid_type']=='email'}
+    {if $verification_enabled && $user_id && !$user_info['is_valid_email'] && !$user_info['is_valid_mobile']}
     <script>
-        var str = '<div class="p-3"><a href="javascript:;" class="dask-ajax-get text-danger" data-url="{:url('account/send_valid_mail')}">{:L('你的邮箱 %s 还未验证, 点击这里重新发送验证邮件', $user_info.email)}</a></div>';
+    (function () {
+        // 验证提醒：同一浏览器会话内只弹一次，避免每次切页都打扰。
+        var key = 'dask_verify_tip_{$user_id}';
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, '1');
+        {if $user_info.email}
+        var tip = '{:L('你的邮箱 %s 还未验证,点击这里重新发送验证邮件', $user_info.email)}';
+        var url = '{:url('account/send_valid_mail')}';
+        {else/}
+        var tip = '{:L('请先验证邮箱或手机号后再进行发布、回答、点赞、关注等操作')}';
+        var url = '{:url('account/modify_email')}';
+        {/if}
         var width = $(window).width() > 600 ? '600px' : '85%';
         layer.open({
             title: '',
@@ -375,8 +386,9 @@
             scrollbar: false,
             shade: 0.7,
             area: [width],
-            content: str,
-        })
+            content: '<div class="p-3"><a href="javascript:;" class="dask-ajax-open text-danger" data-url="' + url + '">' + tip + '</a></div>',
+        });
+    })();
     </script>
     {/if}
 

@@ -53,12 +53,23 @@ class MailHelper
      * @param mixed $data
      * @return array
      */
+    /** 邮件功能是否已完整配置（用于判断用户能否完成邮箱验证）。 */
+    public static function isConfigured(): bool
+    {
+        $config = get_setting();
+        return config_bool('email_enable')
+            && !empty($config['email_host'])
+            && !empty($config['email_username'])
+            && !empty($config['email_password'])
+            && !empty($config['email_from']);
+    }
+
     public static function sendEmail($email = '', $subject = '', $message = '', $data = []): array
     {
         $emailConfig = get_setting();
         $mail = new PHPMailer(true);
 
-        if (!config_bool('email_enable') || empty($emailConfig['email_host']) || empty($emailConfig['email_username']) || empty($emailConfig['email_password']) || empty($emailConfig['email_from'])) {
+        if (!self::isConfigured()) {
             return ['code' => 0, 'message' => '邮件功能未启用或配置不完整'];
         }
 

@@ -3,6 +3,7 @@ namespace app\common\controller;
 use app\common\library\helper\CheckHelper;
 use app\common\library\helper\SiteConfigHelper;
 use app\common\library\helper\StringHelper;
+use app\common\library\helper\VerificationHelper;
 use app\common\library\helper\UserAuthHelper;
 use app\common\traits\Common;
 use app\model\Users;
@@ -114,6 +115,7 @@ class Frontend extends Base
         $this->settings['enable_multilingual'] = SiteConfigHelper::feature('multilingual_enable', true) ? 'Y' : 'N';
         $this->settings['default_language'] = (string) SiteConfigHelper::feature('default_language', 'zh-cn');
         $this->assign('draft_interval_ms', SiteConfigHelper::draftIntervalMs());
+        $this->assign('verification_enabled', VerificationHelper::enabled());
 
         $this->assign([
             'baseUrl'=> $this->baseUrl,
@@ -167,6 +169,17 @@ class Frontend extends Base
                 $this->redirect(url('account/login'));
             }
             $this->error('请先登录后进行操作', url('account/login'));
+        }
+
+        // 身份真实性门槛：未验证邮箱/手机号的用户不得执行修改活动（POST），
+        // 验证/账号设置/退出等白名单操作放行，GET 页面仍可正常浏览。
+        if ($this->request->isPost() && $this->user_id && VerificationHelper::enabled()
+            && !VerificationHelper::isVerified($this->user_info)
+            && !VerificationHelper::isAllowed($this->controller, $this->action)) {
+            $this->error(
+                VerificationHelper::guideMessage($this->user_info),
+                (string) url('account/send_valid_mail')
+            );
         }
 
         //检查用户在线状态

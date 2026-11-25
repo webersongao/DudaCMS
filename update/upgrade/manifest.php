@@ -124,4 +124,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'config:auto_save_draft=absent, config:remove_xss=absent',
     ],
+    '1.0.13' => [
+        'from'    => '1.0.12',
+        'file'    => 'update1.0.12to1.0.13.sql',
+        'title'   => '存量用户邮箱补齐与身份验证门槛',
+        'summary' => '无邮箱存量用户填充系统占位邮箱；新注册须邮箱或手机号二选一并验证后才可修改活动',
+        'risk'    => 'medium',
+        'verify'  => 'users:no_email=0',
+    ],
 ];

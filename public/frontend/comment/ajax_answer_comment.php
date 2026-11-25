@@ -16,7 +16,7 @@
     <div class="dask-comment-text">
         <div class="post-comment-text-inner">
             <p class="text-muted font-8">
-                {$message|raw}
+                {:render_rich_text($message)}
             </p>
         </div>
     </div>

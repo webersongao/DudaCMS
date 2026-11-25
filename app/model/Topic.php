@@ -30,11 +30,33 @@ use WordAnalysis\Analysis;
  */
 class Topic extends BaseModel
 {
-    //模糊搜索话题列表
+    //模糊搜索话题列表（保留旧调用；新代码禁止拼接用户输入）
     public static function getTopic($where, $page = 1, $per_page = 5)
     {
         $where = is_array($where) ? implode(' AND ', $where) : $where;
         return db('topic')->whereRaw($where)->order(['discuss' => 'desc'])->page($page, $per_page)->select()->toarray();
+    }
+
+    /** 安全关键词搜索：参数绑定 LIKE + 数字 ID 白名单。 */
+    public static function searchByKeywords(array $keywords, int $page = 1, int $perPage = 5): array
+    {
+        $keywords = array_values(array_unique(array_filter(array_map(function ($keyword) {
+            $keyword = trim((string) $keyword);
+            return mb_substr($keyword, 0, 50);
+        }, $keywords), 'strlen')));
+        $query = db('topic')->where('status', 1);
+        if ($keywords) {
+            $ids = array_values(array_filter(array_map('intval', $keywords)));
+            $query->where(function ($q) use ($keywords, $ids) {
+                foreach ($keywords as $keyword) {
+                    $q->whereOr('title', 'like', '%' . $keyword . '%');
+                }
+                if ($ids) {
+                    $q->whereOr('id', 'in', $ids);
+                }
+            });
+        }
+        return $query->order(['discuss' => 'desc'])->page($page, $perPage)->select()->toArray();
     }
 
     //ajax话题列表

@@ -49,4 +49,37 @@ class UploadPolicy
         $base = $ext !== '' ? substr($file, 0, -(strlen($ext) + 1)) : $file;
         return $base . '.thumb.' . $ext;
     }
+
+    /** 服务端签发附件批次凭证，并绑定到当前用户。 */
+    public static function issueAccessKey(int $uid): string
+    {
+        $key = bin2hex(random_bytes(16));
+        $keys = \think\facade\Session::get('upload.access_keys', []);
+        $keys = is_array($keys) ? $keys : [];
+        foreach ($keys as $savedKey => $meta) {
+            if (($meta['time'] ?? 0) < time() - 86400) {
+                unset($keys[$savedKey]);
+            }
+        }
+        if (count($keys) >= 20) {
+            array_shift($keys);
+        }
+        $keys[$key] = ['uid' => $uid, 'time' => time()];
+        session('upload.access_keys', $keys);
+        return $key;
+    }
+
+    /** 校验凭证是否由服务端签发且属于当前用户。 */
+    public static function verifyAccessKey(string $key, int $uid): bool
+    {
+        if ($key === '' || $uid <= 0) {
+            return false;
+        }
+        $keys = \think\facade\Session::get('upload.access_keys', []);
+        if (!is_array($keys) || !isset($keys[$key])) {
+            return false;
+        }
+        $meta = $keys[$key];
+        return (int) ($meta['uid'] ?? 0) === $uid && (int) ($meta['time'] ?? 0) >= time() - 86400;
+    }
 }

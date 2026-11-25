@@ -12,6 +12,7 @@
 namespace app\backend\admin;
 
 use app\common\controller\Backend;
+use app\common\library\helper\HtmlHelper;
 use app\model\Config as ConfigModel;
 
 /**
@@ -235,12 +236,10 @@ class Config extends Backend
         return in_array($type, $supported, true) ? $type : 'text';
     }
 
-    /** 移除脚本、内联事件与 javascript: 伪协议，保留有限的富文本标签 */
+    /** 统一走服务端白名单过滤器，避免各处正则策略不一致。 */
     private static function sanitizeRichText(string $value): string
     {
-        $value = preg_replace('/<\s*(script|style|iframe|object|embed)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $value) ?? $value;
-        $value = preg_replace('/\son[a-z]+\s*=\s*(["\']).*?\1/is', '', $value) ?? $value;
-        return preg_replace('/javascript\s*:/i', '', $value) ?? $value;
+        return HtmlHelper::purify($value);
     }
 
     /**

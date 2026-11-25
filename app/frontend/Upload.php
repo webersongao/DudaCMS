@@ -25,7 +25,10 @@ class Upload extends Frontend
         $uploadObj = UploadHelper::instance();
 
         $uploadPath = UploadPolicy::normalizePath($this->request->param('path', 'common'));
-        $access_key = (string) ($this->request->param('access_key', '') ?: bin2hex(random_bytes(16)));
+        $clientKey = (string) $this->request->param('access_key', '');
+        $access_key = UploadPolicy::verifyAccessKey($clientKey, (int) $this->user_id)
+            ? $clientKey
+            : UploadPolicy::issueAccessKey((int) $this->user_id);
         $uploadType = $this->request->param('upload_type', 'img');
 
         // 编辑器统一上传入口：按文件后缀自动识别图片 / 附件，避免前端维护两个地址。

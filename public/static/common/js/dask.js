@@ -2013,6 +2013,11 @@ var Dask = {
                         ? {id: response.attach_id, access_key: response.access_key || accessKey}
                         : null;
                     $("input[name='" + field + "']").val(url);
+                    // 服务端可能重新签发批次凭证，必须同步回表单，否则发布后附件无法绑定。
+                    if (response.access_key) {
+                        accessKey = response.access_key;
+                        $scope.find('input[name="access_key"]').first().val(accessKey);
+                    }
                     $("#" + preview).attr('src', url);
                     $("#" + preview).parent("a").attr('href', url);
                 }

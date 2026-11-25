@@ -24,6 +24,10 @@ class Attach extends Model
         if (!is_numeric($item_id) or !$attach_access_key) {
             return false;
         }
+        $uid = (int) getLoginUid();
+        if ($uid > 0 && !\app\common\library\helper\UploadPolicy::verifyAccessKey((string) $attach_access_key, $uid)) {
+            return false;
+        }
 
         $result = self::update(array('item_id' => $item_id), ['item_type' => $item_type, 'item_id' => 0, 'access_key' => $attach_access_key]);
         if ($result) {

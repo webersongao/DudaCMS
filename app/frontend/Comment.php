@@ -102,7 +102,7 @@ class Comment extends Frontend
 
 
             if ($ret) {
-                $ret['message'] = htmlspecialchars_decode($ret['message']);
+                $ret['message'] = render_rich_text(htmlspecialchars_decode((string) ($ret['message'] ?? '')));
                 $ret['user_info'] = $this->user_info;
                 $html = $this->fetch('comment/ajax_question_comment', ['comment' => $ret]);
                 $this->result(['html' => $html],1,'评论成功');
@@ -120,6 +120,7 @@ class Comment extends Frontend
         if($this->request->isPost())
         {
             $data = $this->request->post();
+            $data['message'] = remove_xss((string) ($data['message'] ?? ''));
 
             if (!$data['message']) $this->error('请填写评论内容');
             $data['uid'] = $this->user_id;
@@ -139,7 +140,7 @@ class Comment extends Frontend
 
 
             if ($ret) {
-                $ret['message'] = htmlspecialchars_decode($ret['message']);
+                $ret['message'] = render_rich_text(htmlspecialchars_decode((string) ($ret['message'] ?? '')));
                 $html = $this->fetch('comment/ajax_answer_comment',$ret);
                 $this->result(['html'=>$html],1,'评论成功');
             }

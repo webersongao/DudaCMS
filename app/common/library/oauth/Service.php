@@ -11,6 +11,8 @@
 namespace app\common\library\oauth;
 
 use app\common\library\helper\MailHelper;
+use app\common\library\helper\PresentationHelper;
+use app\common\library\helper\SecretHelper;
 use app\model\Users;
 use app\model\Third;
 use think\facade\Db;
@@ -110,12 +112,12 @@ class Service
             'openid'        => $openid,
             'unionid'       => (string) ($params['unionid'] ?? ''),
             'open_username' => mb_substr((string) ($userInfo['nickname'] ?? ''), 0, 50),
-            'access_token'  => (string) ($params['access_token'] ?? ''),
-            'refresh_token' => (string) ($params['refresh_token'] ?? ''),
+            'access_token'  => SecretHelper::encrypt($params['access_token'] ?? ''),
+            'refresh_token' => SecretHelper::encrypt($params['refresh_token'] ?? ''),
             'expires_in'    => $expiresIn,
             'login_time'    => $time,
             'expire_time'   => $time + $expiresIn,
-            'token'         => (string) ($params['token'] ?? ''),
+            'token'         => SecretHelper::encrypt($params['token'] ?? ''),
         ];
 
         $third = db('oauth')->where(['platform' => $platform, 'openid' => $openid])->find();
@@ -131,28 +133,39 @@ class Service
                 return false;
             }
 
-            db('oauth')->where(['id' => $third['id']])->update($values);
+            Db::startTrans();
+            try {
+                db('oauth')->where(['id' => $third['id']])->update($values);
 
-            // 老绑定用户此前没有邮箱：本次平台若能返回已验证邮箱，直接补全为已验证绑定邮箱。
-            if ($email !== '' && $emailVerified && (string) ($user['email'] ?? '') === '') {
-                if (self::emailOwner($email, (int) ($third['uid'] ?? 0))) {
-                    self::debugLog('existing_email_conflict', [
-                        'platform'    => $platform,
-                        'uid'         => (int) ($third['uid'] ?? 0),
-                    ]);
-                } else {
-                    db('users')->where('uid', (int) $third['uid'])->update([
-                        'email'          => $email,
-                        'is_valid_email' => 1,
-                        'group_id'       => 4,
-                        'update_time'    => $time,
-                    ]);
-                    $user['email'] = $email;
-                    self::debugLog('existing_email_bound', [
-                        'platform'    => $platform,
-                        'uid'         => (int) ($third['uid'] ?? 0),
-                    ]);
+                // 老绑定用户此前没有邮箱：本次平台若能返回已验证邮箱，直接补全为已验证绑定邮箱。
+                if ($email !== '' && $emailVerified && (string) ($user['email'] ?? '') === '') {
+                    if (self::emailOwner($email, (int) ($third['uid'] ?? 0))) {
+                        self::debugLog('existing_email_conflict', [
+                            'platform'    => $platform,
+                            'uid'         => (int) ($third['uid'] ?? 0),
+                        ]);
+                    } else {
+                        db('users')->where('uid', (int) $third['uid'])->update([
+                            'email'          => $email,
+                            'is_valid_email' => 1,
+                            'group_id'       => 4,
+                            'update_time'    => $time,
+                        ]);
+                        $user['email'] = $email;
+                        self::debugLog('existing_email_bound', [
+                            'platform'    => $platform,
+                            'uid'         => (int) ($third['uid'] ?? 0),
+                        ]);
+                    }
                 }
+                Db::commit();
+            } catch (\Throwable $e) {
+                Db::rollback();
+                self::debugLog('existing_update_exception', [
+                    'platform' => $platform,
+                    'message'  => $e->getMessage(),
+                ]);
+                return false;
             }
 
             if (!Users::extracted($user)) {
@@ -181,7 +194,7 @@ class Service
             return false;
         }
 
-        $nickname = trim((string) ($userInfo['nickname'] ?? ''));
+        $nickname = trim(strip_tags((string) ($userInfo['nickname'] ?? '')));
         $username = self::buildUsername($nickname);
         $password = bin2hex(random_bytes(max(6, (int) get_setting('password_min_length'))));
 
@@ -193,7 +206,7 @@ class Service
             $extend['sex'] = self::normalizeSex($userInfo['sex'] ?? 0);
         }
         if (empty($extend['avatar']) && !empty($userInfo['avatar'])) {
-            $extend['avatar'] = mb_substr((string) $userInfo['avatar'], 0, 255);
+            $extend['avatar'] = mb_substr(PresentationHelper::safeUrl($userInfo['avatar'], ''), 0, 255);
         }
         if (empty($extend['signature']) && !empty($userInfo['signature'])) {
             $extend['signature'] = mb_substr(trim(strip_tags((string) $userInfo['signature'])), 0, 255);

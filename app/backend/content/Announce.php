@@ -48,6 +48,9 @@ class Announce extends Backend
         if($this->request->isPost())
         {
             $data = $this->request->except(['file'],'post');
+            if (!empty($data['message'])) {
+                $data['message'] = remove_xss((string) $data['message']);
+            }
 
             // 字段规则验证
             try {

@@ -57,10 +57,19 @@ class Favorite extends Frontend
 	//删除标签
 	public function delete()
 	{
-		$id = $this->request->param('id', 0);
-		if (db('users_favorite')->where('tag_id', $id)->delete()) {
-			db('users_favorite_tag')->where(['id' => $id])->delete();
+		$id = (int) $this->request->param('id', 0);
+		if ($id <= 0) {
+			$this->error('参数错误');
+		}
+		\think\facade\Db::startTrans();
+		try {
+			db('users_favorite')->where(['tag_id' => $id, 'uid' => $this->user_id])->delete();
+			db('users_favorite_tag')->where(['id' => $id, 'uid' => $this->user_id])->delete();
+			\think\facade\Db::commit();
 			$this->success('删除成功');
+		} catch (\Throwable $e) {
+			\think\facade\Db::rollback();
+			$this->error('删除失败');
 		}
 		$this->error('删除失败');
 	}

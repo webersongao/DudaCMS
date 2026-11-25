@@ -118,6 +118,9 @@ class Column extends Backend
     {
         if ($this->request->isPost()) {
             $data = db_input_normalize('column', $this->request->except(['file'], 'post'));
+            if (!empty($data['description'])) {
+                $data['description'] = remove_xss((string) $data['description']);
+            }
             $result = $this->model->create($data);
             if (!$result) {
                 $this->error('添加失败');
@@ -140,6 +143,9 @@ class Column extends Backend
     {
         if ($this->request->isPost()) {
             $data = db_input_normalize('column', $this->request->except(['file'], 'post'));
+            if (!empty($data['description'])) {
+                $data['description'] = remove_xss((string) $data['description']);
+            }
             $oldRow = db('column')->where('id', $data['id'] ?? 0)->find();
             $result = $this->model->update($data);
             if ($result) {

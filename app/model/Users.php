@@ -58,7 +58,8 @@ class Users extends BaseModel
      */
     public static function removeUser($uid, int $realMove = 0): bool
     {
-        $uid = is_array($uid) ? $uid : explode(',', $uid);
+        $uid = is_array($uid) ? $uid : explode(',', (string) $uid);
+        $uid = array_values(array_filter(array_map('intval', $uid)));
         if (empty($uid = array_diff($uid, [1, getLoginUid()]))) {
             self::setError('不可删创世管理员或自己');
             return false;
@@ -721,7 +722,9 @@ class Users extends BaseModel
             foreach ($match_name as $user_name) {
                 $user_info = $userMap[$user_name] ?? null;
                 if ($user_info) {
-                    $content = str_replace('@' . $user_name, '<a href="' . get_user_url($user_info['uid'])  . '" class="dask-username text-primary me-1" data-id="' . $user_info['uid'] . '" target="_blank">@' . $user_info['nick_name'] . '</a>', $content);
+                    $userUrl = htmlspecialchars((string) get_user_url($user_info['uid']), ENT_QUOTES, 'UTF-8');
+                    $nickname = htmlspecialchars((string) ($user_info['nick_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    $content = str_replace('@' . $user_name, '<a href="' . $userUrl . '" class="dask-username text-primary me-1" data-id="' . (int) $user_info['uid'] . '" target="_blank" rel="noopener noreferrer">@' . $nickname . '</a>', $content);
                     if ($to_uid) {
                         $content_uid = str_replace('@' . $user_name, '@' . $user_info['uid'], $content_uid);
                     }
@@ -1246,7 +1249,8 @@ class Users extends BaseModel
     // 批量封禁IP
     public static function batchForbiddenIp($uid)
     {
-        $uid = is_array($uid) ? $uid : explode(',', $uid);
+        $uid = is_array($uid) ? $uid : explode(',', (string) $uid);
+        $uid = array_values(array_filter(array_map('intval', $uid)));
         if (empty($uid = array_diff($uid, [1, getLoginUid()]))) {
             self::setError('不可封创世管理员或自己的IP');
             return false;

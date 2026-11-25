@@ -30,7 +30,7 @@
 
         <dl>
             <dt class="mb-2">{:L('问题详情')}</dt>
-            <dd class="dask-content">{$data['detail']|htmlspecialchars_decode|raw}</dd>
+            <dd class="dask-content">{:render_rich_text(htmlspecialchars_decode((string)($data['detail'] ?? '')))}</dd>
         </dl>
         {/if}
 
@@ -69,7 +69,7 @@
 
         <dl>
             <dt class="mb-2">{:L('文章详情')}</dt>
-            <dd class="dask-content">{$data['message']|htmlspecialchars_decode|raw}</dd>
+            <dd class="dask-content">{:render_rich_text(htmlspecialchars_decode((string)($data['message'] ?? '')))}</dd>
         </dl>
         {/if}
 
@@ -80,7 +80,7 @@
         </dl>
         <dl>
             <dt class="mb-2">{:L('回答详情')}</dt>
-            <dd class="dask-content">{$data['content']|htmlspecialchars_decode|raw}</dd>
+            <dd class="dask-content">{:render_rich_text(htmlspecialchars_decode((string)($data['content'] ?? '')))}</dd>
         </dl>
         {/if}
 
@@ -89,7 +89,7 @@
         {if $info['reason']}
         <dl>
             <dt class="mb-2">{:L('拒绝原因')}</dt>
-            <dd class="dask-content text-danger">{$info['reason']|raw}</dd>
+            <dd class="dask-content text-danger">{:render_rich_text((string)($info['reason'] ?? ''))}</dd>
         </dl>
         {/if}
 

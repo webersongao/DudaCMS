@@ -335,8 +335,14 @@ class Approval extends Backend
     {
         if (request()->isPost()) {
             $data = request()->post();
-            db($this->table)->where('id', $data['id'])->update([$data['field'] => $data['value']]);
-            if ($data['field'] == 'status') {
+            $id = (int) ($data['id'] ?? 0);
+            $field = (string) ($data['field'] ?? '');
+            if ($id <= 0 || !in_array($field, ['status', 'reason'], true)) {
+                return json(['error' => 1, 'msg' => '参数不正确']);
+            }
+            $value = $field === 'status' ? db_input_int($data['value'] ?? 0) : mb_substr(remove_xss((string) ($data['value'] ?? '')), 0, 500);
+            db($this->table)->where('id', $id)->update([$field => $value]);
+            if ($field == 'status') {
                 if ($data['value'] == 1) {
                     ApprovalModel::approval($data['id']);
                 }

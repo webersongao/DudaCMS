@@ -22,7 +22,7 @@
     <div class="dask-comment-text">
         <div class="post-comment-text-inner">
             <p class="text-muted font-8">
-                {$v.message|raw}
+                {:render_rich_text($v['message'])}
             </p>
         </div>
     </div>

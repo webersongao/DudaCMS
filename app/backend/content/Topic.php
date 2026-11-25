@@ -127,6 +127,9 @@ class Topic extends Backend
     {
         if ($this->request->isPost()) {
             $data = db_input_normalize('topic', $this->request->except(['file'], 'post'));
+            if (!empty($data['description'])) {
+                $data['description'] = remove_xss((string) $data['description']);
+            }
 
             // 字段规则验证
             try {
@@ -183,6 +186,9 @@ class Topic extends Backend
     {
         if ($this->request->isPost()) {
             $data = db_input_normalize('topic', $this->request->except(['file'], 'post'));
+            if (!empty($data['description'])) {
+                $data['description'] = remove_xss((string) $data['description']);
+            }
 
             // 字段规则验证
             try {

@@ -92,4 +92,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'table:config',
     ],
+    '1.0.9' => [
+        'from'    => '1.0.8',
+        'file'    => 'update1.0.8to1.0.9.sql',
+        'title'   => '布尔与状态字段类型统一',
+        'summary' => '布尔统一 tinyint(1) unsigned NOT NULL；多状态统一 tinyint unsigned；排序统一 smallint unsigned',
+        'risk'    => 'low',
+        'verify'  => 'column:action_log.anonymous, column:users.status, column:article.sort',
+    ],
 ];

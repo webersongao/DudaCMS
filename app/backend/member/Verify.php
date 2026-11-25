@@ -492,8 +492,11 @@ class Verify extends Backend
     public function state_type()
     {
         if (request()->isPost()) {
-            $id = request()->post('id');
-            $field = request()->post('field');
+            $id = (int) request()->post('id');
+            $field = (string) request()->post('field');
+            if ($id <= 0 || $field !== 'status') {
+                return json(['error' => 1, 'msg' => '参数不正确']);
+            }
             $info = db('users_verify_type')->find($id);
             $status = $info[$field] == 1 ? 0 : 1;
             db('users_verify_type')->where('id', $id)->update([$field => $status]);

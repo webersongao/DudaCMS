@@ -391,7 +391,7 @@ class Answer extends BaseModel
         $user_infos = $uids ? Users::getUserInfoByIds($uids) : [];
         foreach ($list['data'] as $key => &$value) {
             $list['data'][$key]['user_info'] = $user_infos[$value['uid']] ?? Users::getUserInfo(0);
-            $list['data'][$key]['message'] = htmlspecialchars_decode($value['message']);
+            $list['data'][$key]['message'] = render_rich_text(htmlspecialchars_decode((string) $value['message']));
         }
         return $list;
     }
@@ -509,9 +509,9 @@ class Answer extends BaseModel
     {
         $arr['answer_id'] = $data['answer_id'];
         $arr['uid'] = $data['uid'];
-        $at_info = Users::parseAtUser(htmlspecialchars_decode($data['message']), true);
+        $at_info = Users::parseAtUser(remove_xss((string) $data['message']), true);
         $allUsers = $at_info[1];
-        $arr['message'] = htmlspecialchars($at_info[0]);
+        $arr['message'] = $at_info[0];
 
         if (isset($data['id']) and $data['id'] > 0) {
             $arr['id'] = $data['id'];

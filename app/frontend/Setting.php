@@ -114,26 +114,39 @@ class Setting extends Frontend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post();
-            $id = $params['id'];
+            $id = (int) ($params['id'] ?? 0);
             if (!isset($params['type'])) {
                 $this->error('请选择认证类型!');
             }
             //认证前置操作
 
-            $type = $params['type'];
-            unset($params['id'], $params['type']);
+            $type = (string) $params['type'];
+            if (!db('users_verify_type')->where(['name' => $type, 'status' => 1])->find()) {
+                $this->error('认证类型不存在或已关闭');
+            }
+            if ($id > 0 && !db('users_verify')->where(['id' => $id, 'uid' => $this->user_id])->find()) {
+                $this->error('认证记录不存在');
+            }
             $field = db('verify_field')->where(['verify_type' => $type, 'verify_show' => 1])->column('title,name,validate');
+            $allowed = [];
             foreach ($field as $v) {
-                $fieldName = $v['name'];
+                $fieldName = (string) $v['name'];
+                $allowed[$fieldName] = $v;
                 if (empty($params[$fieldName]) && $v['validate']) {
                     $this->error($v['title'] . '不能为空!');
                 }
             }
+            $payload = [];
+            foreach ($allowed as $fieldName => $_) {
+                if (array_key_exists($fieldName, $params)) {
+                    $payload[$fieldName] = mb_substr(trim(strip_tags((string) $params[$fieldName])), 0, 500);
+                }
+            }
 
             if (!$id) {
-                db('users_verify')->insert(['create_time' => time(), 'type' => $type, 'data' => json_encode($params), 'status' => 1, 'uid' => intval($this->user_id), 'reason' => '']);
+                db('users_verify')->insert(['create_time' => time(), 'type' => $type, 'data' => json_encode($payload, JSON_UNESCAPED_UNICODE), 'status' => 1, 'uid' => intval($this->user_id), 'reason' => '']);
             } else {
-                db('users_verify')->where('id', $id)->update(['type' => $type, 'data' => json_encode($params), 'status' => 1]);
+                db('users_verify')->where(['id' => $id, 'uid' => $this->user_id])->update(['type' => $type, 'data' => json_encode($payload, JSON_UNESCAPED_UNICODE), 'status' => 1]);
             }
 
             //认证后置操作

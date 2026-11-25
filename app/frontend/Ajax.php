@@ -410,17 +410,15 @@ class Ajax extends Frontend
     {
         $item_type = $this->request->param('item_type');
         $item_id = $this->request->param('item_id', 0, 'intval');
-        $keywords = $this->request->param('keywords');
-        $cache_key = 'get_topic_q' . md5(trim($keywords) . '_search_type' . $item_type . '_id' . $item_id);
+        $keywords = $this->request->param('keywords', '');
+        $keywords = is_array($keywords) ? [] : explode(',', (string) $keywords);
+        $keywords = array_values(array_filter(array_map(function ($keyword) {
+            return mb_substr(trim(strip_tags((string) $keyword)), 0, 50);
+        }, $keywords), 'strlen'));
+        $cache_key = 'get_topic_q' . md5(implode('|', $keywords) . '_search_type' . $item_type . '_id' . $item_id);
         $topic_list = cache($cache_key);
         if (!$topic_list) {
-            $where[] = 'status=1';
-            if ($keywords) {
-                $keywords = is_array($keywords) ? [] : explode(',', $keywords);
-                $where[] = "(title regexp '" . implode('|', $keywords) . "' OR id regexp '" . implode('|', $keywords) . "')";
-            }
-
-            $topic_list = TopicModel::getTopic($where);
+            $topic_list = TopicModel::searchByKeywords($keywords);
 
             $is_related = $item_type === 'topic';
             foreach ($topic_list as $key => $val) {

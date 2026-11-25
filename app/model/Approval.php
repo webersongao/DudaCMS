@@ -23,11 +23,16 @@ class Approval extends BaseModel
      */
     public static function saveApproval($type, $data, $uid, string $access_key = '')
     {
+        array_walk_recursive($data, function (&$value) {
+            if (is_string($value)) {
+                $value = remove_xss($value);
+            }
+        });
         $insertData = array(
-            'type' => $type,
+            'type' => remove_xss((string) $type),
             'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
             'uid' => intval($uid),
-            'access_key' => $access_key,
+            'access_key' => (string) $access_key,
             'create_time' => time()
         );
         //保存审核信息钩子

@@ -6,8 +6,12 @@
             <div id="fileList_cover" class="uploader-list"></div>
             <div id="filePicker_cover" class="dask-onboarding__avatar-picker">
                 <img class="image_preview_info" id="cover_preview" src="{$user_info.avatar|default='/static/common/image/default-avatar.svg'}" alt="{$user_info.user_name|default=''}">
-                <span class="dask-onboarding__avatar-edit" aria-hidden="true">+</span>
             </div>
+            <span class="dask-onboarding__avatar-edit" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <path d="M12 5v14M5 12h14"></path>
+                </svg>
+            </span>
         </div>
         <h1 class="dask-onboarding__title">
             {:L('欢迎来到')} {:get_setting('site_name')}{:L('，')}{$user_info.user_name|default=''}

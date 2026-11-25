@@ -66,7 +66,7 @@
   function parseArgs(args) {
     var options = {};
     var callbacks = [];
-    for (var i = 1; i < args.length; i++) {
+    for (var i = 0; i < args.length; i++) {
       var arg = args[i];
       if (isFunction(arg)) {
         callbacks.push(arg);
@@ -315,6 +315,7 @@
         index: index,
         type: 'msg',
         element: null,
+        end: isFunction(parsed.callbacks[0]) ? parsed.callbacks[0] : null,
         timer: null,
         cleanup: function () {
           var item = record.element;

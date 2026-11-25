@@ -259,12 +259,21 @@ body.dask-account-page #wrapMain,
 
 .dask-onboarding__avatar-picker {
     position: relative;
+    display: block;
     width: 100%;
     height: 100%;
     border-radius: inherit;
     overflow: hidden;
     cursor: pointer;
     border: 2px solid var(--dask-line);
+}
+
+.dask-onboarding__avatar-picker,
+.dask-onboarding__avatar .webuploader-container,
+.dask-onboarding__avatar .webuploader-pick {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: inherit;
 }
 
 .dask-onboarding__avatar-picker img {
@@ -277,17 +286,25 @@ body.dask-account-page #wrapMain,
 .dask-onboarding__avatar-edit {
     position: absolute;
     right: 0;
-    bottom: 0;
+    bottom: 2px;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 26px;
     height: 26px;
+    border: 2px solid var(--dask-surface);
     border-radius: var(--dask-r-pill);
     background: var(--dask-blue);
     color: var(--dask-on-primary);
-    font-size: 1rem;
-    line-height: 1;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+.dask-onboarding__avatar-edit svg {
+    display: block;
+    width: 14px;
+    height: 14px;
 }
 
 .dask-onboarding__title {

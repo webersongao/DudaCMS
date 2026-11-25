@@ -24,6 +24,9 @@ class Search
     //搜索引擎
     protected $handler;
 
+    // 当前是否为 ES 驱动（用于连接失败时降级）
+    protected $isElastic = false;
+
     /**
      * 架构函数
      * @access public
@@ -31,7 +34,17 @@ class Search
      */
     public function __construct($search = null)
     {
-        $this->handler = $search == 'ElasticSearch' ? new ElasticSearch() : new RegexpSearch();
+        // 未显式指定时读取后台「其他配置」的搜索引擎选择，
+        // 避免头部 Ajax 搜索等无参调用点恒走本地库、与搜索主页行为不一致。
+        if ($search === null) {
+            $search = get_setting('search_handle', 'regexp');
+        }
+        // 选了 ES 但未配置服务地址时自动降级本地搜索，避免整站搜索报错。
+        if ($search === 'ElasticSearch' && !get_setting('search_engine_host')) {
+            $search = 'regexp';
+        }
+        $this->isElastic = $search === 'ElasticSearch';
+        $this->handler = $this->isElastic ? new ElasticSearch() : new RegexpSearch();
     }
 
     public function search($keywords, $type, $uid, $order, $page = 1, $per_page = 10)
@@ -42,16 +55,21 @@ class Search
         $where = [];
         if ($page <= 1) $page = 1;
         if ($per_page <= 0) $per_page = 5;
-        if ($type == 'all') {
-            $searchResult = $this->handler->search($keywords, '', $uid, [], $page, $per_page);
-        } else {
-            if (in_array($type, ['question', 'users', 'topic', 'answer', 'article'])) {
+        try {
+            if ($type == 'all') {
+                $searchResult = $this->handler->search($keywords, '', $uid, [], $page, $per_page);
+            } elseif (in_array($type, ['question', 'users', 'topic', 'answer', 'article'], true)) {
                 $searchResult = $this->handler->search($keywords, $type, $uid, [], $page, $per_page);
             } else {
                 //自定义搜索类型
-                $searchResult = '';
-                $searchResult = json_decode($searchResult, true);
+                $searchResult = json_decode('', true);
             }
+        } catch (\Throwable $e) {
+            // ES 服务不可达时自动降级本地数据库搜索，保证前台搜索不中断。
+            if (!$this->isElastic) {
+                throw $e;
+            }
+            $searchResult = (new RegexpSearch())->search($keywords, $type === 'all' ? '' : $type, $uid, [], $page, $per_page);
         }
         return $searchResult;
     }

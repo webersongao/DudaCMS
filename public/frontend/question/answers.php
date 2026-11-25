@@ -5,11 +5,11 @@
         <div class="user-details-card-avatar float-start" style="position: relative">
             {if $v.is_anonymous}
             <a href="javascript:;">
-                <img src="/static/common/image/default-avatar.svg" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url('')}" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
             </a>
             {else/}
             <a href="{$v['user_info']['url']}" class="dask-username" data-id="{$v.uid}" title="{$v['user_info']['name']}">
-                <img src="{$v['user_info']['avatar']}" onerror="this.src='/static/common/image/default-avatar.svg'" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
             </a>
             {/if}
         </div>

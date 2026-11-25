@@ -19,7 +19,7 @@
                             <div class="dask-user dask-hcard">
                                 <div class="dask-hcard__media">
                                     <a href="{$user_info['url']}">
-                                        <img alt="{$user_info['name']}" src="{$user_info['avatar']}" class="rounded" style="width: 40px;height: 40px">
+                                        <img alt="{$user_info['name']}" src="{:user_avatar_url($user_info['avatar'] ?? '')}" class="rounded" style="width: 40px;height: 40px">
                                     </a>
                                 </div>
                                 <div class="dask-hcard__body">

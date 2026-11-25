@@ -340,7 +340,11 @@ class AuthHelper
      */
     public function isSuperAdmin(): bool
     {
-        return session('admin_user_info')['group_id'] == 1;
+        $uid = AuthSession::adminUid();
+        if (!$uid) {
+            return false;
+        }
+        return (int) db('users')->where('uid', $uid)->value('group_id') === 1;
     }
 
     //获取用户权限数
@@ -519,11 +523,16 @@ class AuthHelper
         if (!verify_password($password, (string) $userInfo['password'], (string) $userInfo['salt'])) {
             return false;
         }
+        // 后台只允许站点管理员组进入，避免任意注册用户通过后台入口提权。
+        if (!in_array((int) ($userInfo['group_id'] ?? 0), [1, 2], true)) {
+            return false;
+        }
         if (password_needs_upgrade((string) $userInfo['password'])) {
             db('users')->where('uid', $userInfo['uid'])->update(['password' => hash_password($password)]);
         }
-        session('admin_user_info', $userInfo);
-        session('admin_login_uid', $userInfo['uid']);
+        AuthSession::regenerate();
+        unset($userInfo['password'], $userInfo['salt']);
+        AuthSession::writeAdmin((int) $userInfo['uid'], $userInfo);
         return true;
     }
 

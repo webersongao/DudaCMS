@@ -133,7 +133,7 @@
                                 <div class="dask-hcard">
                                     <div class="dask-hcard__media">
                                         <a href="{$article_info['user_info']['url']}" class="dask-username" data-id="{$article_info.uid}">
-                                            <img alt="{$article_info['user_info']['nick_name']}" src="{$article_info['user_info']['avatar']}" class="circle" style="width: 45px;height: 45px">
+                                            <img alt="{$article_info['user_info']['nick_name']}" src="{:user_avatar_url($article_info['user_info']['avatar'] ?? '')}" class="circle" style="width: 45px;height: 45px">
                                         </a>
                                     </div>
                                     <div class="dask-hcard__body">
@@ -299,7 +299,7 @@
                         <textarea type="text" name="message" class="form-control commentMessage" rows="6" placeholder="{:L('写下您的评论吧')}..."></textarea>
                         <div class="overflow-hidden mt-3">
                             <div class="float-start dask-username" data-id="{$user_info.uid}">
-                                <img src="{$user_info['avatar']|default='/static/common/image/default-avatar.svg'}" alt="{$user_info['nick_name']}" class="rounded" style="width: 16px;height: 16px">
+                                <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="{$user_info['nick_name']}" class="rounded" style="width: 16px;height: 16px">
                                 <span>{$user_info['nick_name']}</span>
                             </div>
                             <div class="float-end">
@@ -338,7 +338,7 @@
                                 <div class="clearfix pt-0 pb-2">
                                     <div class="user-details-card-avatar float-start" style="position: relative">
                                         <a href="{:get_user_url($v['uid'])}">
-                                            <img src="{$v['user_info']['avatar']}" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
+                                            <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
                                         </a>
                                     </div>
                                     <div class="user-details-card-name float-start ms-2">
@@ -366,11 +366,11 @@
                                             <div class="user-details-card pt-0 pb-2">
                                                 <div class="user-details-card-avatar" style="position: relative">
                                                     <a href="{:get_user_url($v1['uid'])}">
-                                                        <img src="{$v1['user_info']['avatar']}" alt="{$v1['user_info']['nick_name']}" style="width: 40px;height: 40px">
+                                                        <img src="{:user_avatar_url($v1['user_info']['avatar'] ?? '')}" alt="{$v1['user_info']['nick_name']}" style="width: 40px;height: 40px">
                                                     </a>
                                                 </div>
                                                 <div class="user-details-card-name">
-                                                    <a href="{$v1['user_info']['url']}">{$v1['user_info']['nick_name']}</a> <span class="ms-0"> {:date('Y-m-d H:i',$v['create_time'])} </span>
+                                                    <a href="{$v1['user_info']['url']}">{$v1['user_info']['nick_name']}</a> <span class="ms-0"> {:front_time($v['create_time'], 'Y-m-d H:i')} </span>
                                                 </div>
                                             </div>
                                             <p>{$v1.message|raw}</p>
@@ -426,7 +426,7 @@
                         <div class="dask-hcard pb-2 border-bottom">
                             <div class="dask-hcard__media">
                                 <a href="{:url('column/detail',['id'=>$article_info['column_id']])}" data-pjax="pageMain">
-                                    <img src="{$article_info['column_info']['cover']|default='/static/common/image/default-avatar.svg'}" class="rounded" width="40" height="40">
+                                    <img src="{:safe_url($article_info['column_info']['cover'] ?? '', '/static/common/image/default-cover.svg')}" class="rounded" width="40" height="40">
                                 </a>
                             </div>
                             <div class="dask-hcard__body">

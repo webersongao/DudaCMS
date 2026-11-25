@@ -1,35 +1,19 @@
 {__NOLAYOUT__}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="{:html_lang()}" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8" http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404-{:L('对不起')}！{:L('您访问的页面不存在')}</title>
-    {literal}
+    <script src="{$assetBase}common/js/dask-theme-init.js?v={:asset_version('common/js/dask-theme-init.js')}" data-default="{:get_setting('theme_mode','auto')}"></script>
     <script>
-    /* 独立边界页不走 block.php，需自行初始化主题与返回动作 */
-    (function () {
-        try {
-            var pref = localStorage.getItem('dask_theme');
-            if (!pref) {
-                var m = document.cookie.match(/(?:^|; )dask_theme=([^;]*)/);
-                pref = m ? decodeURIComponent(m[1]) : 'auto';
-            }
-            if (['light','dark','auto'].indexOf(pref) === -1) pref = 'auto';
-            document.documentElement.setAttribute('data-theme', pref);
-            var dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.setAttribute('data-dark', dark ? '1' : '0');
-            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-        } catch (e) {}
-        document.addEventListener('click', function (e) {
-            var target = e.target && e.target.closest ? e.target.closest('[data-action="history-back"]') : null;
-            if (!target) return;
-            e.preventDefault();
-            window.history.back();
-        });
-    })();
+    document.addEventListener('click', function (e) {
+        var target = e.target && e.target.closest ? e.target.closest('[data-action="history-back"]') : null;
+        if (!target) return;
+        e.preventDefault();
+        window.history.back();
+    });
     </script>
-    {/literal}
     <link rel="stylesheet" href="{$assetBase}common/design/tokens.css?v={:asset_version('common/design/tokens.css')}">
     <style type="text/css">
         *{box-sizing:border-box;}

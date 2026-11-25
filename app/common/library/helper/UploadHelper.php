@@ -41,10 +41,8 @@ class UploadHelper
      */
     public static function instance(): UploadHelper
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new static();
-        }
-        return self::$instance;
+        // 每次上传使用独立实例，避免沿用上一次的路径/类型/access_key 状态。
+        return new static();
     }
 
     /**
@@ -54,7 +52,7 @@ class UploadHelper
      */
     public function setUploadPath($uploadPath): UploadHelper
     {
-        $this->uploadPath= $this->cleanFileName($uploadPath);
+        $this->uploadPath = UploadPolicy::normalizePath($uploadPath);
         return $this;
     }
 
@@ -77,7 +75,7 @@ class UploadHelper
     public function setUploadType($type): UploadHelper
     {
         $type = is_array($type) ? (string) end($type) : (string) $type;
-        $this->upload_type = in_array($type, ['img', 'file'], true) ? $type : 'img';
+        $this->upload_type = UploadPolicy::normalizeType($type);
         return $this;
     }
 
@@ -243,24 +241,15 @@ class UploadHelper
                         $height = (int) $wh[1][1];
                     }
 
-                    //图片做压缩处理
-                    if(get_setting('upload_image_thumb_enable','N')=='Y' && get_setting('upload_image_thumb_percent')< 1 && get_setting('upload_image_thumb_percent')>0 && $file_ext!='gif' && $file_ext!='GIF')
-                    {
-                        $thumb_path = str_replace('.'.$file_ext,'.thumb.'.$file_ext,$path);
-                        ImageHelper::compressImg($thumb_path,$path,get_setting('upload_image_thumb_percent'));
-                        if(file_exists($thumb_path))
-                        {
-                            $thumb = str_replace('.'.$file_ext,'.thumb.'.$file_ext,$url);
-                        }
-                    }
-
-                    // 水印在缩略图生成之后叠加，避免缩略图从已加水印的原图二次叠加。
-                    ImageHelper::addTextWatermark($path);
-                    if(!empty($thumb_path) && file_exists($thumb_path))
-                    {
-                        ImageHelper::addTextWatermark($thumb_path);
-                    }
+                    // 图片压缩、缩略图与水印统一由媒体处理器完成。
+                    $processed = MediaProcessor::processImage($path, $file_ext, $url);
+                    $url = $processed['url'];
+                    $thumb = $processed['thumb'];
                 }
+                if (!$isImage) {
+                    MediaProcessor::processVideo($path, $file_ext);
+                }
+
                 // 域名/服务器解耦：入库只存相对路径，物理操作仍用上面的绝对路径 $path。
                 $storedPath = AttachPathHelper::toRelative($path) ?: $path;
                 $data = [
@@ -547,23 +536,14 @@ class UploadHelper
                     $height = (int) $wh[1][1];
                 }
 
-                //图片做压缩处理
-                if(get_setting('upload_image_thumb_enable','N')=='Y' && get_setting('upload_image_thumb_percent')< 1 && get_setting('upload_image_thumb_percent')>0 && $pathInfo['extension']!='gif' && $pathInfo['extension']!='GIF')
-                {
-                    $thumb_path = str_replace('.'.$pathInfo['extension'],'.thumb.'.$pathInfo['extension'],$path);
-                    ImageHelper::compressImg($thumb_path,$path,get_setting('upload_image_thumb_percent'));
-                    if(file_exists($thumb_path))
-                    {
-                         $thumb = str_replace('.'.$pathInfo['extension'],'.thumb.'.$pathInfo['extension'],$url);
-                    }
-                }
+                // 图片压缩、缩略图与水印统一由媒体处理器完成。
+                $processed = MediaProcessor::processImage($path, $pathInfo['extension'], $url);
+                $url = $processed['url'];
+                $thumb = $processed['thumb'];
+            }
 
-                // 水印在缩略图生成之后叠加，避免缩略图从已加水印的原图二次叠加。
-                ImageHelper::addTextWatermark($path);
-                if(!empty($thumb_path) && file_exists($thumb_path))
-                {
-                    ImageHelper::addTextWatermark($thumb_path);
-                }
+            if (!$isImage) {
+                MediaProcessor::processVideo($path, $pathInfo['extension']);
             }
 
             // 域名/服务器解耦：入库只存相对路径

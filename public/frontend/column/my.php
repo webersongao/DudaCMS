@@ -72,7 +72,7 @@
                         <div class="dask-hcard border-bottom bg-white p-3">
                             <div class="dask-hcard__media">
                                 <a href="{$user_info['url']}">
-                                    <img src="{$user_info['avatar']|default='/static/common/image/default-avatar.svg'}" width="45" height="45">
+                                    <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" width="45" height="45">
                                 </a>
                             </div>
                             <div class="dask-hcard__body">

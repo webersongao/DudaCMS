@@ -207,19 +207,21 @@ class ImageHelper
     public static function replaceImageUrl($images, $url = '')
     {
         if (!$images) return false;
-        $url = $url ?: request()->domain();
+        $url = rtrim((string) ($url ?: request()->domain()), '/');
+        $normalize = function ($value) use ($url) {
+            $value = (string) $value;
+            if ($value === '' || preg_match('#^[a-z][a-z0-9+.-]*://#i', $value) === 1 || str_starts_with($value, 'data:')) {
+                return $value;
+            }
+            return $url . '/' . ltrim($value, '/');
+        };
         if (is_array($images)) {
             foreach ($images as $k => $v) {
-                if (!strstr($v, 'http') && !strstr($v, 'https')) {
-                    $images[$k] = $url . $v;
-                }
+                $images[$k] = $normalize($v);
             }
-        } else {
-            if (!strstr($images, 'http') && !strstr($images, 'https')) {
-                $images = $url . '/' . $images;
-            }
+            return $images;
         }
-        return $images;
+        return $normalize($images);
     }
 
     /**
@@ -246,7 +248,7 @@ class ImageHelper
     public static function addTextWatermark(string $file, string $text = ''): bool
     {
         try {
-            if (get_setting('watermark_enable', 'N') !== 'Y') {
+            if (!config_bool('watermark_enable')) {
                 return false;
             }
             if ($text === '') {
@@ -300,16 +302,21 @@ class ImageHelper
                 imagesavealpha($image, true);
             }
 
-            $font = public_path('static') . 'vendor/captcha/font/SourceHanSansCN-Normal.ttf';
+            $font = trim((string) get_setting('watermark_font', ''));
+            $font = $font !== '' ? $font : (public_path('static') . 'vendor/captcha/font/SourceHanSansCN-Normal.ttf');
             if (!is_file($font)) {
                 imagedestroy($image);
                 return false;
             }
 
-            $fontSize = (int) max(12, min(48, round(min($width, $height) / 22)));
+            $configuredSize = config_int('watermark_font_size', 0);
+            $fontSize = $configuredSize > 0
+                ? max(8, min(96, $configuredSize))
+                : (int) max(12, min(48, round(min($width, $height) / 22)));
             $padding = (int) max(6, min(20, round(min($width, $height) * 0.03)));
             $maxWidth = (int) max(40, $width - $padding * 2);
-            $lines = self::wrapWatermarkText($text, $font, $fontSize, $maxWidth);
+            $maxLines = max(1, min(6, config_int('watermark_max_lines', 3)));
+            $lines = self::wrapWatermarkText($text, $font, $fontSize, $maxWidth, $maxLines);
             if (!$lines) {
                 imagedestroy($image);
                 return false;
@@ -322,12 +329,30 @@ class ImageHelper
                 $box = imagettfbbox($fontSize, 0, $font, $line);
                 $blockWidth = max($blockWidth, abs((int) $box[2] - (int) $box[0]));
             }
-            $x = max($padding, $width - $padding - $blockWidth);
             $textHeight = count($lines) * $lineHeight;
-            $y = max($fontSize, $height - $padding - $textHeight + $fontSize);
+            $position = strtolower(trim((string) get_setting('watermark_position', 'bottom-right')));
+            $x = match ($position) {
+                'top-left', 'top-right' => $padding,
+                'center' => max($padding, (int) (($width - $blockWidth) / 2)),
+                default => max($padding, $width - $padding - $blockWidth),
+            };
+            if ($position === 'top-right') {
+                $x = max($padding, $width - $padding - $blockWidth);
+            }
+            $y = match ($position) {
+                'top-left', 'top-right' => $fontSize + $padding,
+                'center' => max($fontSize, (int) (($height - $textHeight) / 2) + $fontSize),
+                default => max($fontSize, $height - $padding - $textHeight + $fontSize),
+            };
 
-            $shadow = imagecolorallocatealpha($image, 0, 0, 0, 65);
-            $white = imagecolorallocatealpha($image, 255, 255, 255, 0);
+            $alpha = max(0, min(127, 127 - (int) round(config_int('watermark_opacity', 100) / 100 * 127)));
+            $hex = ltrim(trim((string) get_setting('watermark_color', '#ffffff')), '#');
+            if (strlen($hex) !== 6 || preg_match('/^[0-9a-f]{6}$/i', $hex) !== 1) {
+                $hex = 'ffffff';
+            }
+            $rgb = [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
+            $shadow = imagecolorallocatealpha($image, 0, 0, 0, min(127, $alpha + 40));
+            $white = imagecolorallocatealpha($image, $rgb[0], $rgb[1], $rgb[2], $alpha);
             foreach ($lines as $index => $line) {
                 $lineY = $y + $index * $lineHeight;
                 foreach ([[-1, 0], [1, 0], [0, -1], [0, 1]] as $offset) {
@@ -338,10 +363,12 @@ class ImageHelper
 
             // 先写临时文件再原子替换，避免写入失败时留下半张损坏图片。
             $tmp = $file . '.watermark.tmp';
+            $quality = max(1, min(100, config_int('watermark_quality', 90)));
+            $pngLevel = max(0, min(9, (int) round((100 - $quality) / 10)));
             if ((int) $info[2] === IMAGETYPE_JPEG || (int) $info[2] === IMAGETYPE_WEBP) {
-                $ok = $save($image, $tmp, 90);
+                $ok = $save($image, $tmp, $quality);
             } elseif ((int) $info[2] === IMAGETYPE_PNG) {
-                $ok = $save($image, $tmp, 6);
+                $ok = $save($image, $tmp, $pngLevel);
             } else {
                 $ok = $save($image, $tmp);
             }

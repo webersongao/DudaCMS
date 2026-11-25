@@ -22,7 +22,7 @@
             {volist name="$invite_list" id="v"}
             <span class="ms-2 mb-0">
                 <a href="javascript:;">
-                    <img src="{$v.avatar}" style="border-radius:50%;width: 18px;height: 18px;" title="{$v.nick_name}" alt="{$v.nick_name}"/>
+                    <img src="{:user_avatar_url($v['avatar'] ?? '')}" style="border-radius:50%;width: 18px;height: 18px;" title="{$v.nick_name}" alt="{$v.nick_name}"/>
                 </a>
             </span>
             {/volist}
@@ -35,7 +35,7 @@
         <div class="dask-hcard invite-recommend-user bg-white p-3 mb-1" data-total="{$total}">
             <div class="dask-hcard__media">
                 <a href="javascript:;">
-                    <img src="{$v.avatar}" alt="" style="border-radius:50%;width: 50px;height: 50px;" />
+                    <img src="{:user_avatar_url($v['avatar'] ?? '')}" alt="" style="border-radius:50%;width: 50px;height: 50px;" />
                 </a>
             </div>
             <div class="dask-hcard__body">

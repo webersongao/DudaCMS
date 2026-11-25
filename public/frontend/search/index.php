@@ -41,11 +41,11 @@
                                 <div class="dask-list-item__meta text-muted">
                                     {if $v.is_anonymous}
                                     <a href="javascript:;" class="dask-username">
-                                        <img src="/static/common/image/default-avatar.svg"  onerror="this.src='/static/common/image/default-avatar.svg'"  class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
+                                        <img src="{:user_avatar_url('')}"   class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
                                     </a>
                                     {else/}
                                     <a href="{$v['user_info']['url']}" class="dask-user-name" data-id="{$v['user_info']['uid']}">
-                                        <img src="{$v['user_info']['avatar']}"  onerror="this.src='/static/common/image/default-avatar.svg'"  class="circle" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
+                                        <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}"   class="circle" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
                                     </a>
                                     {/if}
                                     <i>{:L('发起了提问')}</i>
@@ -154,7 +154,7 @@
                             {if $v['search_type']=="users" }
                             <div class="users d-flex position-relative dask-list-item">
                                 <div class="flex-fill me-3" style="width: 54px;height: 54px">
-                                    <a href="{$v.url}" class="rounded d-block"><img src="{$v.avatar}"  onerror="this.src='/static/common/image/default-avatar.svg'"  alt="{$v.name}" style="width: 54px;height: 54px"></a>
+                                    <a href="{$v.url}" class="rounded d-block"><img src="{:user_avatar_url($v['avatar'] ?? '')}"   alt="{$v.name}" style="width: 54px;height: 54px"></a>
                                     <span class="{$v['is_online'] ? 'online-dot' : 'offline-dot'}"></span>
                                 </div>
                                 <div class="flex-fill w-100 mb-0">
@@ -199,11 +199,11 @@
                                     {if (!$v['answer_info'])}
                                     {if $v.is_anonymous}
                                     <a href="javascript:;" class="dask-username">
-                                        <img src="/static/common/image/default-avatar.svg" onerror="this.src='/static/common/image/default-avatar.svg'" class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
+                                        <img src="{:user_avatar_url('')}" class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
                                     </a>
                                     {else/}
                                     <a href="{$v['user_info']['url']}" class="dask-user-name" data-id="{$v['user_info']['uid']}">
-                                        <img src="{$v['user_info']['avatar']}" onerror="this.src='/static/common/image/default-avatar.svg'" class="circle" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
+                                        <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" class="circle" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
                                     </a>
                                     {/if}
                                     <i>{:L('发起了提问')}</i>
@@ -211,11 +211,11 @@
                                     {else/}
                                     {if $v['answer_info']['is_anonymous']}
                                     <a href="javascript:;" class="dask-username" >
-                                        <img src="/static/common/image/default-avatar.svg" onerror="this.src='/static/common/image/default-avatar.svg'" class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
+                                        <img src="{:user_avatar_url('')}" class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
                                     </a>
                                     {else/}
                                     <a href="{$v['answer_info']['user_info']['url']}" data-id="{$v['answer_info']['uid']}" class="dask-user-name" data-pjax="WrapBody">
-                                        <img src="{$v['answer_info']['user_info']['avatar']}" onerror="this.src='/static/common/image/default-avatar.svg'" class="circle" alt="{$v['answer_info']['user_info']['name']}">{$v['answer_info']['user_info']['name']}
+                                        <img src="{:user_avatar_url($v['answer_info']['user_info']['avatar'] ?? '')}" class="circle" alt="{$v['answer_info']['user_info']['name']}">{$v['answer_info']['user_info']['name']}
                                     </a>
                                     {/if}
                                     <i>{:L('回复了问题')}（{:L('回复')}{$v['answer_count']}）</i>

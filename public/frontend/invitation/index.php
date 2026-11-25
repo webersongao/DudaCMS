@@ -41,7 +41,7 @@
                             <tbody>
                             {foreach $list as $v}
                             <tr>
-                                <td class="text-muted">{:date('Y-m-d H:i', $v['create_time'])}</td>
+                                <td class="text-muted">{:front_time($v['create_time'], 'Y-m-d H:i')}</td>
                                 <td>{$v.active_type_label}</td>
                                 <td>
                                     {if $v.invitation_email}
@@ -53,7 +53,7 @@
                                     </p>
                                 </td>
                                 <td>{$v.active_status_label}</td>
-                                <td>{:date('Y-m-d H:i', $v['active_expire'])}</td>
+                                <td>{:front_time($v['active_expire'], 'Y-m-d H:i')}</td>
                             </tr>
                             {/foreach}
                             </tbody>

@@ -28,7 +28,7 @@
                                 <td class="text-muted">{$v.remark}</td>
                                 <td>{$v.credit}</td>
                                 <td>{$v.balance}</td>
-                                <td>{:date('Y-m-d H:i:s',$v['create_time'])}</td>
+                                <td>{:front_time($v['create_time'], 'Y-m-d H:i:s')}</td>
                             </tr>
                             {/volist}
                             </tbody>

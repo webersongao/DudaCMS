@@ -13,7 +13,7 @@
         <div class="dask-hcard">
             <div class="dask-hcard__media">
                 <a href="{$v.url}" class="dask-username" data-id="{$v.uid}">
-                    <img src="{$v['avatar']|default='/static/common/image/default-avatar.svg'}" onerror="this.src='/static/common/image/default-avatar.svg'">
+                    <img src="{:user_avatar_url($v['avatar'] ?? '')}">
                 </a>
             </div>
             <div class="dask-hcard__body">

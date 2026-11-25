@@ -11,7 +11,7 @@
     <a class="bh-sider-footer-item" href="https://www.12377.cn/" target="_blank" rel="nofollow">{:L('网上有害信息举报专区')}</a>
     <br>
     <a class="bh-sider-footer-item" href="/page/contact" title="{:L('联系 %s', $setting.site_name)}" target="_blank">{:L('联系我们')}</a>
-    <span> © {:date('Y',time())} {$setting.site_name}{:L('社区')}</span>
+    <span> © {:front_time(time(), 'Y')} {$setting.site_name}{:L('社区')}</span>
     <br>
   </div>
 </div>

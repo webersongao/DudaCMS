@@ -1,6 +1,6 @@
 {if !$_ajax}
 <!doctype html>
-<html style="height: auto">
+<html lang="{:html_lang()}" style="height: auto">
 
 <head>
     <meta charset="utf-8">
@@ -28,25 +28,7 @@
     {if ($thisController=='account' && in_array($thisAction,['login','register','find_password'])) || (in_array($thisController,['question','article']) && $thisAction=='publish')}
     <link rel="stylesheet" type="text/css" href="{$assetBase}vendor/captcha/css/captcha.css?v={:asset_version('vendor/captcha/css/captcha.css')}" />
     {/if}
-    {literal}
-    <script>
-        /* 主题首屏防闪：在样式生效前按用户偏好打上 data-theme */
-        (function() {
-            try {
-                var pref = localStorage.getItem('dask_theme');
-                if (!pref) {
-                    var m = document.cookie.match(/(?:^|; )dask_theme=([^;]*)/);
-                    pref = m ? decodeURIComponent(m[1]) : 'auto';
-                }
-                if (['light', 'dark', 'auto'].indexOf(pref) === -1) pref = 'auto';
-                document.documentElement.setAttribute('data-theme', pref);
-                var dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                document.documentElement.setAttribute('data-dark', dark ? '1' : '0');
-                document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-            } catch (e) {}
-        })();
-    </script>
-    {/literal}
+    <script src="{$assetBase}common/js/dask-theme-init.js?v={:asset_version('common/js/dask-theme-init.js')}" data-default="{:get_setting('theme_mode','auto')}"></script>
     <link rel="stylesheet" href="{$assetBase}common/design/tokens.css?v={:asset_version('common/design/tokens.css')}">
     <link rel="stylesheet" type="text/css" href="{$static_url}css/app.min.css?v={:asset_version('frontend/css/app.min.css')}">
     <link rel="stylesheet" type="text/css" href="{$static_url}css/zhihu-blue.css?v={:asset_version('frontend/css/zhihu-blue.css')}">
@@ -115,6 +97,7 @@
     <script id="g-dask-turbo" data-turbo-permanent src="{$assetBase}common/js/dask-turbo.js?v={:asset_version('common/js/dask-turbo.js')}" type="text/javascript"></script>
     <script id="g-dask-list-init" data-turbo-permanent src="{$assetBase}common/js/dask-list-init.js?v={:asset_version('common/js/dask-list-init.js')}" type="text/javascript"></script>
     <script id="g-dask-modern" data-turbo-permanent src="{$assetBase}common/js/dask-modern.js?v={:asset_version('common/js/dask-modern.js')}"></script>
+    <script>window.DASK_LABELS = window.DASK_LABELS || { backTop: "{:L('返回顶部')}" };</script>
     <script id="g-dask-theme" data-turbo-permanent src="{$assetBase}common/js/dask-theme.js?v={:asset_version('common/js/dask-theme.js')}"></script>
     <script id="g-app" data-turbo-permanent src="{$static_url}js/app.js?v={:asset_version('frontend/js/app.js')}"></script>
     <script id="g-frontend-modern" data-turbo-permanent src="{$assetBase}app/frontend-modern.js?v={:asset_version('app/frontend-modern.js')}"></script>
@@ -309,14 +292,14 @@
                             </div>
                             <div class="dropdown bh-mobile d-inline-block position-relative">
                                 <a href="javascript:;" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <img class="rounded" src="{$user_info.avatar}" style="width: 22px;height: 22px">
+                                    <img class="rounded" src="{:user_avatar_url($user_info['avatar'] ?? '')}" style="width: 22px;height: 22px">
                                     <span class="d-none d-sm-inline-block ms-1">{$user_info.nick_name}</span>
                                     <i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end p-0 border-0 font-size-sm" aria-labelledby="page-header-user-dropdown">
                                     <div class="p-3 text-center bg-primary">
                                         <a href="{:url('creator/index')}">
-                                            <img class="img-avatar img-avatar-thumb" style="border-radius: 50%" width="48" height="48" src="{$user_info.avatar ? : '/static/common/image/avatar-default.png'}" alt="">
+                                            <img class="img-avatar img-avatar-thumb" style="border-radius: 50%" width="48" height="48" src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="">
                                         </a>
                                     </div>
                                     <div class="p-2 text-center">
@@ -345,7 +328,6 @@
                             <a {if $theme_config['common']['login_type']=='dialog' }href="javascript:;" data-action="user-login" {else/}href="{:url('account/login')}" {/if} class="btn btn-sm gradientBtn px-3 logon-but d-inline-block">{:L('登录')}</a>
                             {/if}
 
-                            {include file="widget/theme_toggle" /}
                         </div>
                     </div>
                 </div>
@@ -373,7 +355,7 @@
     <div class="foot">
         <div class="container justify-content-center">
             <div class="foot-main">
-                <div class="foot-copyright">© 2018 - {:date('Y',time())} {$setting.site_name} 保留所有权利。</div>
+                <div class="foot-copyright">© 2018 - {:front_time(time(), 'Y')} {$setting.site_name} 保留所有权利。</div>
                 <div class="foot-links">
                     {if $setting.icp}<span class="foot-sep">·</span><a target="_blank" rel="noopener noreferrer" href="https://icp.gov.moe/?keyword=20248099">{$setting.icp}</a>{/if}
                     {if $footerMenu}{foreach $footerMenu as $k=>$v}<span class="foot-sep">·</span><a href="{$v.url}" title="{$v.title}" target="_blank">{$v.title}</a>{/foreach}{/if}

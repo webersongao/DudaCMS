@@ -2,7 +2,7 @@
 {volist name="data" id="v"}
 <div class="invite-recommend-user bg-white overflow-auto border-bottom py-2" data-total="{$total}">
     <div class="float-start">
-        <a href="javascript:;"><img src="{$v.avatar}" alt="" style="border-radius:50%;width: 50px;height: 50px;" /></a>
+        <a href="javascript:;"><img src="{:user_avatar_url($v['avatar'] ?? '')}" alt="" style="border-radius:50%;width: 50px;height: 50px;" /></a>
     </div>
     <div class="float-start ms-2">
         <a href="javascript:;"><b> {$v.nick_name} </b></a>

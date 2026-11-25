@@ -21,7 +21,7 @@
                         <div class="dask-list-item question position-relative">
                             <div class="dask-list-item__meta mb-2">
                                 <a href="{$user_info['url']}" class="dask-user-name">
-                                    <img src="{$user_info['avatar']}" alt="{$user_info['name']}">{$user_info['name']}
+                                    <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="{$user_info['name']}">{$user_info['name']}
                                 </a>
                                 <span>{:L('发起了提问')}</span>
                                 <label class="ms-auto">{:date_friendly($v['create_time'])}</label>
@@ -75,7 +75,7 @@
                             {/if}
                             <div class="dask-common-footer n-footer mt-2">
                                 <a href="{$user_info['url']}" class="dask-user-name avatar">
-                                    <img src="{$user_info['avatar']}" alt="" class="rounded" style="width: 12px;height: 12px">
+                                    <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="" class="rounded" style="width: 12px;height: 12px">
                                 </a>
                                 <a href="{$user_info['url']}" class="dask-user-name font-9" style="font-size:12px;">{$user_info['name']}</a>
                                 <span style="font-size:12px;"> | {:date_friendly($v['create_time'])}</span>
@@ -93,7 +93,7 @@
                         <div class="dask-list-item question position-relative">
                             <div class="dask-list-item__meta mb-2">
                                 <a href="{$user_info['url']}" class="dask-user-name">
-                                    <img src="{$user_info['avatar']}" alt="{$user_info['name']}">{$user_info['name']}
+                                    <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="{$user_info['name']}">{$user_info['name']}
                                 </a>
                                 <span>{:L('回答了问题')}</span>
                                 <label class="ms-auto">{:date_friendly($v['create_time'])}</label>

@@ -1,9 +1,9 @@
 <div class="answerCommentItem py-2">
     <div class="dask-comment-head pt-0 pb-2 position-relative">
         <a href="{:get_user_url($comment['uid'])}" class="dask-username" data-id="{$comment.uid}">
-            <img src="{$comment['user_info']['avatar']}" alt="{$comment['user_info']['name']}" style="width: 18px;height: 18px" class="me-1 rounded"><span>{$comment['user_info']['name']}</span>
+            <img src="{:user_avatar_url($comment['user_info']['avatar'] ?? '')}" alt="{$comment['user_info']['name']}" style="width: 18px;height: 18px" class="me-1 rounded"><span>{$comment['user_info']['name']}</span>
         </a>
-        <a href="javascript:;" class="dask-comment-head__time">{:date('Y-m-d H:i',$comment['create_time'])}</a>
+        <a href="javascript:;" class="dask-comment-head__time">{:front_time($comment['create_time'], 'Y-m-d H:i')}</a>
         {if $user_id}
         <div class="dask-comment-head__actions">
             <!--<label class="me-3 reply" data-info='{:json_encode(["uid"=>$comment.uid,"user_name"=>$comment.user_info.name])}'>

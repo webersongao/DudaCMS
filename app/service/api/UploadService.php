@@ -3,18 +3,19 @@ namespace app\service\api;
 
 use app\api\v1\ApiException;
 use app\common\library\helper\UploadHelper;
+use app\common\library\helper\UploadPolicy;
 
 class UploadService
 {
     public function upload(int $uid, string $path, string $type): array
     {
-        $path = in_array($path, ['question', 'answer', 'article', 'avatar', 'common'], true) ? $path : 'common';
-        $type = $type === 'file' ? 'file' : 'image';
+        $path = UploadPolicy::normalizePath($path);
+        $type = UploadPolicy::normalizeType($type);
 
         $result = UploadHelper::instance()
             ->setUploadPath($path)
             ->setUploadType($type)
-            ->setAccessKey(md5($uid . time() . random_int(1000, 9999)))
+            ->setAccessKey(bin2hex(random_bytes(16)))
             ->upload($uid, '', '');
 
         if (empty($result['code'])) {

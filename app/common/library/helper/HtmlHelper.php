@@ -203,7 +203,7 @@ class HtmlHelper
     }
 
     /**
-     * 富文本安全过滤（服务端强制，不依赖 remove_xss 开关）
+     * 富文本安全过滤：白名单标签/属性/协议，服务端强制且不依赖业务开关。
      */
     public static function purify(string $html): string
     {
@@ -211,60 +211,75 @@ class HtmlHelper
             return '';
         }
 
+        $allowedTags = [
+            'div', 'span', 'p', 'br', 'hr', 'b', 'strong', 'i', 'em', 'u', 's', 'del',
+            'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'h1', 'h2', 'h3',
+            'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
+            'figure', 'figcaption', 'sup', 'sub',
+        ];
+        $blockedTags = ['script', 'style', 'object', 'embed', 'form', 'input', 'button',
+            'textarea', 'select', 'meta', 'link', 'base', 'iframe', 'svg', 'math'];
+        $allowedAttrs = ['href', 'src', 'alt', 'title', 'width', 'height', 'class', 'style', 'colspan', 'rowspan'];
+
         $doc = new \DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
-        $doc->loadHTML(
-            '<?xml encoding="UTF-8"><div id="__dask_root">' . $html . '</div>',
-            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-        );
+        $doc->loadHTML('<?xml encoding="UTF-8"><div id="__dask_root">' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
-
         $root = $doc->getElementById('__dask_root');
-        if (!$root) {
-            return '';
-        }
+        if (!$root) return '';
 
-        $blockedTags = ['script', 'style', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'meta', 'link', 'base'];
-        $walk = function (\DOMNode $node) use (&$walk, $blockedTags) {
-            if ($node instanceof \DOMElement) {
-                if (in_array(strtolower($node->tagName), $blockedTags, true)) {
-                    $node->parentNode->removeChild($node);
-                    return;
+        $sanitize = function (\DOMElement $node) use (&$sanitize, $allowedTags, $blockedTags, $allowedAttrs) {
+            $tag = strtolower($node->tagName);
+            foreach (iterator_to_array($node->attributes) as $attr) {
+                $name = strtolower($attr->name);
+                $value = trim($attr->value);
+                if (!in_array($name, $allowedAttrs, true)) {
+                    $node->removeAttribute($attr->name);
+                    continue;
                 }
-
-                foreach (iterator_to_array($node->attributes) as $attr) {
-                    $name = strtolower($attr->name);
-                    $value = trim($attr->value);
-
-                    if (strpos($name, 'on') === 0 || $name === 'srcdoc' || $name === 'formaction') {
-                        $node->removeAttribute($attr->name);
-                        continue;
-                    }
-
-                    if (in_array($name, ['href', 'src', 'action', 'xlink:href'], true)) {
-                        $lower = strtolower($value);
-                        $isImageData = ($node->tagName === 'img' && strpos($lower, 'data:image/') === 0);
-                        if (
-                            preg_match('#^(javascript|vbscript):#i', $lower)
-                            || (strpos($lower, 'data:') === 0 && !$isImageData)
-                            || strpos($lower, 'data:text/html') === 0
-                        ) {
-                            $node->removeAttribute($attr->name);
-                        }
-                    }
-
-                    if ($name === 'style' && preg_match('/expression\s*\(|javascript\s*:|behavior\s*:/i', $value)) {
+                if (in_array($name, ['href', 'src'], true)) {
+                    $lower = strtolower($value);
+                    $safe = preg_match('#^(https?:|mailto:|tel:|/)#i', $lower) === 1
+                        || ($tag === 'img' && $name === 'src' && strpos($lower, 'data:image/') === 0);
+                    if (!$safe) {
                         $node->removeAttribute($attr->name);
                     }
+                }
+                if ($name === 'style' && preg_match('/expression\s*\(|javascript\s*:|behavior\s*:|url\s*\(\s*["\']?javascript:/i', $value)) {
+                    $node->removeAttribute($attr->name);
                 }
             }
-
+            if ($tag === 'a' && $node->getAttribute('target') === '_blank') {
+                $node->setAttribute('rel', 'noopener noreferrer');
+            }
             foreach (iterator_to_array($node->childNodes) as $child) {
-                $walk($child);
+                if ($child instanceof \DOMElement) $sanitize($child);
             }
         };
-        $walk($root);
+
+        // 先自底向上处理属性，再删除/解包非白名单标签。
+        foreach (iterator_to_array($root->getElementsByTagName('*')) as $node) {
+            if ($node instanceof \DOMElement) $sanitize($node);
+        }
+        $cleanup = function (\DOMNode $parent) use (&$cleanup, $allowedTags, $blockedTags) {
+            foreach (iterator_to_array($parent->childNodes) as $child) {
+                if (!($child instanceof \DOMElement)) continue;
+                $tag = strtolower($child->tagName);
+                if (in_array($tag, $blockedTags, true)) {
+                    $child->parentNode->removeChild($child);
+                    continue;
+                }
+                $cleanup($child);
+                if (!in_array($tag, $allowedTags, true)) {
+                    while ($child->firstChild) {
+                        $parent->insertBefore($child->firstChild, $child);
+                    }
+                    $parent->removeChild($child);
+                }
+            }
+        };
+        $cleanup($root);
 
         $result = '';
         foreach (iterator_to_array($root->childNodes) as $child) {

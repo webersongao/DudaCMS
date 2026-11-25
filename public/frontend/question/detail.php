@@ -343,11 +343,11 @@
                                 <div class="user-details-card-avatar float-start" style="position: relative">
                                     {if $v.is_anonymous}
                                     <a href="javascript:;">
-                                        <img src="/static/common/image/default-avatar.svg" class="rounded" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
+                                        <img src="{:user_avatar_url('')}" class="rounded" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
                                     </a>
                                     {else/}
                                     <a href="{$v['user_info']['url']}" class="dask-username dask-avatar-wrap" data-id="{$v.uid}" title="{$v['user_info']['name']}">
-                                        <img src="{$v['user_info']['avatar']}" class="rounded" onerror="this.src='/static/common/image/default-avatar.svg'" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
+                                        <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" class="rounded" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
                                         {if $v['user_info']['verified']}
                                         <span class="dask-verified-badge" title="{$v['user_info']['verified_name']|default='已认证'}" aria-label="{$v['user_info']['verified_name']|default='已认证'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>
                                         {/if}
@@ -528,7 +528,7 @@
                         <dl class="border-bottom">
                             <dt>{$v.label|raw}</dt>
                             <dd class="mt-2">{$v.content|raw}</dd>
-                            <dd>{$v.create_time}</dd>
+                            <dd>{:front_time($v['create_time'] ?? 0)}</dd>
                         </dl>
                         {/foreach}
                     </div>
@@ -551,7 +551,7 @@
                         <div class="dask-hcard pb-2 border-bottom">
                             <div class="dask-hcard__media">
                                 <a href="{$question_info['user_info']['url']}" data-pjax="pageMain" class="dask-username dask-avatar-wrap" data-id="{$question_info.uid}">
-                                    <img src="{$question_info['user_info']['avatar']|default='/static/common/image/default-avatar.svg'}" class="rounded" width="45" height="45">
+                                    <img src="{:user_avatar_url($question_info['user_info']['avatar'] ?? '')}" class="rounded" width="45" height="45">
                                     {if $question_info['user_info']['verified']}
                                     <span class="dask-verified-badge" title="{$question_info['user_info']['verified_name']|default='已认证'}" aria-label="{$question_info['user_info']['verified_name']|default='已认证'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>
                                     {/if}
@@ -607,11 +607,11 @@
                         <div class="text-center text-muted">
                             <dl class="dask-kv-row mb-1">
                                 <dt>{:L('发布时间')}</dt>
-                                <dd class="dask-kv-time" title="{:date('Y-m-d H:i', $question_info['create_time'])}">{:date_compact($question_info['create_time'])}</dd>
+                                <dd class="dask-kv-time" title="{:front_time($question_info['create_time'], 'Y-m-d H:i')}">{:date_compact($question_info['create_time'])}</dd>
                             </dl>
                             <dl class="dask-kv-row mb-1">
                                 <dt>{:L('更新时间')}</dt>
-                                <dd class="dask-kv-time" title="{:date('Y-m-d H:i', $question_info['update_time'])}">{:date_compact($question_info['update_time'])}</dd>
+                                <dd class="dask-kv-time" title="{:front_time($question_info['update_time'], 'Y-m-d H:i')}">{:date_compact($question_info['update_time'])}</dd>
                             </dl>
                             <dl class="dask-kv-row mb-1">
                                 <dt>{:L('关注')}</dt>
@@ -623,7 +623,7 @@
                                 {foreach $question_focus_users as $k=>$v}
                                 <li class="px-1 d-inline-block">
                                     <a href="{$v.url}" class="dask-username" data-id="{$v.uid}" title="{$v.nick_name}" >
-                                        <img src="{$v.avatar}" width="26" height="26" style="border-radius: 50%" alt="{$v.nick_name}">
+                                        <img src="{:user_avatar_url($v['avatar'] ?? '')}" width="26" height="26" style="border-radius: 50%" alt="{$v.nick_name}">
                                     </a>
                                 </li>
                                 {/foreach}

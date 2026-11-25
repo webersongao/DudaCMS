@@ -112,7 +112,7 @@
     <div class="dask-hcard dask-user-hcard position-relative">
         <div class="dask-hcard__media">
             <a href="{$v.user_info.url}" class="dask-username rounded d-block">
-                <img src="{$v.user_info.avatar}" alt="{$v.user_info.name}" width="80" height="80">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v.user_info.name}" width="80" height="80">
             </a>
             {if $v['user_info']['is_online']}
             <span class="online-dot"></span>
@@ -146,7 +146,7 @@
     <div class="dask-hcard dask-user-hcard position-relative">
         <div class="dask-hcard__media">
             <a href="{$v.user_info.url}" class="dask-username rounded d-block">
-                <img src="{$v.user_info.avatar}" alt="{$v.user_info.name}" width="80" height="80">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v.user_info.name}" width="80" height="80">
             </a>
             {if $v['user_info']['is_online']}
             <span class="online-dot"></span>

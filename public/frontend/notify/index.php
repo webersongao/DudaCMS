@@ -35,7 +35,7 @@
                             </a>
                             {else/}
                             <a href="{$v['recipient_user']['url']}">
-                                <img src="{$v['recipient_user']['avatar']}" alt="" class="rounded" style="width: 46px;height: 46px">
+                                <img src="{:user_avatar_url($v['recipient_user']['avatar'] ?? '')}" alt="" class="rounded" style="width: 46px;height: 46px">
                             </a>
                             {/if}
                             <span class="dask-online-status dask-notify-status {$v['read_flag'] ? 'read' : 'unread'}"></span>

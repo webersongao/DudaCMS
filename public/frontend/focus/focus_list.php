@@ -5,11 +5,11 @@
     <div class="dask-list-item__meta text-muted">
         {if $v.is_anonymous}
         <a href="javascript:;" class="dask-username">
-            <img src="/static/common/image/default-avatar.svg" class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
+            <img src="{:user_avatar_url('')}" class="dask-user-img circle" alt="{:L('匿名用户')}">{:L('匿名用户')}
         </a>
         {else/}
         <a href="{$v['user_info']['url']}" class="dask-user-name" data-id="{$v['user_info']['uid']}" target="_blank">
-            <img src="{$v['user_info']['avatar']}" onerror="this.src='/static/common/image/default-avatar.svg'" class="circle" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
+            <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" class="circle" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
         </a>
         {/if}
         <i>{:L('发起了提问')}</i>
@@ -46,7 +46,7 @@
     <div class="dask-hcard dask-user-hcard position-relative">
         <div class="dask-hcard__media">
             <a href="{$v.user_info.url}" class="dask-username rounded d-block">
-                <img src="{$v.user_info.avatar}" class="rounded" onerror="this.src='/static/common/image/default-avatar.svg'" alt="{$v.user_info.name}" width="80" height="80">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" class="rounded" alt="{$v.user_info.name}" width="80" height="80">
             </a>
             {if $v['user_info']['is_online']}
             <span class="online-dot"></span>
@@ -80,7 +80,7 @@
     <div class="dask-hcard dask-user-hcard position-relative">
         <div class="dask-hcard__media">
             <a href="{$v.user_info.url}" class="dask-username rounded d-block">
-                <img src="{$v.user_info.avatar}" class="rounded" onerror="this.src='/static/common/image/default-avatar.svg'" alt="{$v.user_info.name}" width="80" height="80">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" class="rounded" alt="{$v.user_info.name}" width="80" height="80">
             </a>
             {if $v['user_info']['is_online']}
             <span class="online-dot"></span>

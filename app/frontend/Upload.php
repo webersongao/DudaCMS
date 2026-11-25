@@ -14,6 +14,7 @@ use app\common\controller\Frontend;
 use app\common\library\helper\AttachPathHelper;
 use app\common\library\helper\SignedValueHelper;
 use app\common\library\helper\UploadHelper;
+use app\common\library\helper\UploadPolicy;
 use app\model\Attach as AttachModel;
 
 class Upload extends Frontend
@@ -23,8 +24,8 @@ class Upload extends Frontend
     {
         $uploadObj = UploadHelper::instance();
 
-        $uploadPath = $this->request->param('path', 'common');
-        $access_key = $this->request->param('access_key', md5($this->user_id . time()));
+        $uploadPath = UploadPolicy::normalizePath($this->request->param('path', 'common'));
+        $access_key = (string) ($this->request->param('access_key', '') ?: bin2hex(random_bytes(16)));
         $uploadType = $this->request->param('upload_type', 'img');
 
         // 编辑器统一上传入口：按文件后缀自动识别图片 / 附件，避免前端维护两个地址。
@@ -33,7 +34,7 @@ class Upload extends Frontend
             $ext = $file ? strtolower((string) $file->extension()) : '';
             $uploadType = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'], true) ? 'img' : 'file';
         }
-        $uploadObj->setUploadType($uploadType);
+        $uploadObj->setUploadType(UploadPolicy::normalizeType($uploadType));
 
         //上传初始化钩子
         $result = $uploadObj->setAccessKey($access_key)->setUploadPath($uploadPath)->upload($this->user_id, '', '');

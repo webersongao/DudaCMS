@@ -1,7 +1,7 @@
 <div class="dask-ui-card dask-ui-card-default dask-ui-card-small dask-ui-card-body mb-3">
 	<div class="profile-details" style="margin-top: 15px">
 		<div class="profile-image">
-			<img src="{$user_info.avatar}" alt="">
+			<img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="">
 		</div>
 		<div class="profile-details-info mb-3">
 			<h1> {$user_info['nick_name']} </h1>

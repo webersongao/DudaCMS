@@ -13,7 +13,7 @@
                         <div class="dask-hcard bg-white dask-card">
                             <div class="dask-hcard__media mt-2" style="width: 80px">
                                 <a href="{$v.url}" class="dask-username rounded d-block" data-id="{$v.uid}">
-                                    <img src="{$v.avatar}" onerror="this.src='/static/common/image/default-avatar.svg'" alt="{$v.name}" width="80" height="80" style="border-radius: 50%">
+                                    <img src="{:user_avatar_url($v['avatar'] ?? '')}" alt="{$v.name}" width="80" height="80" style="border-radius: 50%">
                                 </a>
                                 {if $v['is_online']}
                                 <span class="online-dot"></span>

@@ -570,7 +570,7 @@ class Article extends BaseModel
         foreach ($comments['data'] as $key => $val) {
             $user_info = $user_infos[$val['uid']] ?? null;
             if (!$user_info)
-                $user_info = ['url' => 'javascript:;', 'uid' => 0, 'nick_name' => '未知用户', 'name' => '未知用户', 'avatar' => 'static/common/image/default-avatar.svg'];
+                $user_info = ['url' => 'javascript:;', 'uid' => 0, 'nick_name' => '未知用户', 'name' => '未知用户', 'avatar' => '/static/common/image/default-avatar.svg'];
             $comments['data'][$key]['user_info'] = $user_info;
         }
         $comments['page_render'] = $pageRender;

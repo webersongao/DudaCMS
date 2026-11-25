@@ -3,6 +3,7 @@ namespace app\service\api;
 
 use app\common\library\helper\HtmlHelper;
 use app\common\library\helper\ImageHelper;
+use app\common\library\helper\PresentationHelper;
 
 class Presenter
 {
@@ -23,7 +24,7 @@ class Presenter
 
     public static function avatar(?string $avatar): string
     {
-        return self::url($avatar ?: '/static/common/image/default-avatar.svg');
+        return PresentationHelper::avatar($avatar, true);
     }
 
     public static function user(?array $user, bool $private = false): array

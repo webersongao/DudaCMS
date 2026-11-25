@@ -5,11 +5,11 @@
         <div class="user-details-card-avatar float-start" style="position: relative">
             {if $v.is_anonymous}
             <a href="javascript:;">
-                <img src="/static/common/image/default-avatar.svg" class="rounded" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url('')}" class="rounded" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
             </a>
             {else/}
             <a href="{$v['user_info']['url']}" class="dask-username dask-avatar-wrap" data-id="{$v.uid}" title="{$v['user_info']['name']}">
-                <img src="{$v['user_info']['avatar']}" class="rounded" onerror="this.src='/static/common/image/default-avatar.svg'" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" class="rounded" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
                 {if $v['user_info']['verified']}
                 <span class="dask-verified-badge" title="{$v['user_info']['verified_name']|default='已认证'}" aria-label="{$v['user_info']['verified_name']|default='已认证'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>
                 {/if}

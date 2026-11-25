@@ -9,7 +9,7 @@
                 <div class="columnInfo bh-text-muted mt-3">
                     <label>
                         <a href="{$column_info['user_info']['url']}"  class="dask-username avatar" data-id="{$column_info['user_info']['uid']}">
-                            <img src="{$column_info['user_info']['avatar']}" alt="" class="rounded dask-user-img" style="width: 18px;height: 18px">
+                            <img src="{:user_avatar_url($column_info['user_info']['avatar'] ?? '')}" alt="" class="rounded dask-user-img" style="width: 18px;height: 18px">
                         </a>
                         <a href="{$column_info['user_info']['url']}" class="dask-username name" data-id="{$column_info['user_info']['uid']}">{$column_info['user_info']['name']}</a>
                     </label>

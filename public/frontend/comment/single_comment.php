@@ -2,7 +2,7 @@
     <div class="dask-comment-head pt-0 pb-2">
         <div class="user-details-card-avatar dask-comment-head__avatar" style="position: relative">
             <a href="{:url('index/index',['uid'=>$comment_info['uid']])}">
-                <img src="{$comment_info['user_info']['avatar']}" alt="{$comment_info['user_info']['name']}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url($comment_info['user_info']['avatar'] ?? '')}" alt="{$comment_info['user_info']['name']}" style="width: 40px;height: 40px">
             </a>
         </div>
         <div class="user-details-card-name dask-comment-head__name">

@@ -3,7 +3,7 @@
 <div class="dask-hcard p-2 header-inbox-item position-relative cursor-pointer">
     <div class="dask-hcard__media">
         <a href="{$v['user']['url']}">
-            <img src="{$v['user']['avatar']}" alt="" class="rounded" style="width: 46px;height: 46px">
+            <img src="{:user_avatar_url($v['user']['avatar'] ?? '')}" alt="" class="rounded" style="width: 46px;height: 46px">
         </a>
     </div>
     <div class="dask-hcard__body">

@@ -3,7 +3,7 @@
     <div class="sidebar-user pt-0">
         <div class="dask-hcard">
             <div class="dask-hcard__media">
-                <a href="{$user_info.url}"><img src="{$user_info.avatar}" alt="{$user_info.name}" class="circle" style="width: 48px;height: 48px"></a>
+                <a href="{$user_info.url}"><img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="{$user_info.name}" class="circle" style="width: 48px;height: 48px"></a>
             </div>
             <div class="dask-hcard__body">
                 <a href="{$user_info.url}">{$user_info.name}</a>

@@ -140,7 +140,7 @@ class TemplateTag
             $result_list[$key]['answer_info'] = $last_answers[$data['id']] ?? false;
 
             if($result_list[$key]['answer_info']){
-                $result_list[$key]['answer_info']['user_info'] = $users_info[$last_answers[$data['id']]['uid']]??['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'static/common/image/default-avatar.svg'];
+                $result_list[$key]['answer_info']['user_info'] = $users_info[$last_answers[$data['id']]['uid']]??['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'/static/common/image/default-avatar.svg'];
                 $result_list[$key]['answer_info']['vote_value'] = intval($answer_vote_map[intval($last_answers[$data['id']]['id'])] ?? 0);
                 $result_list[$key]['answer_info']['content'] = str_cut(strip_tags($result_list[$key]['answer_info']['content']),0,150);
                 $result_list[$key]['answer_info']['img_list'] = ImageHelper::srcList($result_list[$key]['answer_info']['content']);
@@ -357,7 +357,7 @@ class TemplateTag
                     $result_list[$key]['is_answer'] = $answered_map[$data['item_id']] ?? 0;
 
                     if($result_list[$key]['answer_info']){
-                        $result_list[$key]['answer_info']['user_info'] = $users_info[$last_answers[$data['item_id']]['uid']]??['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'static/common/image/default-avatar.svg'];
+                        $result_list[$key]['answer_info']['user_info'] = $users_info[$last_answers[$data['item_id']]['uid']]??['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'/static/common/image/default-avatar.svg'];
                         $result_list[$key]['answer_info']['vote_value'] = intval($answer_vote_map[$last_answers[$data['item_id']]['id']] ?? 0);
                         $result_list[$key]['answer_info']['content'] = str_cut(strip_tags($result_list[$key]['answer_info']['content']),0,150);
                         $result_list[$key]['answer_info']['img_list'] = ImageHelper::srcList($result_list[$key]['answer_info']['content']);
@@ -373,7 +373,7 @@ class TemplateTag
 
                     $result_list[$key]['item_type'] = 'question';
                     $result_list[$key]['topics'] = $topic_infos['question'][$data['item_id']] ?? [];
-                    $result_list[$key]['user_info'] = $users_info[$data['uid']] ?? ['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'static/common/image/default-avatar.svg'];
+                    $result_list[$key]['user_info'] = $users_info[$data['uid']] ?? ['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'/static/common/image/default-avatar.svg'];
                     $result_list[$key]['item_id'] = intval($data['item_id']);
                     $result_list[$key]['item_type'] = $data['item_type'];
                     $result_list[$key]['post_id'] = intval($data['id']);

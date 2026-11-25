@@ -24,6 +24,12 @@ class AppInit
         //定义一天时间戳
         define('ONE_DAY',86400);
 
+        // 统一全站时区，避免模板与服务端时间不一致。
+        $timezone = trim((string) get_setting('site_timezone', 'Asia/Shanghai'));
+        if ($timezone !== '' && function_exists('date_default_timezone_set')) {
+            @date_default_timezone_set($timezone);
+        }
+
         //设置默认语言
         $defaultLang = cookie('dask_lang');
         if (get_setting('default_language','zh-cn') && (!$defaultLang || $defaultLang!=get_setting('default_language','zh-cn')))

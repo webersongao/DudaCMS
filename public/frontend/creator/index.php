@@ -9,7 +9,7 @@
                     <div class="card-body d-flex align-items-center">
                         <div class="dask-creator-avatar">
                             <a href="{:url('setting/profile')}" class="d-block">
-                                <img src="{$user_info.avatar ? : '/static/common/image/avatar-default.png'}" alt="{$user_info.nick_name}">
+                                <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="{$user_info.nick_name}">
                             </a>
                         </div>
                         <div class="flex-fill min-w-0">

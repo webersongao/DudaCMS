@@ -3,11 +3,11 @@
     <div class="user-details-card-avatar float-start" style="position: relative">
         {if $info.is_anonymous}
         <a href="javascript:;">
-            <img src="static/common/image/default-avatar.svg" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
+            <img src="{:user_avatar_url('')}" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
         </a>
         {else/}
         <a href="{$info['user_info']['url']}" class="dask-username" data-id="{$info.uid}" title="{$info['user_info']['name']}">
-            <img src="{$info['user_info']['avatar']}" alt="{$info['user_info']['name']}" style="width: 40px;height: 40px">
+            <img src="{:user_avatar_url($info['user_info']['avatar'] ?? '')}" alt="{$info['user_info']['name']}" style="width: 40px;height: 40px">
         </a>
         {/if}
     </div>
@@ -129,11 +129,11 @@
         <div class="user-details-card-avatar float-start" style="position: relative">
             {if $info.is_anonymous}
             <a href="javascript:;">
-                <img src="static/common/image/default-avatar.svg" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url('')}" alt="{:L('匿名用户')}" title="{:L('匿名用户')}" style="width: 40px;height: 40px">
             </a>
             {else/}
             <a href="{$info['user_info']['url']}" class="dask-username" data-id="{$info.uid}" title="{$info['user_info']['name']}">
-                <img src="{$info['user_info']['avatar']}" alt="{$info['user_info']['name']}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url($info['user_info']['avatar'] ?? '')}" alt="{$info['user_info']['name']}" style="width: 40px;height: 40px">
             </a>
             {/if}
         </div>

@@ -217,7 +217,7 @@
                 <div class="dask-topic-followers">
                     {foreach $focus_user as $k=>$v}
                     <a href="{$v.url}" class="dask-topic-follower" target="_blank" data-id="{$v.uid}" title="{$v.nick_name|default=$v.name|default=''}">
-                        <img src="{$v.avatar}" alt="{$v.nick_name|default=$v.name|default=''}">
+                        <img src="{:user_avatar_url($v['avatar'] ?? '')}" alt="{$v.nick_name|default=$v.name|default=''}">
                     </a>
                     {/foreach}
                 </div>

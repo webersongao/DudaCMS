@@ -72,12 +72,16 @@
     }
   }
 
+  function labelFor(pref, btn) {
+    return (btn && btn.getAttribute('data-label-' + pref)) || LABEL[pref] || pref;
+  }
+
   function updateCycleButtons(pref) {
     var buttons = document.querySelectorAll('[data-theme-cycle]');
     var next = nextPreference(pref);
     for (var i = 0; i < buttons.length; i++) {
       var btn = buttons[i];
-      var label = '外观：' + LABEL[pref] + '（点击切换到' + LABEL[next] + '）';
+      var label = labelFor(pref, btn) + ' → ' + labelFor(next, btn);
       btn.setAttribute('title', label);
       btn.setAttribute('aria-label', label);
       btn.setAttribute('data-theme-current', pref);
@@ -122,8 +126,9 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'dask-backtop';
-    btn.setAttribute('aria-label', '返回顶部');
-    btn.title = '返回顶部';
+    var backTopLabel = (window.DASK_LABELS && window.DASK_LABELS.backTop) || '返回顶部';
+    btn.setAttribute('aria-label', backTopLabel);
+    btn.title = backTopLabel;
     // 用内联 SVG 取代 iconfont：实测 e9d6 在站内字体中没有真实字形，按钮会显示为空心圆。
     btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 11.2V4.9M5.4 7.5 8 4.9l2.6 2.6"/></svg>';
     document.body.appendChild(btn);

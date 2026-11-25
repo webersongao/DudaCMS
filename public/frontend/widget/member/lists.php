@@ -8,18 +8,18 @@
             {if (!$v['answer_info'])}
             {if $v.is_anonymous}
             <a href="javascript:;" class="dask-username"  data-id="{$v['user_info']['uid']}">
-                <img src="/static/common/image/default-avatar.svg" class="dask-user-img" alt="{:L('匿名用户')}">{:L('匿名用户')}
+                <img src="{:user_avatar_url('')}" class="dask-user-img" alt="{:L('匿名用户')}">{:L('匿名用户')}
             </a>
             {else/}
             <a href="{$v['user_info']['url']}" class="dask-user-name">
-                <img src="{$v['user_info']['avatar']}" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
             </a>
             {/if}
             <span>{:L('发起了提问')}</span>
             <label class="float-end">{:date_friendly($v['create_time'])}</label>
             {else/}
             <a href="{$v['answer_info']['user_info']['url']}" class="dask-user-name">
-                <img src="{$v['answer_info']['user_info']['avatar']}" alt="{$v['answer_info']['user_info']['name']}">{$v['answer_info']['user_info']['name']}
+                <img src="{:user_avatar_url($v['answer_info']['user_info']['avatar'] ?? '')}" alt="{$v['answer_info']['user_info']['name']}">{$v['answer_info']['user_info']['name']}
             </a>
             <span>{:L('回复了问题')}（{:L('回复')}{$v['answer_count']}）</span>
             <label class="float-end">{:date_friendly($v['answer_info']['create_time'])}</label>
@@ -99,7 +99,7 @@
             {/if}
             <div class="dask-common-footer">
                 <a href="{$v['user_info']['url']}" class="dask-username avatar" data-id="{$v['user_info']['uid']}">
-                    <img src="{$v['user_info']['avatar']}" alt="" class="rounded dask-user-img" style="width: 22px;height: 22px">
+                    <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="" class="rounded dask-user-img" style="width: 22px;height: 22px">
                 </a>
                 <a href="{$v['user_info']['url']}" class="dask-username name" data-id="{$v['user_info']['uid']}">{$v['user_info']['name']}</a>
                 <span> | {:date_friendly($v['create_time'])}</span>
@@ -118,18 +118,18 @@
             {if (!$v['answer_info'])}
             {if $v.is_anonymous}
             <a href="javascript:;" class="dask-username"  data-id="{$v['user_info']['uid']}">
-                <img src="/static/common/image/default-avatar.svg" class="dask-user-img" alt="{:L('匿名用户')}">{:L('匿名用户')}
+                <img src="{:user_avatar_url('')}" class="dask-user-img" alt="{:L('匿名用户')}">{:L('匿名用户')}
             </a>
             {else/}
             <a href="{$v['user_info']['url']}" class="dask-user-name">
-                <img src="{$v['user_info']['avatar']}" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v['user_info']['name']}">{$v['user_info']['name']}
             </a>
             {/if}
             <span>{:L('发起了提问')}</span>
             <label class="float-end">{:date_friendly($v['create_time'])}</label>
             {else/}
             <a href="{$v['answer_info']['user_info']['url']}" class="dask-user-name">
-                <img src="{$v['answer_info']['user_info']['avatar']}" alt="{$v['answer_info']['user_info']['name']}">{$v['answer_info']['user_info']['name']}
+                <img src="{:user_avatar_url($v['answer_info']['user_info']['avatar'] ?? '')}" alt="{$v['answer_info']['user_info']['name']}">{$v['answer_info']['user_info']['name']}
             </a>
             <span>{:L('回复了问题')}（{:L('回复')}{$v['answer_count']}）</span>
             <label class="float-end">{:date_friendly($v['answer_info']['create_time'])}</label>

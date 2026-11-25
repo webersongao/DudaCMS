@@ -131,7 +131,7 @@ class Feature extends BaseModel
                 $result_list[$key]['is_answer'] = $answered_map[$data['id']] ?? 0;
 
                 if($result_list[$key]['answer_info']){
-                    $result_list[$key]['answer_info']['user_info'] = $users_info[$last_answers[$data['id']]['uid']]??['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'static/common/image/default-avatar.svg'];
+                    $result_list[$key]['answer_info']['user_info'] = $users_info[$last_answers[$data['id']]['uid']]??['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'/static/common/image/default-avatar.svg'];
                     $result_list[$key]['answer_info']['vote_value'] = $answer_vote_map[$last_answers[$data['id']]['id']] ?? 0;
                 }
                 $result_list[$key]['has_focus'] = isset($focus_map[$data['id']]);
@@ -142,7 +142,7 @@ class Feature extends BaseModel
                 $result_list[$key]['img_list'] = $cover;
                 $result_list[$key]['item_type'] = 'question';
                 $result_list[$key]['topics'] = $topic_infos['question'][$data['id']] ?? [];
-                $result_list[$key]['user_info'] = $users_info[$data['uid']] ?? ['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'static/common/image/default-avatar.svg'];
+                $result_list[$key]['user_info'] = $users_info[$data['uid']] ?? ['url'=>'javascript:;','uid'=>0,'name'=>'未知用户','avatar'=>'/static/common/image/default-avatar.svg'];
                 $result_list[$key]['item_id'] = intval($data['id']);
             }
 

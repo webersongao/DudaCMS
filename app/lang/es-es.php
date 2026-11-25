@@ -2176,4 +2176,10 @@ return [
   '%s 用户协议' => 'Términos de servicio de %s',
   '申请 %s 认证(需登录)' => 'Solicita verificación de %s (inicia sesión)',
   '联系 %s' => 'Contacta con %s',
+  '外观模式' => 'Apariencia',
+  '外观模式（点击切换浅色/深色/自动）' => 'Apariencia (cambiar claro/oscuro/automático)',
+  '浅色' => 'Claro',
+  '深色' => 'Oscuro',
+  '自动' => 'Automático',
+  '返回顶部' => 'Volver arriba',
 ];

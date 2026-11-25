@@ -5,6 +5,7 @@ use app\common\library\builder\MakeBuilder;
 use app\common\library\builder\TableBuilder;
 use app\common\library\helper\NotifyHelper;
 use app\common\library\helper\AuthHelper;
+use app\common\library\helper\AuthSession;
 use app\common\library\helper\DataHelper;
 use app\common\traits\Curd;
 use app\model\admin\AdminLog;
@@ -77,9 +78,12 @@ class Backend extends Base
 
         //权限验证器
         $this->auth =AuthHelper::instance();
-        if(session('admin_login_uid') && getLoginUid())
-        {
-            $this->user_info = Users::getUserInfo(getLoginUid());
+        $adminUid = AuthSession::adminUid();
+        if ($adminUid) {
+            $this->user_info = Users::getUserInfo($adminUid);
+            if ($this->user_info && (int) ($this->user_info['status'] ?? 0) !== 1) {
+                $this->user_info = [];
+            }
         }
 
         $this->user_id = $this->user_info ? $this->user_info['uid'] : 0;

@@ -3,11 +3,11 @@
     <div class="user-details-card pt-0 pb-2 clearfix">
         <div class="user-details-card-avatar float-start" style="position: relative">
             <a href="{:url('index/index',['uid'=>$v['uid']])}">
-                <img src="{$v['user_info']['avatar']}" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
+                <img src="{:user_avatar_url($v['user_info']['avatar'] ?? '')}" alt="{$v['user_info']['name']}" style="width: 40px;height: 40px">
             </a>
         </div>
         <div class="user-details-card-name float-start ms-2">
-            <a href="{$v['user_info']['url']}">{$v['user_info']['name']}</a><br><span class="ms-0"> {:date('Y-m-d H:i',$v['create_time'])} </span>
+            <a href="{$v['user_info']['url']}">{$v['user_info']['name']}</a><br><span class="ms-0"> {:front_time($v['create_time'], 'Y-m-d H:i')} </span>
         </div>
     </div>
     <p>{$v.message|raw}</p>

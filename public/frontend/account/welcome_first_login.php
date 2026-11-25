@@ -45,7 +45,7 @@
         <div class="dask-field">
             <label class="dask-field__label" for="onboarding-birthday">{:L('生日')}</label>
             <input class="form-control dask-field__control" type="date" id="onboarding-birthday" name="birthday"
-                   autocomplete="bday" value="{if !empty($user_info['birthday'])}{:date('Y-m-d', $user_info['birthday'])}{/if}">
+                   autocomplete="bday" value="{if !empty($user_info['birthday'])}{:front_time($user_info['birthday'], 'Y-m-d')}{/if}">
             <p class="dask-field__hint">{:L('可稍后在个人资料中修改')}</p>
         </div>
 

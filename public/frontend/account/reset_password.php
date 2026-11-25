@@ -162,7 +162,7 @@
                 {/volist}
             </div>
             <div class="pb-3">
-                <span>© 2018 - {:date('Y')} {$setting.site_name} All Rights Reserved.</span>
+                <span>© 2018 - {:front_time(time(), 'year')} {$setting.site_name} All Rights Reserved.</span>
                 <a target="_blank" rel="noopener noreferrer" href="https://icp.gov.moe/?keyword=20248099">{$setting.icp}</a>
             </div>
         </div>

@@ -2207,4 +2207,10 @@ return[
   '%s 用户协议' => '%s Terms of Service',
   '申请 %s 认证(需登录)' => 'Apply for %s verification (login required)',
   '联系 %s' => 'Contact %s',
+  '外观模式' => 'Appearance',
+  '外观模式（点击切换浅色/深色/自动）' => 'Appearance (click to switch light/dark/auto)',
+  '浅色' => 'Light',
+  '深色' => 'Dark',
+  '自动' => 'Auto',
+  '返回顶部' => 'Back to top',
 ];

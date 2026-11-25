@@ -84,4 +84,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'table:config',
     ],
+    '1.0.8' => [
+        'from'    => '1.0.7',
+        'file'    => 'update1.0.7to1.0.8.sql',
+        'title'   => '全站统一规范配置补齐',
+        'summary' => '新增时区、默认外观、水印参数与视频压缩配置',
+        'risk'    => 'low',
+        'verify'  => 'table:config',
+    ],
 ];

@@ -11,6 +11,7 @@
 
 namespace app\model;
 
+use app\common\library\helper\AuthSession;
 use app\common\library\helper\ImageHelper;
 use app\common\library\helper\IpHelper;
 use app\common\library\helper\LogHelper;
@@ -958,19 +959,29 @@ class Users extends BaseModel
      */
     public static function logout(): bool
     {
-        $token = session('login_token');
-        if ($token) {
-            TokenHelper::delete($token);
-        }
-        session('admin_login_uid', null);
-        session('admin_login_user_info', null);
-        session('login_uid', null);
-        session('login_user_info', null);
-        $cookieKey = config('app.token')['key'] . '_' . md5('login_uid');
-        cookie($cookieKey, null);
+        AuthSession::clearFront();
         self::$_is_login = false;
         self::$_user = null;
+        self::$_token = null;
         return true;
+    }
+
+    /** API 专用认证：只校验账号密码，不写 Web session / remember cookie。 */
+    public static function authenticate(string $account, string $password)
+    {
+        $user = self::checkUserExist($account);
+        if (!$user || (int) ($user['status'] ?? 0) !== 1) {
+            self::setError('账号或密码错误');
+            return false;
+        }
+        if (!verify_password($password, (string) $user['password'], (string) $user['salt'])) {
+            self::setError('账号或密码错误');
+            return false;
+        }
+        if (password_needs_upgrade((string) $user['password'])) {
+            db('users')->where('uid', $user['uid'])->update(['password' => hash_password($password)]);
+        }
+        return $user;
     }
 
     /**
@@ -1084,14 +1095,10 @@ class Users extends BaseModel
             // 登录成功后重新生成 Session ID，防止会话固定攻击
             \think\facade\Session::regenerate(true);
 
-            if ($remember && get_setting('remember_login_enable') == 'Y') {
+            if ($remember) {
                 config('session.expire', $remember);
-                $cookieKey = config('app.token')['key'] . '_' . md5('login_uid');
-                // 记住登录 cookie 使用 HMAC 签名，并绑定当前密码指纹；改密后旧 cookie 自动失效。
-                $fingerprint = substr(hash('sha256', (string) ($user['password'] ?? '') . (string) ($user['salt'] ?? '')), 0, 16);
-                $rememberValue = SignedValueHelper::sign('remember', (int) $user['uid'] . '|' . $fingerprint, $remember);
-                cookie($cookieKey, $rememberValue, ['expire' => $remember]);
-            };
+                AuthSession::writeRemember((int) $user['uid'], $user, $remember);
+            }
 
             $data['last_login_time'] = time();
             $data['last_login_ip'] = $ip;
@@ -1133,15 +1140,11 @@ class Users extends BaseModel
             }
             unset($user['password']);
 
-            session('login_uid', $user['uid']);
-            session('login_user_info', $user);
-
             self::$_user = $user;
-            session('login_token', RandomHelper::uuid());
-            $token = session('login_token');
-
+            $token = RandomHelper::uuid();
             self::$_token = $token;
             self::$_is_login = true;
+            AuthSession::writeFront((int) $user['uid'], $user, $token);
 
             //token 过期时间
             $token_expire_time = $remember ?: config('token.expire');

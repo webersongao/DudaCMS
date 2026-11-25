@@ -136,13 +136,13 @@
             </li>
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="{$user_info.avatar}" class="d-inline-block" width="20" height="20">
+                    <img src="{:user_avatar_url($user_info['avatar'] ?? '')}" class="d-inline-block" width="20" height="20">
                     <span class="d-inline-block">{$user_info.name}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end" style="left: inherit; right: 0;">
                     <div class="p-3 text-center bg-primary">
                         <a href="javascript:;">
-                            <img class="img-avatar img-avatar-thumb" width="48" height="48" src="{$user_info.avatar ? : '/static/common/image/avatar-default.png'}" alt="">
+                            <img class="img-avatar img-avatar-thumb" width="48" height="48" src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="">
                         </a>
                     </div>
                     <div class="p-2 text-center">

@@ -1,34 +1,19 @@
 {__NOLAYOUT__}
 <!DOCTYPE html>
-<html>
+<html lang="{:html_lang()}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跳转提示</title>
-    {literal}
+    <script src="{$assetBase}common/js/dask-theme-init.js?v={:asset_version('common/js/dask-theme-init.js')}" data-default="{:get_setting('theme_mode','auto')}"></script>
     <script>
-    (function () {
-        try {
-            var pref = localStorage.getItem('dask_theme');
-            if (!pref) {
-                var m = document.cookie.match(/(?:^|; )dask_theme=([^;]*)/);
-                pref = m ? decodeURIComponent(m[1]) : 'auto';
-            }
-            if (['light','dark','auto'].indexOf(pref) === -1) pref = 'auto';
-            document.documentElement.setAttribute('data-theme', pref);
-            var dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.setAttribute('data-dark', dark ? '1' : '0');
-            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-        } catch (e) {}
-        document.addEventListener('click', function (e) {
-            var target = e.target && e.target.closest ? e.target.closest('[data-action="history-back"]') : null;
-            if (!target) return;
-            e.preventDefault();
-            window.history.back();
-        });
-    })();
+    document.addEventListener('click', function (e) {
+        var target = e.target && e.target.closest ? e.target.closest('[data-action="history-back"]') : null;
+        if (!target) return;
+        e.preventDefault();
+        window.history.back();
+    });
     </script>
-    {/literal}
     <link rel="stylesheet" href="{$assetBase}common/design/tokens.css?v={:asset_version('common/design/tokens.css')}">
     <style type="text/css">
         *{box-sizing:border-box;margin:0;padding:0;font-family:Lantinghei SC,Open Sans,Arial,Hiragino Sans GB,Microsoft YaHei,"微软雅黑",STHeiti,WenQuanYi Micro Hei,SimSun,sans-serif;-webkit-font-smoothing:antialiased}

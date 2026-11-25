@@ -21,7 +21,7 @@
                     <div class="dask-hcard py-3 border-bottom position-relative">
                         <div class="dask-hcard__media">
                             <a href="{$v['user']['url']}">
-                                <img src="{$v['user']['avatar']}" alt="" class="rounded" style="width: 46px;height: 46px">
+                                <img src="{:user_avatar_url($v['user']['avatar'] ?? '')}" alt="" class="rounded" style="width: 46px;height: 46px">
                             </a>
                             <span class="dask-online-status {$v['unread']  ? 'unread' : 'read'}"></span>
                         </div>

@@ -314,14 +314,7 @@ if (! function_exists('config_bool')) {
     /** 统一布尔配置解析，兼容历史 Y/N 与 1/0 存储 */
     function config_bool(string $name, bool $default = false): bool
     {
-        $value = get_setting($name, null);
-        if ($value === null) {
-            return $default;
-        }
-        if (is_bool($value)) {
-            return $value;
-        }
-        return in_array(strtolower((string) $value), ['y', '1', 'true', 'on', 'yes'], true);
+        return \app\common\library\helper\AppInput::normalizeBool(get_setting($name, null), $default);
     }
 }
 
@@ -614,11 +607,7 @@ if(!function_exists('date_compact'))
 {
     function date_compact($timestamp)
     {
-        if (!$timestamp)
-        {
-            return '';
-        }
-        return '***' . date('n-j H:i', $timestamp);
+        return \app\common\library\helper\PresentationHelper::time($timestamp, 'compact');
     }
 }
 
@@ -632,7 +621,52 @@ if(!function_exists('formatTime'))
 {
     function formatTime($time, $format = 'Y-m-d H:i:s')
     {
-        return date($format, intval($time));
+        return \app\common\library\helper\PresentationHelper::time($time, $format);
+    }
+}
+
+// 前台统一时间输出：default/date/datetime/compact/time/year 或自定义格式。
+if (!function_exists('front_time')) {
+    function front_time($timestamp, string $context = 'default'): string
+    {
+        return \app\common\library\helper\PresentationHelper::time($timestamp, $context);
+    }
+}
+
+// 当前语言/<html lang>，供模板统一输出。
+if (!function_exists('current_lang')) {
+    function current_lang(): string
+    {
+        return \app\common\library\helper\PresentationHelper::lang();
+    }
+}
+
+if (!function_exists('html_lang')) {
+    function html_lang(): string
+    {
+        return \app\common\library\helper\PresentationHelper::htmlLang();
+    }
+}
+
+// 统一安全输出助手。
+if (!function_exists('e')) {
+    function e($value): string
+    {
+        return \app\common\library\helper\PresentationHelper::escape($value);
+    }
+}
+
+if (!function_exists('safe_url')) {
+    function safe_url($url, string $fallback = '#'): string
+    {
+        return \app\common\library\helper\PresentationHelper::safeUrl($url, $fallback);
+    }
+}
+
+if (!function_exists('render_rich_text')) {
+    function render_rich_text($html): string
+    {
+        return \app\common\library\helper\PresentationHelper::richText($html);
     }
 }
 
@@ -838,31 +872,8 @@ if(!function_exists('get_user_info')) {
 if (!function_exists('remove_xss')) {
     function remove_xss($string): string
     {
-        if(get_setting('remove_xss')!='Y')
-        {
-            // 即使后台关闭 HTMLPurifier，也做一次轻量 DOM 清洗，避免存储型 XSS
-            return \app\common\library\helper\HtmlHelper::purify((string) $string);
-        }
-
-        // 生成配置对象
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('AutoFormat.RemoveEmpty', true);
-        $config->set('HTML.Trusted',true);
-        $config->set('HTML.SafeEmbed',true);
-        $config->set('HTML.SafeObject',true);
-        $config->set('Output.FlashCompat',true);
-        // 以下就是配置：
-        $config->set('Core.Encoding', 'UTF-8');
-        // 设置允许使用的HTML标签
-        $config->set('HTML.Allowed', 'div,b,strong,i,em,a[href|title],ul,ol,li,br,p[style],span[style],img[width|height|alt|src]');
-        // 设置允许出现的CSS样式属性
-        $config->set('CSS.AllowedProperties', 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align');
-        // 设置a标签上是否允许使用target="_blank"
-        $config->set('HTML.TargetBlank', TRUE);
-        // 使用配置生成过滤用的对象
-        $obj = new HTMLPurifier($config);
-        // 过滤字符串
-        return $obj->purify($string);
+        // 安全过滤不再受业务开关影响：始终使用统一白名单清洗。
+        return \app\common\library\helper\HtmlHelper::purify((string) $string);
     }
 }
 
@@ -1289,33 +1300,7 @@ if(!function_exists('getLoginUid'))
 {
     function getLoginUid()
     {
-        $sessionUid = session('login_uid');
-        if ($sessionUid) {
-            return $sessionUid;
-        }
-        if (get_setting('remember_login_enable') != 'Y') {
-            return 0;
-        }
-        $cookieKey = config('app.token')['key'] . '_' . md5('login_uid');
-        $cookieUid = (string) cookie($cookieKey);
-        if ($cookieUid === '') {
-            return 0;
-        }
-        $payload = \app\common\library\helper\SignedValueHelper::verify('remember', $cookieUid);
-        if ($payload === null || !str_contains($payload, '|')) {
-            cookie($cookieKey, null);
-            return 0;
-        }
-        [$uid, $fingerprint] = array_pad(explode('|', $payload, 2), 2, '');
-        $uid = (int) $uid;
-        $user = db('users')->where('uid', $uid)->field('uid,password,salt,status')->find();
-        $expected = $user ? substr(hash('sha256', (string) $user['password'] . (string) $user['salt']), 0, 16) : '';
-        if (!$user || $user['status'] != 1 || !hash_equals($expected, (string) $fingerprint)) {
-            cookie($cookieKey, null);
-            return 0;
-        }
-        session('login_uid', $uid);
-        return $uid;
+        return \app\common\library\helper\AuthSession::frontUid();
     }
 }
 
@@ -1469,17 +1454,9 @@ if (!function_exists('safe_last_url')) {
 
 // 统一头像地址：全站使用同一个默认图与路径规则，避免不同页面显示不一致。
 if (!function_exists('user_avatar_url')) {
-    function user_avatar_url($avatar): string
+    function user_avatar_url($avatar, bool $absolute = false): string
     {
-        $default = '/static/common/image/default-avatar.svg';
-        $avatar = trim((string) $avatar);
-        if ($avatar === '') {
-            return $default;
-        }
-        if (str_starts_with($avatar, 'data:') || preg_match('#^https?://#i', $avatar) || str_starts_with($avatar, '/')) {
-            return $avatar;
-        }
-        return '/' . ltrim($avatar, '/');
+        return \app\common\library\helper\PresentationHelper::avatar($avatar, $absolute);
     }
 }
 

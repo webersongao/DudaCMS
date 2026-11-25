@@ -15,7 +15,7 @@ class AuthService
         }
         RateLimitService::byIp('login', 20, 60);
 
-        $user = Users::getLogin($account, $password, 0, 'app');
+        $user = Users::authenticate($account, $password);
         if (!$user) {
             throw new ApiException(2001, Users::getError() ?: '账号或密码错误');
         }

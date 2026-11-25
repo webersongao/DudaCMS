@@ -76,4 +76,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'column:search_log.ip, column:links.status, index:users_favorite.uk_uf_uid_item, index:answer_thanks.uk_at_uid_answer',
     ],
+    '1.0.7' => [
+        'from'    => '1.0.6',
+        'file'    => 'update1.0.6to1.0.7.sql',
+        'title'   => '配置类型兼容修复',
+        'summary' => '将历史配置 type 映射为表单构造器支持的类型，修复后台配置页 500',
+        'risk'    => 'low',
+        'verify'  => 'table:config',
+    ],
 ];

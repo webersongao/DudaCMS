@@ -49,6 +49,7 @@ class Config extends Backend
                 $errors = [];
                 $configList = [];
                 foreach ($schema as $row) {
+                    $row['type'] = self::normalizeType($row['type'] ?? '');
                     $name = (string) $row['name'];
                     $submitted = array_key_exists($name, $post);
                     if (!$submitted) {
@@ -143,8 +144,14 @@ class Config extends Backend
         // 让表单提交地址携带 group，POST 时才能按分组补齐未提交的 checkbox。
         $this->formBuilder->setFormUrl((string) url('config', ['group' => $group]));
         $columns = [];
-        $list = $this->model->where('group', $group)->order(['sort' => 'ASC', 'id' => 'ASC'])->column('type,name,title,tips,option,value');
-        foreach ($list as $key => $val) {
+        // 不使用 column()：它以首列 type 为键，会把同类型配置项互相覆盖。
+        $list = $this->model->where('group', $group)
+            ->field('type,name,title,tips,option,value')
+            ->order(['sort' => 'ASC', 'id' => 'ASC'])
+            ->select()
+            ->toArray();
+        foreach ($list as $val) {
+            $val['type'] = self::normalizeType($val['type'] ?? '');
             if ($val['type'] === 'password') {
                 // 密钥类配置永不回显明文；留空即保持原值，生产环境推荐用环境变量覆盖。
                 $val['value'] = '';
@@ -154,11 +161,13 @@ class Config extends Backend
             }
 
             // 字典管理模块已移除，选项统一从 option(JSON) 读取，不再查 dask_dict。
-            $val['option'] = json_decode($val['option'], true);
+            $val['option'] = json_decode((string) $val['option'], true);
             if (!in_array($val['type'], ['radio', 'checkbox', 'select', 'array', 'images', 'files', 'select2'])) {
                 unset($val['option']);
+            } else {
+                $val['option'] = is_array($val['option']) ? $val['option'] : [];
             }
-            $columns[$key] = array_values($val);
+            $columns[] = array_values($val);
         }
         // 第三方登录（一级入口 Config::third()）：按平台拆为顶部切换式 tab，避免 19 个配置项平铺堆在一页。
         if ((int) $group === 11) {
@@ -204,6 +213,26 @@ class Config extends Backend
         return $this->formBuilder
             ->addLinkGroup($columns, $links)
             ->fetch();
+    }
+
+    /**
+     * 兼容历史配置类型：老版本 install.sql 曾使用 string/int/bool/date/file 等类型，
+     * 升级数据若未转换会导致 FormBuilder::add{Type} 不存在而 500。
+     */
+    private static function normalizeType($type): string
+    {
+        $map = [
+            'string' => 'text', 'int' => 'number', 'integer' => 'number',
+            'bool' => 'radio', 'boolean' => 'radio', 'switch' => 'radio',
+            'date' => 'text', 'datetime' => 'text', 'time' => 'text',
+            'file' => 'image', 'upload' => 'image',
+            'select2' => 'select2', 'array' => 'array',
+        ];
+        $type = strtolower(trim((string) $type));
+        $type = $map[$type] ?? $type;
+        $supported = ['text', 'textarea', 'number', 'password', 'radio', 'checkbox',
+            'select', 'select2', 'array', 'image', 'images', 'files', 'editor', 'code', 'html', 'button'];
+        return in_array($type, $supported, true) ? $type : 'text';
     }
 
     /** 移除脚本、内联事件与 javascript: 伪协议，保留有限的富文本标签 */

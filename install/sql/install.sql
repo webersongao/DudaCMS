@@ -317,8 +317,8 @@ CREATE TABLE `dask_attach` (
       `thumb` varchar(255) DEFAULT NULL COMMENT '缩略图',
       `path` varchar(255) DEFAULT NULL COMMENT '路径',
       `url` varchar(255) DEFAULT NULL COMMENT '完整地址',
-      `ext` varchar(5) DEFAULT NULL COMMENT '后缀',
-      `size` int(11) DEFAULT '0' COMMENT '大小',
+      `ext` varchar(20) DEFAULT NULL COMMENT '后缀',
+      `size` bigint unsigned DEFAULT '0' COMMENT '大小（字节）',
       `width` varchar(30) DEFAULT '0' COMMENT '宽度',
       `height` varchar(30) DEFAULT '0' COMMENT '高度',
       `md5` char(32) DEFAULT NULL,
@@ -326,7 +326,7 @@ CREATE TABLE `dask_attach` (
       `mime` varchar(80) DEFAULT NULL,
       `driver` varchar(20) DEFAULT 'local',
       `status` tinyint(1) NOT NULL DEFAULT '1',
-      `sort` int(5) NOT NULL DEFAULT '50',
+      `sort` int unsigned NOT NULL DEFAULT '50' COMMENT '排序值',
       `item_type` varchar(255) DEFAULT NULL COMMENT '内容类型',
       `item_id` int(10) unsigned DEFAULT '0' COMMENT '内容ID',
       `access_key` varchar(255) DEFAULT NULL COMMENT '批次ID',
@@ -425,7 +425,7 @@ INSERT INTO `dask_config` VALUES (80,'unique_login','5','单一登录','只允�
 INSERT INTO `dask_config` VALUES (81,'auto_save_draft','7','自动保存草稿','是否开启自动保存草稿','radio','Y','{\"N\":\"关闭\",\"Y\":\"开启\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (82,'auto_save_draft_time','7','自动保存时间','草稿自动保存间隔时间,单位：秒','number','30','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (83,'search_engine_user','10','搜索引擎用户名','搜索引擎用户名,没有请留空','text','','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (84,'search_engine_password','10','搜索引擎密码','搜索引擎密码,没有请留空','text','','null',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (84,'search_engine_password','10','搜索引擎密码','搜索引擎密码,没有请留空','password','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (85,'search_engine_host','10','搜索引擎地址','搜索引擎服务地址,请填写完整的服务器地址，包括端口等,如es搜索引擎需要配置','text','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (86,'search_engine_app','10','搜索引擎项目名称','搜索引擎项目名称,如es搜索引擎需要配置','text','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (87,'answer_unique','9','用户对每个问题的回复限制','用户对每个问题的回复限制','radio','Y','{\"Y\":\"只允许回复一次\",\"N\":\"不限制\"}',0,NULL,1,0);
@@ -495,25 +495,25 @@ INSERT INTO `dask_config` VALUES (409,'editor_float_toolbar_enable','13','编辑
 INSERT INTO `dask_config` VALUES (410,'editor_cache_enable','13','本地草稿缓存','开启后使用浏览器本地缓存，可能与服务端草稿叠加','radio','N','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (411,'editor_counter_enable','13','显示字数统计','在工具栏右侧显示编辑器字数','radio','Y','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (413,'editor_upload_timeout','13','上传超时时间','单位：毫秒','number','30000','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (414,'third_enable','11','启用的登录方式','勾选后前台登录页显示对应入口；回调地址由系统按当前域名自动组装为 /ThirdAuth/callback.html?platform=平台','checkbox','qq,wechat,weibo,github,google,twitter','{\"qq\":\"QQ\",\"wechat\":\"微信\",\"weibo\":\"微博\",\"github\":\"GitHub\",\"google\":\"Google\",\"twitter\":\"Twitter/X\"}',0,NULL,1,0);
+INSERT INTO `dask_config` VALUES (414,'third_enable','11','启用的登录方式','勾选后前台登录页显示对应入口；回调地址由系统按当前域名自动组装为 https://当前域名/ThirdAuth/callback?platform=平台','checkbox','qq,wechat,weibo,github,google,twitter','{\"qq\":\"QQ\",\"wechat\":\"微信\",\"weibo\":\"微博\",\"github\":\"GitHub\",\"google\":\"Google\",\"twitter\":\"Twitter/X\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (416,'third_qq_app_id','11','QQ AppID','QQ互联申请的 AppID','text','','',10,NULL,1,0);
-INSERT INTO `dask_config` VALUES (417,'third_qq_app_secret','11','QQ AppKey','QQ互联申请的 AppKey','text','','',11,NULL,1,0);
-INSERT INTO `dask_config` VALUES (418,'third_qq_scope','11','QQ 授权范围','回调地址：/ThirdAuth/callback.html?platform=qq（按实际域名补全）','text','get_user_info','',12,NULL,1,0);
+INSERT INTO `dask_config` VALUES (417,'third_qq_app_secret','11','QQ AppKey','QQ互联申请的 AppKey','password','','',11,NULL,1,0);
+INSERT INTO `dask_config` VALUES (418,'third_qq_scope','11','QQ 授权范围','回调地址：https://当前域名/ThirdAuth/callback?platform=qq（按实际域名补全）','text','get_user_info','',12,NULL,1,0);
 INSERT INTO `dask_config` VALUES (419,'third_wechat_app_id','11','微信 AppID','微信开放平台申请的 AppID','text','','',20,NULL,1,0);
-INSERT INTO `dask_config` VALUES (420,'third_wechat_app_secret','11','微信 AppSecret','微信开放平台申请的 AppSecret','text','','',21,NULL,1,0);
-INSERT INTO `dask_config` VALUES (421,'third_wechat_scope','11','微信授权范围','回调地址：/ThirdAuth/callback.html?platform=wechat（按实际域名补全）','text','snsapi_userinfo','',22,NULL,1,0);
+INSERT INTO `dask_config` VALUES (420,'third_wechat_app_secret','11','微信 AppSecret','微信开放平台申请的 AppSecret','password','','',21,NULL,1,0);
+INSERT INTO `dask_config` VALUES (421,'third_wechat_scope','11','微信授权范围','回调地址：https://当前域名/ThirdAuth/callback?platform=wechat（按实际域名补全）','text','snsapi_userinfo','',22,NULL,1,0);
 INSERT INTO `dask_config` VALUES (422,'third_weibo_app_id','11','微博 AppKey','微博开放平台申请的 AppKey','text','','',30,NULL,1,0);
-INSERT INTO `dask_config` VALUES (423,'third_weibo_app_secret','11','微博 AppSecret','微博开放平台申请的 AppSecret','text','','',31,NULL,1,0);
-INSERT INTO `dask_config` VALUES (424,'third_weibo_scope','11','微博授权范围','回调地址：/ThirdAuth/callback.html?platform=weibo（按实际域名补全）','text','','',32,NULL,1,0);
+INSERT INTO `dask_config` VALUES (423,'third_weibo_app_secret','11','微博 AppSecret','微博开放平台申请的 AppSecret','password','','',31,NULL,1,0);
+INSERT INTO `dask_config` VALUES (424,'third_weibo_scope','11','微博授权范围','回调地址：https://当前域名/ThirdAuth/callback?platform=weibo（按实际域名补全）','text','','',32,NULL,1,0);
 INSERT INTO `dask_config` VALUES (425,'third_github_app_id','11','GitHub Client ID','GitHub OAuth App 的 Client ID','text','','',40,NULL,1,0);
-INSERT INTO `dask_config` VALUES (426,'third_github_app_secret','11','GitHub Client Secret','GitHub OAuth App 的 Client Secret','text','','',41,NULL,1,0);
-INSERT INTO `dask_config` VALUES (427,'third_github_scope','11','GitHub 授权范围','回调地址：/ThirdAuth/callback.html?platform=github（按实际域名补全）','text','read:user user:email','',42,NULL,1,0);
+INSERT INTO `dask_config` VALUES (426,'third_github_app_secret','11','GitHub Client Secret','GitHub OAuth App 的 Client Secret','password','','',41,NULL,1,0);
+INSERT INTO `dask_config` VALUES (427,'third_github_scope','11','GitHub 授权范围','回调地址：https://当前域名/ThirdAuth/callback?platform=github（按实际域名补全）','text','read:user user:email','',42,NULL,1,0);
 INSERT INTO `dask_config` VALUES (428,'third_google_app_id','11','Google Client ID','Google OAuth 客户端的 Client ID','text','','',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (429,'third_google_app_secret','11','Google Client Secret','Google OAuth 客户端的 Client Secret','text','','',51,NULL,1,0);
-INSERT INTO `dask_config` VALUES (430,'third_google_scope','11','Google 授权范围','回调地址：/ThirdAuth/callback.html?platform=google（按实际域名补全）','text','openid email profile','',52,NULL,1,0);
+INSERT INTO `dask_config` VALUES (429,'third_google_app_secret','11','Google Client Secret','Google OAuth 客户端的 Client Secret','password','','',51,NULL,1,0);
+INSERT INTO `dask_config` VALUES (430,'third_google_scope','11','Google 授权范围','回调地址：https://当前域名/ThirdAuth/callback?platform=google（按实际域名补全）','text','openid email profile','',52,NULL,1,0);
 INSERT INTO `dask_config` VALUES (431,'third_twitter_app_id','11','Twitter/X Client ID','X 开发者平台 OAuth 2.0 的 Client ID','text','','',60,NULL,1,0);
-INSERT INTO `dask_config` VALUES (432,'third_twitter_app_secret','11','Twitter/X Client Secret','X 开发者平台 OAuth 2.0 的 Client Secret','text','','',61,NULL,1,0);
-INSERT INTO `dask_config` VALUES (433,'third_twitter_scope','11','Twitter/X 授权范围','回调地址：/ThirdAuth/callback.html?platform=twitter（按实际域名补全）','text','tweet.read users.read offline.access','',62,NULL,1,0);
+INSERT INTO `dask_config` VALUES (432,'third_twitter_app_secret','11','Twitter/X Client Secret','X 开发者平台 OAuth 2.0 的 Client Secret','password','','',61,NULL,1,0);
+INSERT INTO `dask_config` VALUES (433,'third_twitter_scope','11','Twitter/X 授权范围','回调地址：https://当前域名/ThirdAuth/callback?platform=twitter（按实际域名补全）','text','tweet.read users.read offline.access','',62,NULL,1,0);
 INSERT INTO `dask_config` VALUES (434,'watermark_enable','4','上传图片文字水印','开启后所有上传图片自动叠加文字水印，GIF 动画除外','radio','N','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (435,'watermark_text','4','水印文字','可自定义；留空则不叠加。超长文字自动折行，最多 3 行','text','DudaCMS','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (500,'sms_enable','14','短信服务','N 为关闭；ali 阿里云短信；tencent 腾讯云短信','radio','N','{\"N\":\"不启用\",\"ali\":\"阿里云短信\",\"tencent\":\"腾讯云短信\"}',0,NULL,1,0);
@@ -523,7 +523,7 @@ INSERT INTO `dask_config` VALUES (503,'sms_ali_sign_name','14','阿里云短信�
 INSERT INTO `dask_config` VALUES (504,'sms_ali_template_code','14','阿里云短信模板 CODE','控制台模板管理页的模板 CODE','text','','[]',4,NULL,1,0);
 INSERT INTO `dask_config` VALUES (505,'sms_ali_endpoint','14','阿里云节点域名','仅允许 *.aliyuncs.com，非法值自动回退默认节点','text','dysmsapi.aliyuncs.com','[]',5,NULL,1,0);
 INSERT INTO `dask_config` VALUES (506,'sms_tencent_app_id','14','腾讯云 SmsSdkAppid','仅在使用腾讯云短信时填写','text','','[]',10,NULL,1,0);
-INSERT INTO `dask_config` VALUES (507,'sms_tencent_secret_id','14','腾讯云 SecretId','仅在使用腾讯云短信时填写','text','','[]',11,NULL,1,0);
+INSERT INTO `dask_config` VALUES (507,'sms_tencent_secret_id','14','腾讯云 SecretId','仅在使用腾讯云短信时填写','password','','[]',11,NULL,1,0);
 INSERT INTO `dask_config` VALUES (508,'sms_tencent_access_key_secret','14','腾讯云 SecretKey','仅在使用腾讯云短信时填写','password','','[]',12,NULL,1,0);
 INSERT INTO `dask_config` VALUES (509,'sms_tencent_sign_name','14','腾讯云短信签名','控制台签名管理页的签名名称','text','','[]',13,NULL,1,0);
 INSERT INTO `dask_config` VALUES (510,'sms_tencent_template_code','14','腾讯云短信模板 ID','控制台模板管理页的模板 ID','text','','[]',14,NULL,1,0);
@@ -634,8 +634,8 @@ CREATE TABLE `dask_credit_group`  (
      `group_icon` varchar(255) DEFAULT NULL COMMENT '用户组图标',
      `min_credit` int unsigned DEFAULT '0' COMMENT '最小成长值',
      `max_credit` int unsigned DEFAULT '0' COMMENT '最大成长值（不含）',
-     `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '备注',
-     `system` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '修改时间',
+     `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '备注',
+     `system` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '是否系统内置：0否，1是',
      PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC COMMENT = '用户成长等级组' ;
 INSERT INTO `dask_credit_group` VALUES (1,'萌新',1,'{\"visit_website\":\"Y\",\"publish_question_enable\":\"Y\",\"publish_question_approval\":\"Y\",\"publish_article_enable\":\"Y\",\"publish_article_approval\":\"Y\",\"publish_answer_enable\":\"Y\",\"publish_answer_approval\":\"Y\",\"modify_answer_approval\":\"Y\",\"modify_article_approval\":\"Y\",\"modify_question_approval\":\"Y\",\"available_invite_count\":\"5\",\"create_topic_enable\":\"N\",\"publish_approval_time_start\":\"23\",\"publish_approval_time_end\":\"5\",\"publish_url\":\"Y\",\"publish_question_num\":\"3\",\"publish_article_num\":\"3\",\"topic_manager\":\"N\"}',NULL,0,300,'',1);
@@ -699,7 +699,7 @@ CREATE TABLE `dask_links` (
      `id` int(8) unsigned NOT NULL AUTO_INCREMENT,
      `name` varchar(255) NOT NULL DEFAULT '' COMMENT '网站名称',
      `url` varchar(255) NOT NULL DEFAULT '' COMMENT '网站地址',
-     `logo` varchar(80) NOT NULL DEFAULT '' COMMENT '网站logo',
+     `logo` varchar(255) NOT NULL DEFAULT '' COMMENT '网站logo',
      `description` varchar(255) NOT NULL DEFAULT '' COMMENT '描述',
      `sort` int(10) unsigned NOT NULL DEFAULT '50' COMMENT '排序',
      `status` tinyint(10) unsigned NOT NULL DEFAULT '1' COMMENT '状态',
@@ -984,7 +984,7 @@ CREATE TABLE `dask_users_online` (
     `uid` int(11) NOT NULL COMMENT '用户 ID',
     `last_login_time` int(11) DEFAULT '0' COMMENT '上次活动时间',
     `last_login_ip` varchar(50) DEFAULT NULL COMMENT '客户端ip',
-    `last_url` varchar(255) DEFAULT NULL COMMENT '停留页面',
+    `last_url` varchar(512) DEFAULT NULL COMMENT '停留页面（不含 query）',
     `user_agent` mediumtext DEFAULT NULL COMMENT '用户客户端信息',
     PRIMARY KEY (`id`) USING BTREE,
     KEY `uid` (`uid`) USING BTREE,
@@ -998,7 +998,7 @@ CREATE TABLE `dask_oauth` (
   `platform` varchar(30) NOT NULL DEFAULT '' COMMENT '第三方应用',
   `openid` varchar(50) NOT NULL DEFAULT '' COMMENT '第三方唯一ID',
   `unionid` varchar(50) NOT NULL DEFAULT '' COMMENT '第三方唯一ID',
-  `open_username` varchar(50) NOT NULL DEFAULT '' COMMENT '第三方会员昵称',
+  `open_username` varchar(100) NOT NULL DEFAULT '' COMMENT '第三方会员昵称',
   `access_token` text NOT NULL COMMENT 'AccessToken',
   `token` varchar(50) NOT NULL DEFAULT '' COMMENT '自定义Token',
   `refresh_token` text NOT NULL COMMENT 'RefreshToken',
@@ -1029,7 +1029,7 @@ CREATE TABLE `dask_approval` (
     `data` longtext NOT NULL COMMENT '审核数据',
     `uid` int(11) NOT NULL DEFAULT '0',
     `reason` varchar(255) DEFAULT NULL COMMENT '拒绝原因',
-    `status` int(11) NOT NULL DEFAULT '0' COMMENT '0待审核,已审核,2已拒绝',
+    `status` int(11) NOT NULL DEFAULT '0' COMMENT '审核状态：0待审核，1已审核，2已拒绝',
     `access_key` varchar(255) DEFAULT NULL COMMENT '批次ID',
     `create_time` int(10) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`) USING BTREE,
@@ -1186,7 +1186,7 @@ DROP TABLE IF EXISTS `dask_column`;
 CREATE TABLE IF NOT EXISTS `dask_column` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '专栏id',
     `name` varchar(64) DEFAULT NULL COMMENT '专栏标题',
-    `verify` tinyint(1) DEFAULT '0' COMMENT '是否审核通过 （1通过0审核中-1通过）',
+    `verify` tinyint(1) DEFAULT '0' COMMENT '审核状态：0审核中，1已通过',
     `focus_count` int(11) DEFAULT '0' COMMENT '关注计数',
     `description` text COMMENT '专栏描述',
     `cover` varchar(255) DEFAULT NULL COMMENT '专栏图片',
@@ -1494,7 +1494,7 @@ CREATE TABLE `dask_users_verify` (
     `data` longtext COMMENT '审核数据',
     `status` tinyint(1) DEFAULT '0' COMMENT '审核状态0未提交,1待审核2已审核3拒绝审核',
     `type` varchar(32) DEFAULT '' COMMENT '审核类型',
-    `reason` varchar(255) NOT NULL COMMENT '审核理由',
+    `reason` varchar(255) NOT NULL DEFAULT '' COMMENT '审核理由',
     `create_time` int(11) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `uid` (`uid`),
@@ -1508,7 +1508,7 @@ CREATE TABLE `dask_users_verify_type` (
  `title` char(100) NOT NULL DEFAULT '' COMMENT '认证名称',
  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态',
  `icon` varchar(255) DEFAULT NULL COMMENT '认证图标',
- `remark` text NOT NULL COMMENT '备注',
+ `remark` text NULL COMMENT '备注',
  PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='用户认证类型';
 INSERT INTO `dask_users_verify_type` (`id`, `name`, `title`, `status`, `icon`, `remark`) VALUES (1, 'personal', '个人认证', 1, 'static/common/image/people.svg', '个人认证');
@@ -1880,11 +1880,11 @@ CREATE TABLE `dask_feature_topic` (
 -- 短信配置（group 14）：由 plugins/sms 迁入核心配置，默认关闭。
 CREATE TABLE IF NOT EXISTS `dask_sms_log` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `mobile` char(11) NOT NULL COMMENT '手机号',
+  `mobile` varchar(20) NOT NULL COMMENT '手机号',
   `send_type` varchar(32) NOT NULL COMMENT '短信商',
   `template_code` varchar(32) NOT NULL COMMENT '模板id',
   `content` text COMMENT '短信内容',
-  `ip` varchar(32) NOT NULL COMMENT 'ip',
+  `ip` varchar(45) NOT NULL COMMENT 'ip',
   `create_time` int DEFAULT '0' COMMENT '添加时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='短信记录表';
@@ -1916,6 +1916,19 @@ ALTER TABLE `dask_users_favorite` ADD INDEX `idx_fav_uid_item` (`uid`,`item_type
 ALTER TABLE `dask_post_relation` ADD INDEX `idx_pr_type_status_time` (`item_type`,`status`,`create_time`);
 ALTER TABLE `dask_post_relation` ADD INDEX `idx_pr_item` (`item_id`,`item_type`);
 ALTER TABLE `dask_search_log` ADD INDEX `idx_sl_time` (`create_time`);
+
+-- 1.0.4 规范审计补充索引
+ALTER TABLE `dask_users_token` ADD INDEX `idx_ut_uid_expire` (`uid`,`expire_time`);
+ALTER TABLE `dask_attach` ADD INDEX `idx_attach_item` (`item_type`,`item_id`);
+ALTER TABLE `dask_attach` ADD INDEX `idx_attach_access_key` (`access_key`);
+ALTER TABLE `dask_report` ADD INDEX `idx_report_item` (`item_id`,`item_type`,`uid`);
+ALTER TABLE `dask_report` ADD INDEX `idx_report_uid_item` (`uid`,`item_type`,`item_id`);
+ALTER TABLE `dask_column_recommend_article` ADD INDEX `idx_cra_column_status` (`column_id`,`status`);
+ALTER TABLE `dask_users_favorite` ADD INDEX `idx_fav_tag` (`tag_id`);
+ALTER TABLE `dask_answer_thanks` ADD INDEX `idx_at_answer_uid` (`answer_id`,`uid`);
+ALTER TABLE `dask_uninterested` ADD INDEX `idx_un_item` (`item_id`,`item_type`,`uid`);
+ALTER TABLE `dask_browse_records` ADD INDEX `idx_br_uid_item` (`uid`,`item_type`,`item_id`);
+ALTER TABLE `dask_browse_records` ADD INDEX `idx_br_uid_status_time` (`uid`,`status`,`create_time`);
 
 -- 删除被复合索引左前缀覆盖的冗余单列索引，保持新装与升级后结构一致。
 DROP PROCEDURE IF EXISTS `dask_drop_index_600`;
@@ -1986,7 +1999,7 @@ CREATE TABLE `dask_upgrade_log` (
 
 -- 新装即为当前程序版本，写入一条成功记录作为版本基准，避免误报待升级
 INSERT INTO `dask_upgrade_log` (`version`, `status`, `sql_file`, `sql_count`, `remark`, `add_time`)
-VALUES ('1.0.3', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
+VALUES ('1.0.4', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
 
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -638,8 +638,9 @@ class Account extends Frontend
             unset($postData['uid']);
             $postData['birthday'] = db_input_timestamp($postData['birthday'] ?? '', 0);
             $postData['is_first_login'] = 0;
-            Users::updateProfileFields($this->user_id,$postData);
-            $this->success('资料更新成功');
+            Users::updateProfileFields($this->user_id, $postData);
+            // 头像等资料可能在本弹窗内修改，成功后刷新当前页，保证导航与主页头像一致。
+            $this->success('资料更新成功', $this->request->url(true));
         }
         return $this->fetch();
     }

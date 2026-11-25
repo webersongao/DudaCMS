@@ -5,7 +5,7 @@
         <div class="dask-onboarding__avatar" title="{:L('点击更换头像')}">
             <div id="fileList_cover" class="uploader-list"></div>
             <div id="filePicker_cover" class="dask-onboarding__avatar-picker">
-                <img class="image_preview_info" id="cover_preview" src="{$user_info.avatar|default='/static/common/image/default-avatar.svg'}" alt="{$user_info.user_name|default=''}">
+                <img class="image_preview_info" id="cover_preview" src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="{$user_info.user_name|default=''}">
             </div>
             <span class="dask-onboarding__avatar-edit" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -21,7 +21,7 @@
 
     <form action="{:url('account/welcome_first_login')}" method="post" class="dask-onboarding__form" data-dask-onboarding-form>
         <input type="hidden" name="uid" value="{$user_id}">
-        <input type="hidden" name="avatar" value="{$user_info.avatar|default='/static/common/image/default-avatar.svg'}" class="avatar-input">
+        <input type="hidden" name="avatar" value="{:user_avatar_url($user_info['avatar'] ?? '')}" class="avatar-input">
 
         <div class="dask-field">
             <label class="dask-field__label" for="onboarding-nickname">{:L('昵称')}</label>

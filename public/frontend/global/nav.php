@@ -156,14 +156,14 @@
                     </div>
                     <div class="dropdown bh-mobile d-inline-block position-relative">
                         <a href="#" role="button" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <img class="rounded" src="{$user_info.avatar}" style="width: 22px;height: 22px">
+                            <img class="rounded" src="{:user_avatar_url($user_info['avatar'] ?? '')}" style="width: 22px;height: 22px" alt="{$user_info.nick_name|default=''}">
                             <span class="d-none d-sm-inline-block ms-1">{$user_info.nick_name}</span>
                             <i class="fa fa-fw fa-angle-down d-none d-sm-inline-block"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end p-0 border-0 font-size-sm" aria-labelledby="page-header-user-dropdown">
                             <div class="p-3 text-center bg-primary">
                                 <a href="{:url('creator/index')}">
-                                    <img class="img-avatar img-avatar-thumb" style="border-radius: 50%" width="48" height="48" src="{$user_info.avatar ? : '/static/common/image/avatar-default.png'}" alt="">
+                                    <img class="img-avatar img-avatar-thumb" style="border-radius: 50%" width="48" height="48" src="{:user_avatar_url($user_info['avatar'] ?? '')}" alt="">
                                 </a>
                             </div>
                             <div class="p-2 text-center">

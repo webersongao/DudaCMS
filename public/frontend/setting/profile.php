@@ -14,11 +14,11 @@
                             <div class="col-md-2">
                                 <div id="fileList_cover" class="uploader-list"></div>
                                 <div id="filePicker_cover" class="dask-setting-avatar-wrap">
-                                    <a href="{$user_info.avatar|default='/static/common/image/default-avatar.svg'}" target="_blank">
-                                        <img class="image_preview_info dask-setting-avatar" src="{$user_info.avatar|default='/static/common/image/default-avatar.svg'}" id="cover_preview" alt="{$user_info.user_name}">
+                                    <a href="{:user_avatar_url($user_info['avatar'] ?? '')}" target="_blank">
+                                        <img class="image_preview_info dask-setting-avatar" src="{:user_avatar_url($user_info['avatar'] ?? '')}" id="cover_preview" alt="{$user_info.user_name}">
                                     </a>
                                 </div>
-                                <input type="hidden" name="avatar" value="{$user_info.avatar|default='/static/common/image/default-avatar.svg'}" class="avatar-input">
+                                <input type="hidden" name="avatar" value="{:user_avatar_url($user_info['avatar'] ?? '')}" class="avatar-input">
                             </div>
                         </div>
 

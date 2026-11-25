@@ -5,7 +5,7 @@
         <div class="col-md-12 mb-2 bg-white dask-card rounded dask-profile-head">
             <div class="dask-profile-head__avatar">
                 <div class="authorAvatar dask-avatar-wrap">
-                    <img src="{$user.avatar}" alt="{$user.name}" onerror="this.src='/static/common/image/default-avatar.svg'">
+                    <img src="{:user_avatar_url($user['avatar'] ?? '')}" alt="{$user.name}" onerror="this.onerror=null;this.src='/static/common/image/default-avatar.svg'">
                     {if $user.verified_icon}
                     <span class="dask-verified-badge" title="{$user.verified_name|default='已认证'}" aria-label="{$user.verified_name|default='已认证'}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>

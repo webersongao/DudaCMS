@@ -1467,6 +1467,22 @@ if (!function_exists('safe_last_url')) {
     }
 }
 
+// 统一头像地址：全站使用同一个默认图与路径规则，避免不同页面显示不一致。
+if (!function_exists('user_avatar_url')) {
+    function user_avatar_url($avatar): string
+    {
+        $default = '/static/common/image/default-avatar.svg';
+        $avatar = trim((string) $avatar);
+        if ($avatar === '') {
+            return $default;
+        }
+        if (str_starts_with($avatar, 'data:') || preg_match('#^https?://#i', $avatar) || str_starts_with($avatar, '/')) {
+            return $avatar;
+        }
+        return '/' . ltrim($avatar, '/');
+    }
+}
+
 // 回跳地址：只接受站内同源地址，杜绝 HTTP_REFERER 造成的开放重定向。
 if (!function_exists('safe_return_url')) {
     function safe_return_url(string $fallback = '/'): string

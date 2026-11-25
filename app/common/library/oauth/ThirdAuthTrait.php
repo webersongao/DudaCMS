@@ -107,13 +107,25 @@ trait ThirdAuthTrait
 
         $userInfo = $this->application->{$platform}->getUserInfo();
         if (!is_array($userInfo) || empty($userInfo['openid'])) {
+            \think\facade\Log::write(
+                '[oauth_callback] userinfo_empty platform=' . $platform,
+                'error'
+            );
             $this->error('第三方授权失败，请重试', $returnUrl);
         }
         $userInfo['token'] = (string) $this->request->get('token', '');
 
         if (Service::connect($platform, $userInfo)) {
+            \think\facade\Log::write(
+                '[oauth_callback] connect_ok platform=' . $platform . ' openid_hash=' . substr(md5((string) $userInfo['openid']), 0, 8),
+                'error'
+            );
             return redirect($returnUrl);
         }
+        \think\facade\Log::write(
+            '[oauth_callback] connect_false platform=' . $platform . ' openid_hash=' . substr(md5((string) $userInfo['openid']), 0, 8),
+            'error'
+        );
         $this->error('登录失败，请稍后重试', $returnUrl);
     }
 

@@ -20,6 +20,14 @@ use think\facade\Db;
  */
 class Service
 {
+    private static function debugLog(string $event, array $context = []): void
+    {
+        \think\facade\Log::write(
+            '[oauth_connect][' . $event . '] ' . json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'error'
+        );
+    }
+
     /**
      * 第三方登录
      * @param string $platform 平台
@@ -31,8 +39,14 @@ class Service
         $openid = (string) ($params['openid'] ?? '');
         $expiresIn = (int) ($params['expires_in'] ?? 0);
         if ($openid === '') {
+            self::debugLog('openid_missing', ['platform' => $platform]);
             return false;
         }
+        self::debugLog('connect_start', [
+            'platform'    => $platform,
+            'openid_hash' => substr(md5($openid), 0, 8),
+            'has_nickname'=> !empty($params['user_info']['nickname'] ?? ''),
+        ]);
         $time = time();
         $values = [
             'platform'      => $platform,
@@ -51,8 +65,18 @@ class Service
         if ($third) {
             $user = $third['uid'] ? Users::getUserInfo($third['uid']) : [];
             if (!$user) {
+                self::debugLog('bound_user_missing', [
+                    'platform'    => $platform,
+                    'openid_hash' => substr(md5($openid), 0, 8),
+                    'uid'         => (int) ($third['uid'] ?? 0),
+                ]);
                 return false;
             }
+            self::debugLog('connect_existing_ok', [
+                'platform'    => $platform,
+                'openid_hash' => substr(md5($openid), 0, 8),
+                'uid'         => (int) ($third['uid'] ?? 0),
+            ]);
             Users::extracted($user);
             return true;
         } else {
@@ -76,6 +100,12 @@ class Service
                 $uid = Users::registerUser($username, $password, $extend);
 
                 if (!$uid) {
+                    self::debugLog('register_failed', [
+                        'platform'     => $platform,
+                        'openid_hash'  => substr(md5($openid), 0, 8),
+                        'username_hash'=> substr(md5($username), 0, 8),
+                        'error'        => Users::getError(),
+                    ]);
                     return false;
                 }
 
@@ -94,9 +124,21 @@ class Service
                 }
 
                 \think\facade\Db::commit();
+                self::debugLog('connect_new_ok', [
+                    'platform'    => $platform,
+                    'openid_hash' => substr(md5($openid), 0, 8),
+                    'uid'         => (int) $uid,
+                ]);
                 return true;
             } catch (\Exception $e) {
                 \think\facade\Db::rollback();
+                self::debugLog('connect_exception', [
+                    'platform'    => $platform,
+                    'openid_hash' => substr(md5($openid), 0, 8),
+                    'message'     => $e->getMessage(),
+                    'file'        => basename($e->getFile()),
+                    'line'        => $e->getLine(),
+                ]);
                 return false;
             }
         }

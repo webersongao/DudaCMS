@@ -55,6 +55,17 @@ abstract class OAuth2
         $this->config = array_merge($thirdConfig, is_array($options) ? $options : []);
     }
 
+    protected function debugLog(string $event, array $context = []): void
+    {
+        $context['platform'] = $this->platform;
+        $state = (string) session('third_state_' . $this->platform);
+        $context['trace'] = $state !== '' ? substr(md5($state), 0, 8) : '-';
+        \think\facade\Log::write(
+            '[oauth][' . $event . '] ' . json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'error'
+        );
+    }
+
     /**
      * 读取当前平台的配置项。
      */
@@ -103,6 +114,12 @@ abstract class OAuth2
             $params['code_challenge_method'] = 'S256';
         }
 
+        $this->debugLog('authorize', [
+            'redirect_uri'  => $params['redirect_uri'],
+            'client_id_tail' => substr($params['client_id'], -12),
+            'scope'         => $params['scope'],
+        ]);
+
         return $this->authorizeUrl . (strpos($this->authorizeUrl, '?') === false ? '?' : '&') . http_build_query($params);
     }
 
@@ -116,6 +133,11 @@ abstract class OAuth2
         $state = (string) ($params['state'] ?? '');
         $expected = (string) session('third_state_' . $this->platform);
         if ($state === '' || $expected === '' || !hash_equals($expected, $state)) {
+            $this->debugLog('state_mismatch', [
+                'state_hash'       => $state !== '' ? substr(md5($state), 0, 8) : '-',
+                'state_len'        => strlen($state),
+                'expected_present' => $expected !== '',
+            ]);
             return [];
         }
         // state 一次性使用，防止重放
@@ -123,19 +145,36 @@ abstract class OAuth2
 
         $code = (string) ($params['code'] ?? '');
         if ($code === '') {
+            $this->debugLog('code_missing', ['trace' => substr(md5($state), 0, 8)]);
             return [];
         }
 
         $token = $this->getAccessToken($code);
         $accessToken = (string) ($token['access_token'] ?? '');
+        $this->debugLog('token_exchange', [
+            'code_hash'        => substr(md5($code), 0, 8),
+            'has_access_token' => $accessToken !== '',
+            'error'            => (string) ($token['error'] ?? ''),
+            'error_description'=> (string) ($token['error_description'] ?? ''),
+            'token_type'       => (string) ($token['token_type'] ?? ''),
+            'expires_in'       => (int) ($token['expires_in'] ?? 0),
+        ]);
         if ($accessToken === '') {
             return [];
         }
 
         $profile = $this->fetchProfile($accessToken);
+        $this->debugLog('profile_fetch', [
+            'has_profile' => !empty($profile),
+            'has_openid'  => !empty($profile['id'] ?? ''),
+            'nickname'    => (string) ($profile['nickname'] ?? ''),
+            'has_avatar'  => !empty($profile['avatar'] ?? ''),
+        ]);
         if (!$profile) {
             return [];
         }
+
+        $this->debugLog('userinfo_ok', ['openid_hash' => substr(md5((string) ($profile['id'] ?? '')), 0, 8)]);
 
         return [
             'openid'        => (string) ($profile['id'] ?? ''),
@@ -172,13 +211,27 @@ abstract class OAuth2
             session('third_pkce_' . $this->platform, null);
         }
 
+        $this->debugLog('token_request', [
+            'code_hash'      => substr(md5($code), 0, 8),
+            'token_url'      => $this->tokenUrl,
+            'redirect_uri'   => $params['redirect_uri'],
+            'client_id_tail' => substr($params['client_id'], -12),
+        ]);
+
         $options = $this->tokenRequestOptions($params);
         $response = HttpHelper::post($this->tokenUrl, $params, $options);
         if (empty($response['code'])) {
+            $this->debugLog('token_http_error', ['http_code' => (int) ($response['code'] ?? 0)]);
             return [];
         }
 
         $data = $this->decodeResponse((string) ($response['data'] ?? ''));
+        $this->debugLog('token_response', [
+            'http_code'         => (int) ($response['code'] ?? 0),
+            'has_access_token'  => !empty($data['access_token']),
+            'error'             => (string) ($data['error'] ?? ''),
+            'error_description' => (string) ($data['error_description'] ?? ''),
+        ]);
         return is_array($data) ? $data : [];
     }
 

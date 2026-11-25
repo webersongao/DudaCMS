@@ -272,6 +272,17 @@ var Dask = {
             });
         },
 
+        /** 执行布局 script 块中的内联脚本；每次开窗都重新执行并按本次弹窗作用域初始化。 */
+        _runModalInlineScripts: function (codes, layero) {
+            codes.forEach(function (code) {
+                try {
+                    new Function('layero', code)(layero);
+                } catch (error) {
+                    console.error('[dask][modal-script]', error);
+                }
+            });
+        },
+
         /**
          * 从服务端返回的完整 HTML 文档里提取弹窗内容片段与模块级脚本。
          * 原生弹窗不再用 iframe 加载整套框架，只取 #wrapMain 内容 + 该控制器的模块 js。
@@ -293,9 +304,16 @@ var Dask = {
                 var isModule = src.indexOf('/static/js/') > -1 || src.indexOf('/static/frontend/js/') > -1;
                 if (!isFramework && isModule) moduleScripts.push(src);
             });
+            // 布局 script 块中的内联脚本（位于 #wrapMain 之外），需单独执行。
+            var inlineScripts = [];
+            Array.prototype.forEach.call(doc.querySelectorAll('script:not([src])'), function (s) {
+                if (!main.contains(s) && s.textContent.trim() !== '') {
+                    inlineScripts.push(s.textContent);
+                }
+            });
             // body 内容（去掉会污染主页面的 html/body 高度样式由调用方局部化）
             var content = main.innerHTML;
-            return { content: content, scripts: moduleScripts };
+            return { content: content, scripts: moduleScripts, inlineScripts: inlineScripts };
         },
 
         /**
@@ -340,6 +358,7 @@ var Dask = {
                         success: function (layero, index) {
                             layer.setTop(layero);
                             $(layero).data("callback", options.callback);
+                            Dask.api._runModalInlineScripts(parsed.inlineScripts || [], layero);
                             Dask.api._runModalScripts(parsed.scripts, layero);
                         }
                     }, options);

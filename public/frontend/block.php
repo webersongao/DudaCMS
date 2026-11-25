@@ -435,5 +435,6 @@
 {else/}
 <div style="{$theme_config['common']['fixed_navbar']=='Y' && !$_ajax_open && !$_ajax && !in_array($thisAction,['login','register','find_password']) && !($thisController=='column' && $thisAction=='index') && (!($thisController=='index' && $thisAction=='index') || get_theme_setting('home.search_enable')=='N') ? 'margin-top:80px' : ''}" id="wrapMain">
     {block name="main"} {/block}
+    {block name="script"} <!--自定义js脚本-->{/block}
 </div>
 {/if}

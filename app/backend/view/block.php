@@ -228,6 +228,7 @@
 
 <div id="wrapMain" class="dask-overflow-auto">
 {block name="main"} {/block}
+{block name="script"} <!--自定义js脚本-->{/block}
 </div>
 {/if}
 </body>

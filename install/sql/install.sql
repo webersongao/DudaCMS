@@ -999,9 +999,9 @@ CREATE TABLE `dask_oauth` (
   `openid` varchar(50) NOT NULL DEFAULT '' COMMENT '第三方唯一ID',
   `unionid` varchar(50) NOT NULL DEFAULT '' COMMENT '第三方唯一ID',
   `open_username` varchar(50) NOT NULL DEFAULT '' COMMENT '第三方会员昵称',
-  `access_token` varchar(255) NOT NULL DEFAULT '' COMMENT 'AccessToken',
+  `access_token` text NOT NULL COMMENT 'AccessToken',
   `token` varchar(50) NOT NULL DEFAULT '' COMMENT '自定义Token',
-  `refresh_token` varchar(255) NOT NULL DEFAULT '' COMMENT 'RefreshToken',
+  `refresh_token` text NOT NULL COMMENT 'RefreshToken',
   `expires_in` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '有效期',
   `create_time` int(10) unsigned DEFAULT NULL COMMENT '创建时间',
   `update_time` int(10) unsigned DEFAULT NULL COMMENT '更新时间',
@@ -1986,7 +1986,7 @@ CREATE TABLE `dask_upgrade_log` (
 
 -- 新装即为当前程序版本，写入一条成功记录作为版本基准，避免误报待升级
 INSERT INTO `dask_upgrade_log` (`version`, `status`, `sql_file`, `sql_count`, `remark`, `add_time`)
-VALUES ('1.0.2', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
+VALUES ('1.0.3', 1, 'install.sql', 0, '全新安装基准', UNIX_TIMESTAMP());
 
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -39,7 +39,7 @@ class Frontend extends Base
         //检查IP封禁
         $this->checkIpAllowed();
 
-        $this->user_info = Users::getUserInfo(intval(getLoginUid()));
+        $this->user_info = Users::getUserInfo(intval(getLoginUid())) ?: [];
         $this->user_id = $this->user_info['uid'] ?? 0;
         $this->baseUrl = rtrim(Request::domain(), '/');
 
@@ -139,7 +139,7 @@ class Frontend extends Base
         CheckHelper::checkOnline();
 
         //检查游客权限 和 浏览网站权限
-        if($this->user_info['permission']['visit_website']!='Y' && request()->controller()!='Account' && request()->action()!='login')
+        if(($this->user_info['permission']['visit_website'] ?? 'Y')!='Y' && request()->controller()!='Account' && request()->action()!='login')
         {
             $this->error('您所在组已禁止浏览网站',url('account/login'));
         }

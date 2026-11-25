@@ -259,7 +259,7 @@ class Ajax extends Frontend
                 $target = ($parts['path'] ?? '/') . $query;
             }
         }
-        if (get_setting('enable_multilingual', 'N') != 'Y') {
+        if (!\app\common\library\helper\SiteConfigHelper::feature('multilingual_enable', true)) {
             return redirect($target);
         }
         $lang = $this->request->param('lang', config('lang.default_lang'));

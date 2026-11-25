@@ -101,10 +101,10 @@
                             </label>
                             {/if}
                             <a href="{:url('page/credit')}" target="_blank" ><i class="fa fa-database"></i> {:L(get_setting("credit_unit"))}{:L('规则')}</a>
-                            {if get_setting('auto_save_draft')=='Y'}
+                            {if $setting.auto_save_draft=='Y'}
                             <script>
-                                //自动保存时间间隔
-                                var AutoSaveTime = parseInt("{:get_setting('auto_save_draft_time')}")*360;
+                                //自动保存时间间隔（内置配置，单位毫秒；30 秒 = 30000）
+                                var AutoSaveTime = {$draft_interval_ms|default=30000};
                                 //设置自动保存
                                 setInterval(function (item_type,itemId){
                                     var formData = Dask.common.formToJSON('question_form');

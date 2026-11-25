@@ -252,9 +252,9 @@ class Config extends Backend
                 '登录与访问' => ['online_check', 'online_check_time', 'visitor_view_answer_count'],
             ],
             7 => [
-                '内容功能' => ['enable_column', 'enable_category', 'enable_anonymous', 'enable_multilingual', 'default_language'],
-                '安全与审核' => ['sensitive_words', 'remove_xss', 'enable_frontend_captcha', 'enable_backend_captcha'],
-                '系统设置' => ['date_friendly_enable', 'record_admin_log', 'auto_save_draft', 'auto_save_draft_time', 'api_doc_public'],
+                '内容功能' => ['enable_category', 'enable_anonymous'],
+                '安全与审核' => ['sensitive_words', 'enable_frontend_captcha', 'enable_backend_captcha'],
+                '系统设置' => ['date_friendly_enable', 'record_admin_log', 'api_doc_public'],
             ],
             9 => [
                 '功能开关' => ['attach_enable', 'topic_enable', 'open_content_enable'],

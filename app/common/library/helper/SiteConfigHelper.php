@@ -26,6 +26,18 @@ class SiteConfigHelper
         return is_array($policy) ? $policy : [];
     }
 
+    /** 读取内置功能配置（草稿、多语言等）。 */
+    public static function feature(string $key, $default = null)
+    {
+        return config('dask.feature.' . $key, $default);
+    }
+
+    /** 草稿自动保存间隔（毫秒），供前端定时器直接使用。 */
+    public static function draftIntervalMs(): int
+    {
+        return max(1000, (int) self::feature('auto_save_interval_ms', 30000));
+    }
+
     /**
      * 站点资源绝对 URL（基于站内静态目录）。
      */

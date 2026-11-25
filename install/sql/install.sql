@@ -378,7 +378,6 @@ INSERT INTO `dask_config` VALUES (17,'seo_description','1','站点描述','站�
 INSERT INTO `dask_config` VALUES (19,'register_valid_type','5','验证类型','新用户注册验证类型','radio','email','{\"email\":\"邮箱验证\",\"admin\":\"后台审核\",\"N\":\"不验证\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (20,'register_type','5','注册类型','注册类型','radio','email','{\"email\":\"邮箱注册\",\"mobile\":\"手机注册\",\"all\":\"手机+邮箱注册\",\"close\":\"关闭注册\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (28,'register_agreement','5','注册协议','','textarea','当您申请用户时，表示您已经同意遵守本规章。\r\n欢迎您加入本站点参与交流和讨论，本站点为社区，为维护网上公共秩序和社会稳定，请您自觉遵守以下条款：\r\n\r\n一、不得利用本站危害国家安全、泄露国家秘密，不得侵犯国家社会集体的和公民的合法权益，不得利用本站制作、复制和传播下列信息：\r\n　（一）煽动抗拒、破坏宪法和法律、行政法规实施的；\r\n　（二）煽动颠覆国家政权，推翻社会主义制度的；\r\n　（三）煽动分裂国家、破坏国家统一的；\r\n　（四）煽动民族仇恨、民族歧视，破坏民族团结的；\r\n　（五）捏造或者歪曲事实，散布谣言，扰乱社会秩序的；\r\n　（六）宣扬封建迷信、淫秽、色情、赌博、暴力、凶杀、恐怖、教唆犯罪的；\r\n　（七）公然侮辱他人或者捏造事实诽谤他人的，或者进行其他恶意攻击的；\r\n　（八）损害国家机关信誉的；\r\n　（九）其他违反宪法和法律行政法规的；\r\n　（十）进行商业广告行为的。\r\n\r\n二、互相尊重，对自己的言论和行为负责。\r\n三、禁止在申请用户时使用相关本站的词汇，或是带有侮辱、毁谤、造谣类的或是有其含义的各种语言进行注册用户，否则我们会将其删除。\r\n四、禁止以任何方式对本站进行各种破坏行为。\r\n五、如果您有违反国家相关法律法规的行为，本站概不负责，您的登录信息均被记录无疑，必要时，我们会向相关的国家管理部门提供此类信息。','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (29,'enable_column','7','启用专栏','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (30,'enable_category','7','启用分类','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (47,'upload_type','4','上传方式','默认为TP上传','radio','tp','{\"tp\":\"默认方式\",\"big\":\"分片上传\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (48,'footer_html','1','公共底部代码','','textarea','','null',53,NULL,1,0);
@@ -390,7 +389,6 @@ INSERT INTO `dask_config` VALUES (57,'email_port','3','邮箱端口','常用端�
 INSERT INTO `dask_config` VALUES (58,'email_from','3','显示来源','请保持和邮箱用户名同一主域下','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (59,'email_show_name','3','来源名称','显示来源名称','text','','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (62,'search_handle','10','搜索引擎','搜索引擎选择,未安装其他搜索引擎时默认为本地数据库搜索','radio','regexp','{\"regexp\":\"系统默认\",\"ElasticSearch\":\"ElasticSearch\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (63,'remove_xss','7','启用XSS过滤','启用XSS过滤可能会导致某些内容被过滤','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (64,'date_friendly_enable','7','时间格式','','radio','friendly','{\"friendly\":\"友好格式\",\"normal\":\"标准格式\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (65,'attach_enable','9','发布内容支持附件','发布内容(问题、文章)时是否支持附件','radio','Y','{\"Y\":\"是\",\"N\":\"否\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (66,'topic_enable','9','发布内容必选话题','发布内容(问题、文章)时是否必选话题','radio','Y','{\"Y\":\"是\",\"N\":\"否\"}',0,NULL,1,0);
@@ -405,8 +403,6 @@ INSERT INTO `dask_config` VALUES (74,'publish_content_verify_num','9','发文验
 INSERT INTO `dask_config` VALUES (76,'enable_frontend_captcha','7','启用前台验证码','是否启用前台登录验证码','radio','N','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (77,'enable_backend_captcha','7','启用后台验证码','是否启用后台登录验证码','radio','N','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (79,'cache_relation_list_time','8','相关数据缓存','问题/文章详情页相关数据/推荐内容缓存周期0代表不缓存，单位：分钟','number','0','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (81,'auto_save_draft','7','自动保存草稿','是否开启自动保存草稿','radio','Y','{\"N\":\"关闭\",\"Y\":\"开启\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (82,'auto_save_draft_time','7','自动保存时间','草稿自动保存间隔时间,单位：秒','number','30','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (83,'search_engine_user','10','搜索引擎用户名','搜索引擎用户名,没有请留空','text','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (84,'search_engine_password','10','搜索引擎密码','搜索引擎密码,没有请留空','password','','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (85,'search_engine_host','10','搜索引擎地址','搜索引擎服务地址,请填写完整的服务器地址，包括端口等,如es搜索引擎需要配置','text','','null',0,NULL,1,0);
@@ -422,10 +418,8 @@ INSERT INTO `dask_config` VALUES (108,'answer_sort_type','9','默认回答排序
 INSERT INTO `dask_config` VALUES (110,'auto_question_lock_day','9','自动锁定问题天数','自动锁定问题天数 0 代表不自动锁定，单位：天','number','60','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (111,'auto_set_best_answer_day','9','自动设定最佳回答天数','自动设定最佳回答天数 0 代表不自动设定，单位：天','number','7','[]',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (112,'best_answer_min_count','9','自动设定最佳回答时该问题最小回答数','自动设定最佳回答时该问题最小回答数','number','1','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (113,'enable_multilingual','7','启用多语言','启用前台多语言','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (114,'visitor_view_answer_count','5','游客可浏览回答数量','游客可浏览回答数量，0代表不限制','number','0','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (115,'uninterested_fold','9','“不感兴趣”数量达到多少个时自动折叠回复','“不感兴趣”数量达到多少个时自动折叠回复','number','10','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (117,'default_language','7','默认站点语言','站点默认使用语言','radio','zh-cn','{\"zh-cn\":\"中文\",\"en-us\":\"英文\",\"zh-tw\":\"繁體中文\",\"es-es\":\"西班牙语\"}',50,'',0,1);
 INSERT INTO `dask_config` VALUES (118,'best_agree_min_count','9','自动设定最佳回答时该回答至少获赞数','自动设定最佳回答时该回答至少获赞数','number','3','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (119,'content_popular_value_show','9','热度值大于多少参与热度排序','热度值达到多少参与热度排序,默认大于0即参与热门排序','number','0','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (120,'upload_image_thumb_enable','4','是否启用图片压缩','是否启用图片压缩，PNG图片压缩会失去透明效果','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
@@ -1967,9 +1961,9 @@ INSERT IGNORE INTO `dask_admin_auth` (`id`, `pid`, `name`, `title`, `type`, `sta
 (414, 413, 'member.Users/third_delete', '操作-删除', 1, 0, '', 0, 1, 'fa fa-trash', 0, 0, '', NULL);
 
 
--- 15. 初始化展示类与安全审计类功能开关，便于呈现完整站点（站点开关保持默认）。
+-- 15. 初始化展示类与安全审计类功能开关（enable_column/remove_xss/enable_multilingual 已内置到 config/dask.php）。
 UPDATE `dask_config` SET value = 'Y' WHERE name IN (
-  'enable_column', 'enable_multilingual', 'attach_enable', 'remove_xss', 'record_admin_log'
+  'attach_enable', 'record_admin_log'
 );
 UPDATE `dask_config` SET value = 'qq,wechat,weibo,github,google,twitter' WHERE name = 'third_enable';
 

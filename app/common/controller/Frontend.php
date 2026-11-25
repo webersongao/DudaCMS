@@ -1,6 +1,7 @@
 <?php
 namespace app\common\controller;
 use app\common\library\helper\CheckHelper;
+use app\common\library\helper\SiteConfigHelper;
 use app\common\library\helper\StringHelper;
 use app\common\library\helper\UserAuthHelper;
 use app\common\traits\Common;
@@ -107,6 +108,12 @@ class Frontend extends Base
             'username' => "{$usernameMin} - {$usernameMax} 个字符，字母、数字或下划线",
             'password' => "{$passwordMin} - {$passwordMax} 位，需包含数字和字母",
         ]);
+        // 草稿自动保存与多语言改为内置配置；settings 保留兼容键供模板读取。
+        $this->settings['auto_save_draft'] = SiteConfigHelper::feature('auto_save_draft', true) ? 'Y' : 'N';
+        $this->settings['auto_save_draft_time'] = (string) SiteConfigHelper::feature('auto_save_interval', 30);
+        $this->settings['enable_multilingual'] = SiteConfigHelper::feature('multilingual_enable', true) ? 'Y' : 'N';
+        $this->settings['default_language'] = (string) SiteConfigHelper::feature('default_language', 'zh-cn');
+        $this->assign('draft_interval_ms', SiteConfigHelper::draftIntervalMs());
 
         $this->assign([
             'baseUrl'=> $this->baseUrl,

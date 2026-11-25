@@ -116,4 +116,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'config:site_logo=absent, config:password_min_length=absent',
     ],
+    '1.0.12' => [
+        'from'    => '1.0.11',
+        'file'    => 'update1.0.11to1.0.12.sql',
+        'title'   => '草稿与多语言内置化',
+        'summary' => '草稿默认开启间隔30秒、默认启用多语言改为内置；清理无读取点的失效配置',
+        'risk'    => 'low',
+        'verify'  => 'config:auto_save_draft=absent, config:remove_xss=absent',
+    ],
 ];

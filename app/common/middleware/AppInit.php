@@ -30,13 +30,13 @@ class AppInit
             @date_default_timezone_set($timezone);
         }
 
-        //设置默认语言
+        // 设置默认语言：多语言开关与默认语言改为内置配置。
         $defaultLang = cookie('dask_lang');
-        if (get_setting('default_language','zh-cn') && (!$defaultLang || $defaultLang!=get_setting('default_language','zh-cn')))
-        {
-            if(get_setting('enable_multilingual')!='Y')
-            {
-                cookie('dask_lang',get_setting('default_language','zh-cn'));
+        $builtinLang = (string) \app\common\library\helper\SiteConfigHelper::feature('default_language', 'zh-cn');
+        $multilingual = \app\common\library\helper\SiteConfigHelper::feature('multilingual_enable', true);
+        if ($builtinLang !== '' && (!$defaultLang || $defaultLang !== $builtinLang)) {
+            if (!$multilingual) {
+                cookie('dask_lang', $builtinLang);
             }
         }
         return $next($request);

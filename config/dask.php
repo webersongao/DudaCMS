@@ -49,6 +49,17 @@ return array (
     'font' => 'vendor/captcha/font/SourceHanSansCN-Normal.ttf',
   ],
 
+  // 功能配置：草稿自动保存与多语言为固定基线，后台不再自定义。
+  'feature' => [
+    // 默认开启草稿自动保存，间隔 30 秒（毫秒值供前端定时器直接使用）。
+    'auto_save_draft'      => true,
+    'auto_save_interval'   => 30,        // 秒
+    'auto_save_interval_ms' => 30000,    // 毫秒 = 秒 * 1000
+    // 默认启用前台多语言，站点默认语言 zh-cn。
+    'multilingual_enable'  => true,
+    'default_language'     => 'zh-cn',
+  ],
+
   // 账号策略（注册 / 登录 / 找回密码统一读取，后台不再自定义）。
   'account_policy' => [
     'username_min_length'   => 2,

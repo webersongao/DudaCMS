@@ -187,9 +187,14 @@ class UsersInbox extends BaseModel
 		}
 
 		if (is_string($recipient_uid)) {
-			$recipient_uid = ctype_digit(trim($recipient_uid))
-				? intval($recipient_uid)
-				: intval(db('users')->where('nick_name', trim($recipient_uid))->value('uid'));
+			$recipient = trim($recipient_uid);
+			$recipient_uid = ctype_digit($recipient)
+				? intval($recipient)
+				: intval(db('users')->where('user_name', $recipient)->whereOr('nick_name', $recipient)->value('uid'));
+		}
+		if (!$recipient_uid) {
+			self::setError('接收私信的用户不存在');
+			return false;
 		}
 
 		if (trim($message) == '') {

@@ -154,7 +154,7 @@ class Ajax extends Frontend
     {
         $user_name = $this->request->param('recipient_uid', '');
         $page = $this->request->param('page', 1);
-        $recipient_uid = db('users')->where('nick_name', $user_name)->value('uid');
+        $recipient_uid = db('users')->where('user_name', $user_name)->whereOr('nick_name', $user_name)->value('uid');
         $dialog_info = InboxModel::getDialogByUser($this->user_id, $recipient_uid);
         $list = $dialog_info ? InboxModel::getMessageByDialogId($dialog_info['id'], $this->user_id, intval($page)) : [];
         if ($this->user_info['inbox_unread'] && $dialog_info) {

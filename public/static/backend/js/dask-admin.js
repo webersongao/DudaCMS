@@ -205,7 +205,7 @@ const DaskAdmin = {
                 data: options.data || null,
                 dataType: 'html',
                 success: function (html) {
-                    var trimmed = $.trim(String(html || ''));
+                    var trimmed = String(html || '').trim();
                     if (trimmed.charAt(0) === '{') {
                         try {
                             var result = JSON.parse(trimmed);
@@ -244,7 +244,7 @@ const DaskAdmin = {
                     return layer.open(layerOptions);
                 },
                 error: function (xhr) {
-                    var msg = $.trim(xhr.responseText || '');
+                    var msg = String(xhr.responseText || '').trim();
                     DaskAdmin.api.error(msg ? ('加载失败：' + msg.slice(0, 200)) : '加载失败，请稍后重试');
                 }
             });

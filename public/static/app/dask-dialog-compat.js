@@ -315,6 +315,10 @@
     window.__daskModalIndex = index;
     if (typeof element.showModal === 'function') element.showModal();
     else element.setAttribute('open', '');
+    // 与 layer.success 对齐：模块脚本与弹窗内初始化逻辑依赖此回调执行。
+    if (isFunction(options.success)) {
+      try { options.success(element, index); } catch (error) { console.error('[layer] success callback', error); }
+    }
     return index;
   }
 

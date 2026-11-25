@@ -140,7 +140,7 @@
                                         <input type="text" class="dask-form-control" id="mobile" name="mobile" placeholder="{:L('请输入手机号')}">
                                     </div>
                                     <div class="mb-3 bline">
-                                        <input type="password" class="dask-form-control" name="password" placeholder="{:L('请输入新密码')}">
+                                        <input type="password" class="dask-form-control" name="password" placeholder="{$account_hints.password}">
                                     </div>
                                     <div class="mb-3 bline">
                                         <input type="password" class="dask-form-control" name="re_password" placeholder="{:L('请再次确认密码')}">

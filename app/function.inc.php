@@ -1248,25 +1248,24 @@ if(!function_exists('array_key_sort_asc_callback')) {
     }
 }
 
-// 密码检查
+// 密码检查（统一走集中配置，兼容旧调用）
 if (!function_exists('daskCheckPassword')) {
     function daskCheckPassword($value)
     {
-        // 验证密码长度
+        $min = (int) \app\common\library\helper\SiteConfigHelper::account('password_min_length', 8);
+        $max = (int) \app\common\library\helper\SiteConfigHelper::account('password_max_length', 30);
         $len = mb_strlen($value);
-        if ($len < get_setting('password_min_length') || $len > get_setting('password_max_length')) {
-            return '请输入'.get_setting('password_min_length').' - '.get_setting('password_max_length').' 位的密码';
+        if ($len < $min || $len > $max) {
+            return "密码长度需为 {$min} - {$max} 位";
         }
 
-        $types = get_setting('password_type');
-        if (empty($types)) return true;
-        if (in_array('number', $types) && !preg_match("/[0-9]+/", $value)) return '密码需包含数字';
-
-        if (in_array('special', $types) && !preg_match("/[_|\-|+|=|*|!|@|#|$|%|^|&|(|)]+/", $value)) return '密码需包含特殊字符';
-
-        if (in_array('letter', $types) && !preg_match("/[a-zA-Z]+/", $value)) return '密码需包含大小写字母';
-
-        return true;
+        $types = (array) \app\common\library\helper\SiteConfigHelper::account('password_types', []);
+        if (!$types) return true;
+        $hints = [];
+        if (in_array('number', $types, true) && !preg_match('/[0-9]/', $value)) $hints[] = '数字';
+        if (in_array('letter', $types, true) && !preg_match('/[a-zA-Z]/', $value)) $hints[] = '字母';
+        if (in_array('special', $types, true) && !preg_match('/[^a-zA-Z0-9]/', $value)) $hints[] = '特殊符号';
+        return $hints ? '密码需包含' . implode('、', $hints) : true;
     }
 }
 

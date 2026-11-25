@@ -90,6 +90,24 @@ class Frontend extends Base
         $heroTitle = $this->settings['site_name'] . ' ' . ($heroLabels[$heroKey] ?? '');
         // 题图副标题使用固定默认文案（原「站点短标语」配置项已移除）
         $heroSubtitle = '与世界分享你的装逼技巧与水平';
+
+        // 站点 Logo / 描述 / 关键词统一走集中配置与 SEO 字段，不再由后台单独维护。
+        $this->settings['site_logo'] = \app\common\library\helper\SiteConfigHelper::assetUrl('logo');
+        $this->settings['site_description'] = $this->settings['seo_description'] ?? '';
+        $this->settings['site_keywords'] = $this->settings['seo_keywords'] ?? '';
+        // 兼容模板里仍按旧 settings 读取账号策略的写法，统一指向内置配置。
+        $accountPolicy = \app\common\library\helper\SiteConfigHelper::accountAll();
+        $this->settings['remember_login_enable'] = !empty($accountPolicy['remember_login_enable']) ? 'Y' : 'N';
+        // 注册 / 找回密码输入框的优雅提示（长度与复杂度来自集中配置）。
+        $usernameMin = (int) ($accountPolicy['username_min_length'] ?? 2);
+        $usernameMax = (int) ($accountPolicy['username_max_length'] ?? 15);
+        $passwordMin = (int) ($accountPolicy['password_min_length'] ?? 8);
+        $passwordMax = (int) ($accountPolicy['password_max_length'] ?? 30);
+        $this->assign('account_hints', [
+            'username' => "{$usernameMin} - {$usernameMax} 个字符，字母、数字或下划线",
+            'password' => "{$passwordMin} - {$passwordMax} 位，需包含数字和字母",
+        ]);
+
         $this->assign([
             'baseUrl'=> $this->baseUrl,
             'thisController'       => parse_name($this->controller),
@@ -154,10 +172,10 @@ class Frontend extends Base
         }
 
         // 检测当前用户是在其他地方登录
-        if ($this->user_id && get_setting('unique_login')=='Y' && !CheckHelper::checkUserIsLoginOtherPlatform($this->user_id))
+        if ($this->user_id && \app\common\library\helper\SiteConfigHelper::account('unique_login', false) && !CheckHelper::checkUserIsLoginOtherPlatform($this->user_id))
         {
             Users::logout();
-            $this->error('您已在其他地方登录','/');
+            $this->error('你的账号已在其他设备登录，当前会话已退出，请重新登录','/');
         }
 
         // 控制器初始化

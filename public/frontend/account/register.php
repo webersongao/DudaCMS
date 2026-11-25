@@ -28,10 +28,10 @@
                                     {:csrf_field()}
                                     <input name="return_url" id="returnUrl" type="hidden" value="{:base64_encode($return_url)}">
                                     <div class="mb-3 bline">
-                                        <input id="username" name="username" placeholder="{:L('用户名')}" type="text" class="dask-form-control" data-dask-validate="required">
+                                        <input id="username" name="username" placeholder="{$account_hints.username}" type="text" class="dask-form-control" data-dask-validate="required">
                                     </div>
                                     <div class="mb-3 bline">
-                                        <input type="password" id="password" name="password" placeholder="{:L('登录密码')}" class="dask-form-control" data-dask-validate="required">
+                                        <input type="password" id="password" name="password" placeholder="{$account_hints.password}" class="dask-form-control" data-dask-validate="required">
                                     </div>
                                     <!-- <div class="mb-3 bline d-flex">
                                     <input type="invitation_code" id="inviteCode" name="invitation_code" placeholder="{:L('邀请码')}（︎{if get_setting('invite_register_enable') =='Y'}不{/if}可为空）" class="dask-form-control" value="{:input('invitation_code')}"/>

@@ -232,9 +232,9 @@ class Config extends Backend
     {
         $maps = [
             1 => [
-                '站点信息' => ['site_name', 'site_logo', 'site_favicon', 'site_close', 'icp', 'site_description', 'pjax_enable'],
-                'SEO 设置' => ['seo_title', 'seo_keywords', 'seo_description', 'site_keywords'],
-                '联系方式' => ['contact_email', 'report_bug_email'],
+                '站点信息' => ['site_name', 'site_close', 'icp', 'pjax_enable'],
+                'SEO 设置' => ['seo_title', 'seo_keywords', 'seo_description'],
+                '联系方式' => ['contact_email'],
                 '页头页脚' => ['header_html', 'footer_html'],
             ],
             3 => [
@@ -244,13 +244,12 @@ class Config extends Backend
             4 => [
                 '上传限制' => ['upload_file_size', 'upload_file_ext', 'upload_image_size', 'upload_image_ext', 'upload_type', 'upload_max_size'],
                 '图片处理' => ['download_local_enable', 'upload_image_thumb_enable', 'upload_image_thumb_percent'],
-                '水印设置' => ['watermark_enable', 'watermark_text', 'watermark_font', 'watermark_position', 'watermark_font_size', 'watermark_opacity', 'watermark_color', 'watermark_quality'],
+                '水印设置' => ['watermark_enable', 'watermark_text', 'watermark_position', 'watermark_font_size', 'watermark_opacity', 'watermark_color', 'watermark_quality'],
                 '视频压缩' => ['video_compress_enable', 'ffmpeg_path', 'video_compress_crf', 'video_compress_preset', 'video_compress_max_width'],
             ],
             5 => [
                 '注册设置' => ['register_valid_type', 'register_type', 'register_agreement', 'invite_register_enable', 'invitation_expire_time'],
-                '账号规则' => ['password_min_length', 'password_max_length', 'password_type', 'password_max_retries', 'password_lock_minutes', 'username_min_length', 'username_max_length'],
-                '登录与访问' => ['online_check', 'online_check_time', 'unique_login', 'remember_login_enable', 'remember_login_time', 'visitor_view_answer_count'],
+                '登录与访问' => ['online_check', 'online_check_time', 'visitor_view_answer_count'],
             ],
             7 => [
                 '内容功能' => ['enable_column', 'enable_category', 'enable_anonymous', 'enable_multilingual', 'default_language'],

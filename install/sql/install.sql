@@ -361,7 +361,6 @@ CREATE TABLE `dask_config` (
 -- Records of dask_config
 -- ----------------------------
 INSERT INTO `dask_config` VALUES (1,'site_name','1','站点名称','请填写站点名称','text','','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (2,'site_logo','1','网站logo','请上传网站LOGO','image','','null',2,NULL,1,0);
 INSERT INTO `dask_config` VALUES (3,'site_close','1','关闭站点','开启或关闭站点','radio','N','{\"Y\":\"关闭\",\"N\":\"开启\"}',2,NULL,1,0);
 INSERT INTO `dask_config` VALUES (4,'icp','1','备案号','输入网站备案号','text','','null',3,NULL,1,0);
 INSERT INTO `dask_config` VALUES (5,'email_enable','3','邮箱功能','','radio','Y','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
@@ -378,13 +377,6 @@ INSERT INTO `dask_config` VALUES (16,'seo_keywords','1','站点关键词','站�
 INSERT INTO `dask_config` VALUES (17,'seo_description','1','站点描述','站点描述','textarea','','null',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (19,'register_valid_type','5','验证类型','新用户注册验证类型','radio','email','{\"email\":\"邮箱验证\",\"admin\":\"后台审核\",\"N\":\"不验证\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (20,'register_type','5','注册类型','注册类型','radio','email','{\"email\":\"邮箱注册\",\"mobile\":\"手机注册\",\"all\":\"手机+邮箱注册\",\"close\":\"关闭注册\"}',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (21,'password_min_length','5','密码最小长度','密码最小长度','number','6','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (22,'password_max_length','5','密码最大长度','密码最大长度','number','30','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (23,'password_type','5','密码类型','密码类型，密码必须是选择的类型才可使用，不选则不限制','checkbox','','{\"number\":\"数字\",\"special\":\"特殊字符\",\"letter\":\"字母\"}',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (24,'username_min_length','5','用户名最小长度','用户名最小长度','number','0','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (25,'username_max_length','5','用户名最大长度','用户名最大长度','number','15','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (26,'password_max_retries','5','密码最大重试次数','连续输错多少次后锁定账号，0 表示不限制','number','3','[]',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (27,'password_lock_minutes','5','账号锁定时长','触发重试上限后的锁定时长，单位：分钟，0 表示仅提示不锁定','number','10','[]',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (28,'register_agreement','5','注册协议','','textarea','当您申请用户时，表示您已经同意遵守本规章。\r\n欢迎您加入本站点参与交流和讨论，本站点为社区，为维护网上公共秩序和社会稳定，请您自觉遵守以下条款：\r\n\r\n一、不得利用本站危害国家安全、泄露国家秘密，不得侵犯国家社会集体的和公民的合法权益，不得利用本站制作、复制和传播下列信息：\r\n　（一）煽动抗拒、破坏宪法和法律、行政法规实施的；\r\n　（二）煽动颠覆国家政权，推翻社会主义制度的；\r\n　（三）煽动分裂国家、破坏国家统一的；\r\n　（四）煽动民族仇恨、民族歧视，破坏民族团结的；\r\n　（五）捏造或者歪曲事实，散布谣言，扰乱社会秩序的；\r\n　（六）宣扬封建迷信、淫秽、色情、赌博、暴力、凶杀、恐怖、教唆犯罪的；\r\n　（七）公然侮辱他人或者捏造事实诽谤他人的，或者进行其他恶意攻击的；\r\n　（八）损害国家机关信誉的；\r\n　（九）其他违反宪法和法律行政法规的；\r\n　（十）进行商业广告行为的。\r\n\r\n二、互相尊重，对自己的言论和行为负责。\r\n三、禁止在申请用户时使用相关本站的词汇，或是带有侮辱、毁谤、造谣类的或是有其含义的各种语言进行注册用户，否则我们会将其删除。\r\n四、禁止以任何方式对本站进行各种破坏行为。\r\n五、如果您有违反国家相关法律法规的行为，本站概不负责，您的登录信息均被记录无疑，必要时，我们会向相关的国家管理部门提供此类信息。','[]',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (29,'enable_column','7','启用专栏','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (30,'enable_category','7','启用分类','','radio','Y','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
@@ -413,7 +405,6 @@ INSERT INTO `dask_config` VALUES (74,'publish_content_verify_num','9','发文验
 INSERT INTO `dask_config` VALUES (76,'enable_frontend_captcha','7','启用前台验证码','是否启用前台登录验证码','radio','N','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (77,'enable_backend_captcha','7','启用后台验证码','是否启用后台登录验证码','radio','N','{\"Y\":\"启用\",\"N\":\"禁用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (79,'cache_relation_list_time','8','相关数据缓存','问题/文章详情页相关数据/推荐内容缓存周期0代表不缓存，单位：分钟','number','0','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (80,'unique_login','5','单一登录','只允许同一个用户相同ip相同浏览器登录','radio','N','{\"N\":\"关闭\",\"Y\":\"开启\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (81,'auto_save_draft','7','自动保存草稿','是否开启自动保存草稿','radio','Y','{\"N\":\"关闭\",\"Y\":\"开启\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (82,'auto_save_draft_time','7','自动保存时间','草稿自动保存间隔时间,单位：秒','number','30','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (83,'search_engine_user','10','搜索引擎用户名','搜索引擎用户名,没有请留空','text','','null',0,NULL,1,0);
@@ -425,8 +416,6 @@ INSERT INTO `dask_config` VALUES (89,'invitation_expire_time','5','注册邀请�
 INSERT INTO `dask_config` VALUES (91,'show_answer_user_ip','9','显示回答用户IP地址','是否显示回答用户IP地址','radio','Y','{\"Y\":\"显示\",\"N\":\"不显示\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (92,'invite_register_enable','5','开启邀请注册','是否开启邀请注册','radio','N','{\"Y\":\"开启\",\"N\":\"关闭\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (93,'enable_anonymous','7','是否允许匿名','是否允许匿名提问/回答问题','radio','Y','{\"Y\":\"允许\",\"N\":\"不允许\"}',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (95,'remember_login_time','5','记住登录有效期','记住登录有效期，单位：天','number','7','null',50,NULL,1,0);
-INSERT INTO `dask_config` VALUES (97,'report_bug_email','1','BUG反馈接收提醒邮箱','BUG反馈接收提醒邮箱','text','','null',51,'',1,0);
 INSERT INTO `dask_config` VALUES (98,'max_topic_select','9','话题最多选择数量','话题最多选择数量','number','4','null',51,'',1,0);
 INSERT INTO `dask_config` VALUES (106,'pjax_enable','1','是否启用pjax','网站是否启用pjax请求','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',50,'',1,0);
 INSERT INTO `dask_config` VALUES (108,'answer_sort_type','9','默认回答排序','选择默认回答排序方式','radio','new','{\"new\":\"最新排序\",\"hot\":\"热门排序\",\"publish\":\"只看楼主\",\"focus\":\"关注的人\"}',50,'',1,0);
@@ -436,7 +425,6 @@ INSERT INTO `dask_config` VALUES (112,'best_answer_min_count','9','自动设定�
 INSERT INTO `dask_config` VALUES (113,'enable_multilingual','7','启用多语言','启用前台多语言','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (114,'visitor_view_answer_count','5','游客可浏览回答数量','游客可浏览回答数量，0代表不限制','number','0','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (115,'uninterested_fold','9','“不感兴趣”数量达到多少个时自动折叠回复','“不感兴趣”数量达到多少个时自动折叠回复','number','10','null',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (116,'remember_login_enable','5','是否启用记住登录状态','是否启用记住登录状态,为了防止用户通过保存cookie实现自动登录，建议不启用','radio','Y','{\"Y\":\"启用\",\"N\":\"不启用\"}',50,NULL,1,0);
 INSERT INTO `dask_config` VALUES (117,'default_language','7','默认站点语言','站点默认使用语言','radio','zh-cn','{\"zh-cn\":\"中文\",\"en-us\":\"英文\",\"zh-tw\":\"繁體中文\",\"es-es\":\"西班牙语\"}',50,'',0,1);
 INSERT INTO `dask_config` VALUES (118,'best_agree_min_count','9','自动设定最佳回答时该回答至少获赞数','自动设定最佳回答时该回答至少获赞数','number','3','null',0,NULL,1,0);
 INSERT INTO `dask_config` VALUES (119,'content_popular_value_show','9','热度值大于多少参与热度排序','热度值达到多少参与热度排序,默认大于0即参与热门排序','number','0','null',0,NULL,1,0);
@@ -515,15 +503,11 @@ INSERT INTO `dask_config` VALUES (508,'sms_tencent_access_key_secret','14','腾�
 INSERT INTO `dask_config` VALUES (509,'sms_tencent_sign_name','14','腾讯云短信签名','控制台签名管理页的签名名称','text','','[]',13,NULL,1,0);
 INSERT INTO `dask_config` VALUES (510,'sms_tencent_template_code','14','腾讯云短信模板 ID','控制台模板管理页的模板 ID','text','','[]',14,NULL,1,0);
 INSERT INTO `dask_config` VALUES (511,'credit_unit','6','成长值单位','前台成长值单位','text','成长值','[]',0,NULL,1,0);
-INSERT INTO `dask_config` VALUES (512,'site_description','1','站点描述','用于页面 meta description 与侧边栏站点简介','textarea','','[]',4,NULL,1,0);
-INSERT INTO `dask_config` VALUES (513,'site_keywords','1','站点关键词','用于页面 meta keywords 与 API 输出','textarea','','[]',5,NULL,1,0);
 INSERT INTO `dask_config` VALUES (514,'upload_max_size','4','API 上传上限','供前端 API 与编辑器读取，单位：KB','number','20480','[]',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (515,'t_hm_search_enable','12','发现页搜索框','关闭后隐藏发现页顶部搜索框','radio','Y','{\"Y\":\"显示\",\"N\":\"隐藏\"}',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (516,'contact_email','1','联系邮箱','用于站点页脚与错误提示中的联系地址','text','','null',6,NULL,1,0);
-INSERT INTO `dask_config` VALUES (517,'site_favicon','1','站点图标','填写完整 URL 或以 / 开头的站内路径，留空使用默认图标','text','','null',7,NULL,1,0);
 INSERT INTO `dask_config` VALUES (518,'site_timezone','8','站点时区','全站统一时区，例如 Asia/Shanghai、UTC','text','Asia/Shanghai','null',1,NULL,1,0);
 INSERT INTO `dask_config` VALUES (519,'theme_mode','8','默认外观','light 浅色、dark 深色、auto 跟随系统','radio','auto','{\"light\":\"浅色\",\"dark\":\"深色\",\"auto\":\"跟随系统\"}',2,NULL,1,0);
-INSERT INTO `dask_config` VALUES (520,'watermark_font','4','水印字体路径','留空使用内置思源黑体；可填写服务器上的 TTF 字体绝对路径','text','','null',20,NULL,1,0);
 INSERT INTO `dask_config` VALUES (521,'watermark_position','4','水印位置','统一控制图片水印落点','radio','bottom-right','{\"top-left\":\"左上\",\"top-right\":\"右上\",\"bottom-left\":\"左下\",\"bottom-right\":\"右下\",\"center\":\"居中\"}',21,NULL,1,0);
 INSERT INTO `dask_config` VALUES (522,'watermark_font_size','4','水印字号','0 表示按图片尺寸自动计算','number','0','[]',22,NULL,1,0);
 INSERT INTO `dask_config` VALUES (523,'watermark_opacity','4','水印不透明度','0-100，数值越大越不透明','number','100','[]',23,NULL,1,0);

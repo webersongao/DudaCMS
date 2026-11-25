@@ -67,7 +67,7 @@ class AuthSession
     {
         $uid = (int) (session(self::FRONT_UID) ?: session('login_uid') ?: 0);
         if ($uid > 0) return $uid;
-        if (!$restoreRemember || get_setting('remember_login_enable') !== 'Y') return 0;
+        if (!$restoreRemember || !SiteConfigHelper::account('remember_login_enable', false)) return 0;
 
         $cookieUid = (string) cookie(self::rememberCookieKey());
         if ($cookieUid === '') return 0;
@@ -120,7 +120,7 @@ class AuthSession
     /** 写入签名 remember cookie，绑定密码指纹。 */
     public static function writeRemember(int $uid, array $user, int $ttl): void
     {
-        if ($ttl <= 0 || get_setting('remember_login_enable') !== 'Y') return;
+        if ($ttl <= 0 || !SiteConfigHelper::account('remember_login_enable', false)) return;
         $fingerprint = substr(hash('sha256', (string) ($user['password'] ?? '') . (string) ($user['salt'] ?? '')), 0, 16);
         $value = SignedValueHelper::sign('remember', $uid . '|' . $fingerprint, $ttl);
         cookie(self::rememberCookieKey(), $value, ['expire' => $ttl]);

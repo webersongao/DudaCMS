@@ -10,7 +10,7 @@
     <meta name="title" content="{:get_setting('site_name')} - {:L('网站维护中')}"/>
     <meta name="keywords" content="{:get_setting('site_name')}, {:get_setting('seo_keywords')}"/>
     <meta name="image" content="{$assetBase}frontend/image/ameta.webp">
-    <meta name="description" content="{:get_setting('site_description')}"/>
+    <meta name="description" content="{:get_setting('seo_description')}"/>
     <style type="text/css">
         *{box-sizing:border-box;}
         body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--dask-bg,#e6e8eb);color:var(--dask-text,#333);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased;}

@@ -302,8 +302,7 @@ class ImageHelper
                 imagesavealpha($image, true);
             }
 
-            $font = trim((string) get_setting('watermark_font', ''));
-            $font = $font !== '' ? $font : (public_path('static') . 'vendor/captcha/font/SourceHanSansCN-Normal.ttf');
+            $font = self::watermarkFont();
             if (!is_file($font)) {
                 imagedestroy($image);
                 return false;
@@ -386,6 +385,16 @@ class ImageHelper
         } catch (Throwable $e) {
             return false;
         }
+    }
+
+    /** 水印字体：统一取 config/dask.php 中内置的思源黑体。 */
+    private static function watermarkFont(): string
+    {
+        $font = SiteConfigHelper::watermarkFont();
+        if ($font !== '' && is_file($font)) {
+            return $font;
+        }
+        return public_path('static') . 'vendor/captcha/font/SourceHanSansCN-Normal.ttf';
     }
 
     /**

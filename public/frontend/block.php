@@ -11,7 +11,7 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     {/if}
     <base href="{$baseUrl}/">
-    <link rel="icon" href="{:get_setting('site_favicon') ?: asset('brand/favicon.ico', false)}" type="image/x-icon">
+    <link rel="icon" href="{:asset('brand/favicon.ico', false)}" type="image/x-icon">
     <meta name="referrer" content="never">
     <title>{block name="meta_title"}{$_page_title|default=""}{/block}</title>
     <meta name="title" content="{$_page_title|default=''}" />

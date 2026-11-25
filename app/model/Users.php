@@ -229,28 +229,29 @@ class Users extends BaseModel
             // MD5 摘要密码在登录成功后自动升级为 bcrypt
             db('users')->where('uid', $user['uid'])->update(['password' => hash_password($password)]);
         }
-        $password_error_limit_time = intval(get_setting('password_lock_minutes'));
+        $password_error_limit_time = (int) \app\common\library\helper\SiteConfigHelper::account('password_lock_minutes', 10);
         if (!$passwordOk || ($password_error_limit_time > 0 && cache($user['uid'] . '_error_time'))) {
-            $errors_exceeds_limit_password = intval(get_setting('password_max_retries'));
+            $errors_exceeds_limit_password = (int) \app\common\library\helper\SiteConfigHelper::account('password_max_retries', 5);
 
             //限制时长
             if (cache($user['uid'] . '_error_time') && $password_error_limit_time > 0) {
-                $time = $password_error_limit_time - round((time() - (int)cache($user['uid'] . '_error_time')) / 60);
-                self::setError('请等待' . $time . '分钟后重试');
+                $time = max(1, $password_error_limit_time - round((time() - (int)cache($user['uid'] . '_error_time')) / 60));
+                self::setError("登录尝试过于频繁，请 {$time} 分钟后再试");
                 cache($user['uid'] . '_error_count', null);
             } else {
                 ++$errorCount;
                 if ($errors_exceeds_limit_password && $errors_exceeds_limit_password <= $errorCount && $password_error_limit_time > 0) {
                     cache($user['uid'] . '_error_time', time(), ['expire' => $password_error_limit_time * 60]);
-                    self::setError('您已达到最大重试次数,请等待' . $password_error_limit_time . '分钟后重试');
+                    self::setError("密码连续输错次数过多，账号将锁定 {$password_error_limit_time} 分钟，请稍后再试");
                 } elseif ($errors_exceeds_limit_password && $errors_exceeds_limit_password <= $errorCount) {
-                    self::setError('账号已锁定，请联系管理员');
+                    self::setError('账号已锁定，请联系站点管理员解锁');
                 } else {
                     if ($errors_exceeds_limit_password) {
-                        self::setError('用户密码不正确,您还可继续重试' . (int)($errors_exceeds_limit_password - $errorCount) . '次');
+                        $left = (int) ($errors_exceeds_limit_password - $errorCount);
+                        self::setError("密码不正确，你还可以尝试 {$left} 次");
                         cache($user['uid'] . '_error_count', $errorCount);
                     } else {
-                        self::setError('用户密码不正确');
+                        self::setError('密码不正确，请检查后重试');
                     }
                 }
             }

@@ -108,4 +108,12 @@ return [
         'risk'    => 'low',
         'verify'  => 'config:cdn_url=absent, config:watermark_max_lines=absent',
     ],
+    '1.0.11' => [
+        'from'    => '1.0.10',
+        'file'    => 'update1.0.10to1.0.11.sql',
+        'title'   => '站点资源与账号策略内置化',
+        'summary' => '站点图标/描述/关键词/联系邮箱、水印字体、账号策略改为代码集中配置，后台不再自定义',
+        'risk'    => 'low',
+        'verify'  => 'config:site_logo=absent, config:password_min_length=absent',
+    ],
 ];

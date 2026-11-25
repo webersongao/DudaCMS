@@ -196,7 +196,7 @@ class Service
 
         $nickname = trim(strip_tags((string) ($userInfo['nickname'] ?? '')));
         $username = self::buildUsername($nickname);
-        $password = bin2hex(random_bytes(max(6, (int) get_setting('password_min_length'))));
+        $password = bin2hex(random_bytes(max(16, (int) \app\common\library\helper\SiteConfigHelper::account('password_min_length', 8))));
 
         // 只使用平台已授权并返回的数据作为新用户默认值，不覆盖管理员显式传入的 extend。
         if ($nickname !== '' && empty($extend['nick_name'])) {

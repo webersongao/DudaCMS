@@ -276,7 +276,7 @@ class Ajax extends Frontend
             $msg = $this->request->post('msg');
             $from = (string) $this->request->server('HTTP_REFERER', '');
             $message = '来源页面：' . $from . '<br>错误信息：' . $msg;
-            send_email(get_setting('report_bug_email'), '网站BUG反馈', $message);
+            send_email(\app\common\library\helper\SiteConfigHelper::bugEmail(), '网站BUG反馈', $message);
             $this->success();
         }
     }

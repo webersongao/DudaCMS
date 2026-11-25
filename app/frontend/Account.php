@@ -42,9 +42,8 @@ class Account extends Frontend
 
             $remember = 0;
 
-            if(!empty($data['remember']) && $this->settings['remember_login_enable']=='Y')
-            {
-                $remember = intval($this->settings['remember_login_time'])*ONE_DAY;
+            if (!empty($data['remember']) && \app\common\library\helper\SiteConfigHelper::account('remember_login_enable', false)) {
+                $remember = (int) \app\common\library\helper\SiteConfigHelper::account('remember_login_days', 7) * ONE_DAY;
             }
 
             if(isset($data['code']) || isset($data['mobile']))

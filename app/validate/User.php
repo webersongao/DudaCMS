@@ -7,6 +7,7 @@ use think\facade\Cache;
 
 use app\model\Users;
 use app\common\service\SmsService;
+use app\common\library\helper\SiteConfigHelper;
 
 class User extends Validate
 {
@@ -56,17 +57,19 @@ class User extends Validate
     // 用户名检查
     protected function checkUsername($value, $rule, $data = [])
     {
-        // 验证用户名长度
+        $min = (int) SiteConfigHelper::account('username_min_length', 2);
+        $max = (int) SiteConfigHelper::account('username_max_length', 15);
+
         $len = mb_strlen($value);
-        if ($len < get_setting('username_min_length') || $len > get_setting('username_max_length')) {
-            return '请输入'.get_setting('username_min_length').' - '.get_setting('username_max_length').' 字数的用户名';
+        if ($len < $min || $len > $max) {
+            return "用户名长度需为 {$min} - {$max} 个字符";
         }
         // 验证用户名是否只包含字母、数字和下划线
         if (!preg_match('/^[a-zA-Z0-9][a-zA-Z0-9_]*$/', $value)) {
-            return '用户名只能包含字母、数字和下划线，并且不能以下划线开头';
+            return '用户名只能包含字母、数字和下划线，且不能以数字或下划线以外的字符开头';
         }
 
-        if (Users::checkUserExist($value)) return '用户名已存在';
+        if (Users::checkUserExist($value)) return '该用户名已被使用，请换一个试试';
 
         return true;
     }
@@ -74,19 +77,37 @@ class User extends Validate
     // 密码检查
     protected function checkPassword($value, $rule, $data = [])
     {
-        // 验证密码长度
+        $min = (int) SiteConfigHelper::account('password_min_length', 8);
+        $max = (int) SiteConfigHelper::account('password_max_length', 30);
+
         $len = mb_strlen($value);
-        if ($len < get_setting('password_min_length') || $len > get_setting('password_max_length')) {
-            return '请输入'.get_setting('password_min_length').' - '.get_setting('password_max_length').' 位的密码';
+        if ($len < $min || $len > $max) {
+            return "密码长度需为 {$min} - {$max} 位";
         }
 
-        $types = get_setting('password_type');
-        if (empty($types)) return true;
-        if (in_array('number', $types) && !preg_match("/[0-9]+/", $value)) return '密码需包含数字';
-
-        if (in_array('special', $types) && !preg_match("/[_|\-|+|=|*|!|@|#|$|%|^|&|(|)]+/", $value)) return '密码需包含特殊字符';
-
-        if (in_array('letter', $types) && !preg_match("/[a-zA-Z]+/", $value)) return '密码需包含大小写字母';
+        $types = (array) SiteConfigHelper::account('password_types', []);
+        if (!$types) {
+            return true;
+        }
+        $hints = [];
+        if (in_array('number', $types, true)) {
+            if (!preg_match('/[0-9]/', $value)) {
+                $hints[] = '数字';
+            }
+        }
+        if (in_array('letter', $types, true)) {
+            if (!preg_match('/[a-zA-Z]/', $value)) {
+                $hints[] = '字母';
+            }
+        }
+        if (in_array('special', $types, true)) {
+            if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
+                $hints[] = '特殊符号';
+            }
+        }
+        if ($hints) {
+            return '密码需包含' . implode('、', $hints);
+        }
 
         return true;
     }

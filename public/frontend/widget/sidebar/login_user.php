@@ -35,7 +35,7 @@
 {else/}
 <div class="dask-ui-card dask-ui-card-default dask-ui-card-small dask-ui-card-body mb-3 rounded" data-dask-sticky="offset:70 ; media : @m">
     <h3 class="mb-3">{:L('账号登录')}</h3>
-    <p>{:get_setting('site_description')}</p>
+    <p>{:get_setting('seo_description')}</p>
     <a href="{:url('account/login')}" class="button primary dask-display-block mt-3">{:L('登录')}</a>
     <a class="mt-3 button default dask-display-block" href="{:url('account/register')}">{:L('注册')}</a>
 </div>

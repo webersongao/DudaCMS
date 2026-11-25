@@ -10,7 +10,7 @@ class CommonService
     {
         $config = Config::getConfigs();
         $keys = [
-            'site_name', 'site_logo', 'site_description', 'site_keywords',
+            'site_name', 'seo_description', 'seo_keywords',
             'register_type', 'topic_enable', 'enable_category', 'contents_per_page',
             'upload_image_ext', 'upload_file_ext', 'upload_max_size',
             'answer_unique',
@@ -19,7 +19,10 @@ class CommonService
         foreach ($keys as $key) {
             $data[$key] = $config[$key] ?? '';
         }
-        $data['site_logo'] = Presenter::url($data['site_logo']);
+        // 站点描述/关键词统一复用 SEO 配置；logo 使用项目内置静态资源。
+        $data['site_description'] = $data['seo_description'];
+        $data['site_keywords'] = $data['seo_keywords'];
+        $data['site_logo'] = \app\common\library\helper\SiteConfigHelper::assetUrl('logo');
         $data['contents_per_page'] = max(1, (int) $data['contents_per_page']);
         $data['topic_enable'] = ($data['topic_enable'] ?? 'N') === 'Y';
         $data['enable_category'] = ($data['enable_category'] ?? 'N') === 'Y';

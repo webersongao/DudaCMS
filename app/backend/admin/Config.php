@@ -237,7 +237,7 @@ class Config extends Backend
             $this->formBuilder->setExtraHtml(
                 '<div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">' .
                 '<span>在此设置前台成长值显示单位；各行为的成长值规则请前往规则管理页配置。</span>' .
-                '<a class="btn btn-sm btn-primary" href="' . htmlspecialchars($ruleUrl, ENT_QUOTES, 'UTF-8') . '">' .
+                '<a class="btn btn-sm btn-primary" data-turbo="false" href="' . htmlspecialchars($ruleUrl, ENT_QUOTES, 'UTF-8') . '">' .
                 '配置成长值规则 <i class="fa fa-arrow-right ms-1"></i></a></div>',
                 'content_top'
             );

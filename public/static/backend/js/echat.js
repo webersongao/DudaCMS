@@ -33,11 +33,13 @@ function getDate() {
     return arr;
 }
 
-function Echarts(element, type, url, options) {
+function Echarts(element, type, url, options, onLoaded) {
     this.element = element;
     this.type = type;
     this.url = url;
     this.chart = null;
+    this.onLoaded = typeof onLoaded === 'function' ? onLoaded : null;
+    this.retried = false;
     this.options = {
         color: ['#056DE8', '#00A870', '#F5A623', '#E34D59', '#722ED1', '#13C2C2'],
         animation: false,
@@ -100,6 +102,7 @@ Echarts.prototype = {
     initChart: function (url) {
         if (url) {
             this.url = url;
+            this.retried = false;
         }
         this.getData(this.url);
     },
@@ -126,14 +129,32 @@ Echarts.prototype = {
     getData: function (url) {
         var _this = this;
         if (!url) return;
-        $.post(url, { async: true }, function (result) {
-            if (!result || !result.code || !result.data) return;
-            var xAxis = _this.initXAxis(result.data.labels || []);
-            var legend = _this.getUrlParam('tag');
-            var series = _this.initSeries(_this.type, result.data.data || []);
-            _this.options = $.extend(true, {}, _this.options, xAxis, series, legend);
-            _this.render();
-        }, 'json');
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: { async: true },
+            dataType: 'json',
+            global: false,
+            success: function (result) {
+                if (!result || !result.code || !result.data) return;
+                var xAxis = _this.initXAxis(result.data.labels || []);
+                var legend = _this.getUrlParam('tag');
+                var series = _this.initSeries(_this.type, result.data.data || []);
+                _this.options = $.extend(true, {}, _this.options, xAxis, series, legend);
+                _this.render();
+                if (_this.onLoaded) {
+                    _this.onLoaded(_this);
+                }
+            },
+            error: function () {
+                // 后台统计属于辅助数据，偶发连接抖动时重试一次即可，不打断用户操作。
+                if (_this.retried) return;
+                _this.retried = true;
+                setTimeout(function () {
+                    _this.getData(url);
+                }, 400);
+            }
+        });
     },
 
     initSeries: function (type, data) {

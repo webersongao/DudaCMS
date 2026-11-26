@@ -173,9 +173,17 @@
 <script>
     $(function () {
         var dateArr = getDate();
-        //图表数据接入
-        var echart = new Echarts('#user-main', 'line', G_BASE_URL+'/Index/statistic/?tag=new_user,user_valid&start_date=' + dateArr[1] + '&end_date=' + dateArr[0]);
-        var echart2 = new Echarts('#content-main', 'line', G_BASE_URL+'/Index/statistic/?tag=new_question,new_answer,new_topic,new_article&start_date=' + dateArr[1] + '&end_date=' + dateArr[0]);
+        //图表数据接入：两张图的统计接口串行请求，避免并发压满数据库连接。
+        var echart2 = null;
+        var contentChartUrl = function () {
+            return G_BASE_URL+'/Index/statistic/?tag=new_question,new_answer,new_topic,new_article&start_date=' + dateArr[1] + '&end_date=' + dateArr[0];
+        };
+        var loadContentChart = function () {
+            if (echart2) return;
+            echart2 = new Echarts('#content-main', 'line', contentChartUrl());
+        };
+        var echart = new Echarts('#user-main', 'line', G_BASE_URL+'/Index/statistic/?tag=new_user,user_valid&start_date=' + dateArr[1] + '&end_date=' + dateArr[0], {}, loadContentChart);
+        setTimeout(loadContentChart, 1500);
 
         layui.use(['element','laydate'],function(){
             var element = layui.element//元素操作
@@ -205,19 +213,19 @@
                     let date_arr = value.split('~'),
                         start_date = daskTrim(date_arr[0]),
                         end_date = daskTrim(date_arr[1])
-                    echart2.initChart(echart2.url.substring(0, echart2.url.search(/&/)) + '&start_date=' + start_date + '&end_date=' + end_date)
+                    if (echart2) echart2.initChart(echart2.url.substring(0, echart2.url.search(/&/)) + '&start_date=' + start_date + '&end_date=' + end_date)
                 }
             });
         });
         window.addEventListener("resize", function ()
         {
             echart.resize();
-            echart2.resize();
+            if (echart2) echart2.resize();
         }, false);
         window.addEventListener("orientationchange", function ()
         {
             echart.resize();
-            echart2.resize();
+            if (echart2) echart2.resize();
         }, false);
     });
 </script>

@@ -51,6 +51,9 @@
         window.upload_file_size = "{$setting.upload_file_size}";
         window.isAjax = "{$_ajax}";
         window.isAjaxOpen = "{$_ajax_open}";
+        // 后台统一走传统整页导航：Turbo Drive 的 AJAX 替换不会执行新页面的内联脚本，
+        // 且会把目标页的普通请求错误以「请求失败（HTTP 500）」弹窗形式抛出。
+        window.daskDisableTurboDrive = true;
         // 将后台 pjax_enable 配置接线到 Turbo 开关。
         window.pjaxEnable = "{:get_setting('pjax_enable') == 'N' ? 'N' : 'Y'}";
         // 按需加载资源的逐文件版本；不能用 dask-util.js 自身的 hash 代替。

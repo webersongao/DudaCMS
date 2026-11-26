@@ -98,54 +98,64 @@ class Index extends Backend
     //后台统计
     public function statistic()
     {
-        $startDate = trim((string) $this->request->param('start_date', ''));
-        $endDate = trim((string) $this->request->param('end_date', ''));
-        $start_time = $startDate !== '' ? strtotime($startDate . ' 00:00:01') : false;
-        if (!$start_time) {
-            $start_time = strtotime('-12 months');
-        }
+        $data = $labels = [];
 
-        $end_time = $endDate !== '' ? strtotime($endDate . ' 23:59:59') : false;
-        if (!$end_time) {
-            $end_time = time();
-        }
-
-        $statistic_tag = array_values(array_filter(array_map('trim', explode(',', (string) $this->request->param('tag', ''))), 'strlen'));
-        if (empty($statistic_tag)) exit;
-        if (!$month_list = get_month_list($start_time, $end_time, 'y')) exit;
-        $data = $labels = $statistic = $data_template = [];
-        foreach ($month_list AS $key => $val)
-        {
-            $labels[] = $val['year'] . '-' . $val['month'];
-            $data_template[] = 0;
-        }
-
-        foreach ($statistic_tag AS $key => $val)
-        {
-            switch ($val)
-            {
-                case 'new_article':
-                case 'new_answer':  // 新增答案
-                case 'new_question':    // 新增问题
-                case 'new_user':    // 新注册用户
-                case 'user_valid':  // 新激活用户
-                case 'new_topic':   // 新增话题
-                case 'new_answer_vote': // 新增答案投票
-                case 'new_answer_thanks': // 新增答案感谢
-                    $statistic[] = StatisticLogic::singleTagData($val, $start_time, $end_time);
-                    break;
+        try {
+            $startDate = trim((string) $this->request->param('start_date', ''));
+            $endDate = trim((string) $this->request->param('end_date', ''));
+            $start_time = $startDate !== '' ? strtotime($startDate . ' 00:00:01') : false;
+            if (!$start_time) {
+                $start_time = strtotime('-12 months');
             }
-        }
 
-        foreach($statistic AS $key => $val)
-        {
-            $statistic_data = $data_template;
-            foreach ($val AS $k => $v)
-            {
-                $data_key = array_search($v['date'], $labels);
-                $statistic_data[$data_key] = $v['count'];
+            $end_time = $endDate !== '' ? strtotime($endDate . ' 23:59:59') : false;
+            if (!$end_time) {
+                $end_time = time();
             }
-            $data[] = $statistic_data;
+
+            $statistic_tag = array_values(array_filter(array_map('trim', explode(',', (string) $this->request->param('tag', ''))), 'strlen'));
+            if ($statistic_tag) {
+                $month_list = get_month_list($start_time, $end_time, 'y');
+                if ($month_list) {
+                    $statistic = $data_template = [];
+                    foreach ($month_list AS $key => $val) {
+                        $labels[] = $val['year'] . '-' . $val['month'];
+                        $data_template[] = 0;
+                    }
+
+                    foreach ($statistic_tag AS $key => $val) {
+                        switch ($val) {
+                            case 'new_article':
+                            case 'new_answer':  // 新增答案
+                            case 'new_question':    // 新增问题
+                            case 'new_user':    // 新注册用户
+                            case 'user_valid':  // 新激活用户
+                            case 'new_topic':   // 新增话题
+                            case 'new_answer_vote': // 新增答案投票
+                            case 'new_answer_thanks': // 新增答案感谢
+                                $statistic[] = StatisticLogic::singleTagData($val, $start_time, $end_time);
+                                break;
+                        }
+                    }
+
+                    foreach ($statistic AS $key => $val) {
+                        $statistic_data = $data_template;
+                        foreach ($val AS $k => $v) {
+                            $data_key = array_search($v['date'], $labels, true);
+                            if ($data_key === false) {
+                                continue;
+                            }
+                            $statistic_data[$data_key] = $v['count'];
+                        }
+                        $data[] = $statistic_data;
+                    }
+                }
+            }
+        } catch (\think\exception\HttpResponseException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            // 图表为非核心数据：数据库短暂不可用时降级为空数据，避免后台弹出 HTTP 500。
+            $data = $labels = [];
         }
 
         $this->success('', null, ['labels' => $labels, 'data' => $data]);

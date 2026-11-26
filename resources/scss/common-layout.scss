@@ -1940,13 +1940,14 @@ html[data-theme="auto"][data-dark="1"] .dask-badge-group { background: rgba(49,1
 /* --- 邀请页：名额提示文字柔化（不再用刺眼红色紧跟按钮） --- */
 .dask-invite-quota { color: var(--dask-text-3); font-size: 13px; margin-left: 4px; }
 
-/* --- 各 tab 顶部 nav-tabs 选中态统一为品牌蓝填充块 --- */
+/* --- 各 tab 顶部 nav-tabs 选中态：透明背景，仅保留底部蓝色指示条 --- */
 .dask-pjax-tabs .nav-link.active,
 .nav-tabs-block .nav-link.active {
-  background: var(--dask-blue) !important;
-  color: #fff !important;
-  border-color: var(--dask-blue) !important;
-  border-radius: 4px 4px 0 0 !important;
+  background: transparent !important;
+  color: var(--dask-blue) !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 -2px 0 var(--dask-blue) !important;
 }
 .dask-pjax-tabs .nav-link,
 .nav-tabs-block .nav-link { color: var(--dask-text-2) !important; font-size: 14px !important; }

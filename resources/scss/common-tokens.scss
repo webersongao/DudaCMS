@@ -293,7 +293,7 @@ html[data-theme="auto"][data-dark="1"] #wrapMain .dask-tag a,
 html[data-theme="auto"][data-dark="1"] #wrapMain .tag a,
 html[data-theme="auto"][data-dark="1"] #wrapMain .btn-outline-primary { color: var(--dask-blue-strong) !important; }
 html[data-theme="dark"] #wrapMain .nav-tabs .nav-link.active,
-html[data-theme="auto"][data-dark="1"] #wrapMain .nav-tabs .nav-link.active { background-color: var(--dask-primary-bg) !important; color: #fff !important; }
+html[data-theme="auto"][data-dark="1"] #wrapMain .nav-tabs .nav-link.active { background-color: transparent !important; color: var(--dask-blue) !important; }
 html[data-theme="dark"] .w-fun h6,
 html[data-theme="auto"][data-dark="1"] .w-fun h6 { color: var(--dask-text-2) !important; }
 html[data-theme="dark"] .w-fun i[style],
@@ -407,18 +407,20 @@ html[data-theme="auto"][data-dark="1"] #wrapMain .dask-topic em.tag {
   color: var(--dask-blue-strong) !important;
 }
 html[data-theme="dark"] #wrapMain .btn-primary,
-html[data-theme="dark"] #wrapMain .nav-link.active,
-html[data-theme="dark"] #wrapMain .nav-pills .nav-link.active,
-html[data-theme="dark"] #wrapMain .nav-tabs .nav-link.active,
 html[data-theme="dark"] #wrapMain .text-bg-primary,
 html[data-theme="auto"][data-dark="1"] #wrapMain .btn-primary,
-html[data-theme="auto"][data-dark="1"] #wrapMain .nav-link.active,
-html[data-theme="auto"][data-dark="1"] #wrapMain .nav-pills .nav-link.active,
-html[data-theme="auto"][data-dark="1"] #wrapMain .nav-tabs .nav-link.active,
 html[data-theme="auto"][data-dark="1"] #wrapMain .text-bg-primary {
   background-color: var(--dask-primary-bg) !important;
   border-color: var(--dask-primary-bg) !important;
   color: #fff !important;
+}
+html[data-theme="dark"] #wrapMain .nav-link.active,
+html[data-theme="dark"] #wrapMain .nav-pills .nav-link.active,
+html[data-theme="auto"][data-dark="1"] #wrapMain .nav-link.active,
+html[data-theme="auto"][data-dark="1"] #wrapMain .nav-pills .nav-link.active {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: var(--dask-blue) !important;
 }
 html[data-theme="dark"] #wrapMain .btn-outline-primary,
 html[data-theme="dark"] #wrapMain .btn-outline-primary:hover,

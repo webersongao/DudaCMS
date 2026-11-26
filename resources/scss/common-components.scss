@@ -148,8 +148,8 @@ dialog.dask-dialog::backdrop { background: rgba(0, 0, 0, .48); }
 .dask-toast-stack {
   position: fixed;
   z-index: var(--dask-z-toast, 2000);
-  top: calc(var(--dask-topbar-h) + 12px);
-  right: 16px;
+  left: 16px;
+  bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: var(--dask-gap-2);
@@ -491,7 +491,7 @@ html body .dask-common-list .dask-article-row .dask-article-row__time {
 
 @media (max-width: $dask-bp-mobile) {
   .dask-dropdown__panel { position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; max-width: none; }
-  .dask-toast-stack { top: 12px; left: 16px; right: 16px; width: auto; }
+  .dask-toast-stack { left: 16px; right: 16px; bottom: 16px; width: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

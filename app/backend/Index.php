@@ -5,6 +5,7 @@ use app\common\library\helper\FileHelper;
 use app\common\library\helper\MailHelper;
 use think\App;
 use think\facade\Cache;
+use think\facade\Log;
 use app\common\logic\common\StatisticLogic;
 
 class Index extends Backend
@@ -85,6 +86,7 @@ class Index extends Backend
             usort($credit_stats, function ($a, $b) { return $b['income'] <=> $a['income']; });
         } catch (\Throwable $e) {
             // 升级未完成/表缺失时降级为空态，不影响后台首页
+            Log::warning('后台首页成长值概况加载失败: ' . $e->getMessage());
             $credit_stats = [];
         }
 
@@ -155,6 +157,7 @@ class Index extends Backend
             throw $e;
         } catch (\Throwable $e) {
             // 图表为非核心数据：数据库短暂不可用时降级为空数据，避免后台弹出 HTTP 500。
+            Log::warning('后台统计图表加载失败: ' . $e->getMessage(), ['tag' => $this->request->param('tag', '')]);
             $data = $labels = [];
         }
 

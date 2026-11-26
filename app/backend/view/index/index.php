@@ -183,7 +183,6 @@
             echart2 = new Echarts('#content-main', 'line', contentChartUrl());
         };
         var echart = new Echarts('#user-main', 'line', G_BASE_URL+'/Index/statistic/?tag=new_user,user_valid&start_date=' + dateArr[1] + '&end_date=' + dateArr[0], {}, loadContentChart);
-        setTimeout(loadContentChart, 1500);
 
         layui.use(['element','laydate'],function(){
             var element = layui.element//元素操作

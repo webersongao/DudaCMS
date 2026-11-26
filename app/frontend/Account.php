@@ -552,12 +552,12 @@ class Account extends Frontend
                         $this->error('新手机号不能和原来的手机号一样');
                     }
 
-                    if(isset($postData['code']) && !$postData['code'])
+                    if(empty($postData['code']))
                     {
                         $this->error('请输入短信验证码');
                     }
 
-                    if(isset($postData['code']) && !SmsService::verify($postData['mobile'], $postData['code']))
+                    if(!SmsService::verify($postData['mobile'], $postData['code']))
                     {
                         $this->error('验证码不正确');
                     }
@@ -566,7 +566,8 @@ class Account extends Frontend
                     {
                         $this->error('该手机号已存在');
                     }
-                    Users::updateUserFiled($this->user_id,['mobile'=>$postData['mobile']], null, true);
+                    // 新手机号已通过短信验证，换绑后同步重置验证态，避免沿用旧号的已验证标记。
+                    Users::updateUserFiled($this->user_id,['mobile'=>$postData['mobile'],'is_valid_mobile'=>1], null, true);
                     $this->success('修改成功','setting/profile');
                     break;
             }

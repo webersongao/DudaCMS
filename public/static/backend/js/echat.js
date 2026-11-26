@@ -40,6 +40,8 @@ function Echarts(element, type, url, options, onLoaded) {
     this.chart = null;
     this.onLoaded = typeof onLoaded === 'function' ? onLoaded : null;
     this.retried = false;
+    this.requestSeq = 0;
+    this.retryTimer = null;
     this.options = {
         color: ['#056DE8', '#00A870', '#F5A623', '#E34D59', '#722ED1', '#13C2C2'],
         animation: false,
@@ -102,9 +104,13 @@ Echarts.prototype = {
     initChart: function (url) {
         if (url) {
             this.url = url;
-            this.retried = false;
         }
-        this.getData(this.url);
+        if (this.retryTimer) {
+            clearTimeout(this.retryTimer);
+            this.retryTimer = null;
+        }
+        this.retried = false;
+        this.getData(this.url, ++this.requestSeq);
     },
 
     initXAxis: function (data) {
@@ -126,9 +132,12 @@ Echarts.prototype = {
         };
     },
 
-    getData: function (url) {
+    getData: function (url, seq) {
         var _this = this;
         if (!url) return;
+        if (typeof seq !== 'number') {
+            seq = ++this.requestSeq;
+        }
         $.ajax({
             url: url,
             type: 'POST',
@@ -136,25 +145,39 @@ Echarts.prototype = {
             dataType: 'json',
             global: false,
             success: function (result) {
-                if (!result || !result.code || !result.data) return;
+                if (seq !== _this.requestSeq) return;
+                if (!result || !result.code || !result.data) {
+                    _this.finish(seq);
+                    return;
+                }
                 var xAxis = _this.initXAxis(result.data.labels || []);
                 var legend = _this.getUrlParam('tag');
                 var series = _this.initSeries(_this.type, result.data.data || []);
                 _this.options = $.extend(true, {}, _this.options, xAxis, series, legend);
                 _this.render();
-                if (_this.onLoaded) {
-                    _this.onLoaded(_this);
-                }
+                _this.finish(seq);
             },
             error: function () {
+                if (seq !== _this.requestSeq) return;
                 // 后台统计属于辅助数据，偶发连接抖动时重试一次即可，不打断用户操作。
-                if (_this.retried) return;
+                if (_this.retried) {
+                    _this.finish(seq);
+                    return;
+                }
                 _this.retried = true;
-                setTimeout(function () {
-                    _this.getData(url);
+                _this.retryTimer = setTimeout(function () {
+                    _this.retryTimer = null;
+                    _this.getData(url, seq);
                 }, 400);
             }
         });
+    },
+
+    finish: function (seq) {
+        if (seq !== this.requestSeq) return;
+        if (this.onLoaded) {
+            this.onLoaded(this);
+        }
     },
 
     initSeries: function (type, data) {

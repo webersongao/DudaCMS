@@ -31,7 +31,7 @@ class StatisticLogic
                 $query = "SELECT COUNT(uid) AS count, FROM_UNIXTIME(create_time, '%y-%m') AS statistic_date FROM " . get_table('users') . " WHERE create_time BETWEEN " . intval($start_time) . " AND " . intval($end_time) . " GROUP BY statistic_date ORDER BY statistic_date ASC";
                 break;
             case 'user_valid':
-                $query = "SELECT COUNT(uid) AS count, FROM_UNIXTIME(create_time , '%y-%m') AS statistic_date FROM " . get_table('users') . " WHERE is_valid_email = 1 AND create_time BETWEEN " . intval($start_time) . " AND " . intval($end_time) . " GROUP BY statistic_date ORDER BY statistic_date ASC";
+                $query = "SELECT COUNT(uid) AS count, FROM_UNIXTIME(create_time , '%y-%m') AS statistic_date FROM " . get_table('users') . " WHERE (is_valid_email = 1 OR is_valid_mobile = 1) AND create_time BETWEEN " . intval($start_time) . " AND " . intval($end_time) . " GROUP BY statistic_date ORDER BY statistic_date ASC";
                 break;
             case 'new_question':
                 $query = "SELECT COUNT(*) AS count, FROM_UNIXTIME(create_time, '%y-%m') AS statistic_date FROM " . get_table('question') . " WHERE create_time BETWEEN " . intval($start_time) . " AND " . intval($end_time) . " GROUP BY statistic_date ORDER BY statistic_date ASC";

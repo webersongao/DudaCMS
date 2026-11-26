@@ -24,6 +24,15 @@ class AppInit
         //定义一天时间戳
         define('ONE_DAY',86400);
 
+        // 后台表格的 _list 分支直接返回数组。若请求 Accept 不含 json，
+        // 框架会按 html 响应处理并抛出 variable type error：array。
+        // 这里统一把这类请求识别为 JSON，避免直接打开 URL 时产生 500。
+        if (defined('ENTRANCE') && ENTRANCE === 'backend' && $request->param('_list')) {
+            $server = $request->server();
+            $server['HTTP_ACCEPT'] = 'application/json';
+            $request->withServer($server);
+        }
+
         // 统一全站时区，避免模板与服务端时间不一致。
         $timezone = trim((string) get_setting('site_timezone', 'Asia/Shanghai'));
         if ($timezone !== '' && function_exists('date_default_timezone_set')) {

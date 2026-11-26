@@ -348,7 +348,7 @@ const DaskAdmin = {
         }
     },
 
-    btTable: {},  // bootstrapTable
+    btTable: $(),  // bootstrapTable：初始化为空 jQuery 对象，插件缺失时不再抛 TypeError
     tableParam: {},
 
     // 表格封装处理
@@ -391,6 +391,10 @@ const DaskAdmin = {
 
             DaskAdmin.table._option = options;
             DaskAdmin.btTable = $('#bootstrap-table');
+            if (typeof DaskAdmin.btTable.bootstrapTable !== 'function') {
+                console.error('[DaskAdmin] bootstrap-table plugin missing; table init aborted');
+                return;
+            }
             // 初始化新事件对象的属性
             DaskAdmin.table.initEvent();
             // 构建bootstrap数据
